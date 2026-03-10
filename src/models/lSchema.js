@@ -1,0 +1,14 @@
+import mongoose from "mongoose"
+
+const logbookSchema = new mongoose.Schema({
+    nome: { type: String, required: true },
+    carga: { type: Number, required: true },
+    repeticoes: { type: Number, required: true },
+    data: { type: Date, default: new Date() },
+    sincronizado: { type: Boolean, default: false },
+    exercicio: { type: mongoose.Schema.Types.ObjectId, ref: 'Exercicio', required: true },
+}, { versionKey: false })
+
+const LogBook = mongoose.model('LogBook', logbookSchema)
+
+export default LogBook
