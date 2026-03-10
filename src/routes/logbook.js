@@ -43,12 +43,16 @@ const logbookRouter = (logbookService) => {
      *         application/json:
      *           schema:
      *             type: object
+     *             required:
+     *               - exercicios
      *             properties:
-     *               exercicios (array de strings):
+     *               exercicios:
      *                 type: array
-     *                 example: "[699a18f7c9a487fe833a6984]"
+     *                 items:
+     *                   type: string
+     *                 example: ["699a18f7c9a487fe833a6984"]
      *     responses:
-     *       201:
+     *       200:
      *         description: Sucesso.
      *       400:
      *         description: Falhas na sincronização.
@@ -67,16 +71,21 @@ const logbookRouter = (logbookService) => {
      *         application/json:
      *           schema:
      *             type: object
+     *             required:
+     *               - carga
+     *               - repeticoes
+     *               - exercicio
      *             properties:
-     *               exercicio (mongodb _id):
-     *                 type: string
-     *                 example: "699a18f7c9a487fe833a6984"
      *               carga:
-     *                 type: int
+     *                 type: number
      *                 example: 25
      *               repeticoes:
-     *                 type: int
+     *                 type: number
      *                 example: 10
+     *               exercicio:
+     *                 type: string
+     *                 description: ObjectId do exercicio.
+     *                 example: "699a18f7c9a487fe833a6984"
      *     responses:
      *       201:
      *         description: Sucesso.
@@ -85,10 +94,10 @@ const logbookRouter = (logbookService) => {
      *       400:
      *         description: LogBook para este exercício já existe, sincronize ou apague para criar um novo.
      *       422:
-     *         description: ID do exercício é inválido ou erro no middleware.
+     *         description: ID do exercício inválido ou erro no middleware.
      *       500:
      *         description: Erro interno do servidor.
-     * 
+
      */
 
     router.get("/logerros", async (req, res) => {

@@ -52,24 +52,34 @@ const exercicioRouter = (exercicioService) => {
      *         application/json:
      *           schema:
      *             type: object
+     *             required:
+     *               - nome
+     *               - series
+     *               - carga_atual
+     *               - repeticoes_alvo
+     *               - repeticoes_atuais
+     *               - divisao
      *             properties:
      *               nome:
      *                 type: string
      *                 example: "Supino Reto"
      *               series:
-     *                 type: int
+     *                 type: integer
+     *                 format: int32
      *                 example: 2
-     *               repeticoes_alvo:
-     *                 type: int
-     *                 example: 10
      *               carga_atual:
-     *                 type: int
+     *                 type: number
      *                 example: 30
+     *               repeticoes_alvo:
+     *                 type: integer
+     *                 format: int32
+     *                 example: 10
      *               repeticoes_atuais:
-     *                 type: int
+     *                 type: number
      *                 example: 8
-     *               divisao (mongodb _id):
+     *               divisao:
      *                 type: string
+     *                 description: ObjectId da divisao.
      *                 example: "699a18f7c9a487fe833a6984"
      *     responses:
      *       201:
@@ -90,8 +100,8 @@ const exercicioRouter = (exercicioService) => {
      *        name: id
      *        required: true
      *        schema:
-     *          type: integer
-     *          description: ID do exercício a ser deletado.
+     *          type: string
+     *          description: ObjectId do exercício a ser deletado.
      *     responses:
      *       200:
      *         description: Sucesso.
@@ -101,6 +111,7 @@ const exercicioRouter = (exercicioService) => {
      *         description: Um ou mais IDs inválidos ou erro no middleware.
      *       500:
      *         description: Erro interno do servidor.
+
      */
 
     router.get('/exercicios', async (req, res) => {
