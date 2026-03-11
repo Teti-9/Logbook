@@ -23,4 +23,12 @@ export default class logbookRepository {
     async create_errors(data) {
         return await this.logerrosModel.create(data)
     }
+
+    async deleteById(id) {
+        return await this.logbookModel.findByIdAndDelete({ _id: id })
+    }
+
+    async deleteMany(query) {
+        return await this.logbookModel.deleteMany(query)
+    }
 }

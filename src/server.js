@@ -48,7 +48,7 @@ const exercicioRepository = new ExercicioRepository(Exercicio)
 const logbookRepository = new LogbookRepository(Logbook, LogErros)
 
 const divisaoService = new DivisaoService(divisaoRepository)
-const exercicioService = new ExercicioService(exercicioRepository, divisaoRepository)
+const exercicioService = new ExercicioService(exercicioRepository, divisaoRepository, logbookRepository)
 const logbookService = new LogbookService(logbookRepository, exercicioRepository)
 
 const divisao = divisaoRouter(divisaoService)

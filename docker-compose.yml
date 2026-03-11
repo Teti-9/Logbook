@@ -1,0 +1,31 @@
+name: logbook
+
+services:
+  mongodb:
+    image: mongo
+    container_name: database
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  app:
+    build: .
+    container_name: app
+    command: npm run dev
+    restart: always
+    environment:
+      PORT: ${PORT}
+      MONGO_URI: ${MONGO_URI}
+    ports:
+      - "8000:8000"
+    depends_on:
+      - mongodb
+    volumes:
+      - .:/app
+
+volumes:
+  mongo_data:

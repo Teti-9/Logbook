@@ -1,7 +1,8 @@
 export default class ExercicioService {
-    constructor(exercicioRepository, divisaoRepository) {
+    constructor(exercicioRepository, divisaoRepository, logbookRepository) {
         this.exercicioRepository = exercicioRepository
         this.divisaoRepository = divisaoRepository
+        this.logbookRepository = logbookRepository
     }
 
     async getExercicios() {
@@ -41,12 +42,26 @@ export default class ExercicioService {
     }
 
     async deleteExercicio(id) {
-        const exercicioDeletado = await this.exercicioRepository.deleteById(id)
-        if (!exercicioDeletado) {
+        const exercicioExiste = await this.exercicioRepository.findById(id)
+
+        if (!exercicioExiste) {
             const error = new Error("Exercício não encontrado.")
             error.statusCode = 404
             throw error
         }
+
+        const exercicioDeletado = await this.exercicioRepository.deleteById(id)
+
+        if (exercicioExiste && exercicioDeletado) {
+
+            await this.divisaoRepository.findByIdAndUpdate(
+                exercicioDeletado.divisao,
+                { $pull: { exercicios: exercicioDeletado._id } }
+            )
+            
+            await this.logbookRepository.deleteMany({ exercicio: id })
+        }
+        
         return { message: "Exercício excluído com sucesso." }
     }
 }

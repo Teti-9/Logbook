@@ -88,7 +88,7 @@ export default class LogbookService {
         const logbookExiste = await this.logbookRepository.findOne({ exercicio: data.exercicio, sincronizado: false})
         if (logbookExiste) {
             const error = new Error('LogBook para este exercício já existe, sincronize ou apague para criar um novo.')
-            error.statusCode = 404
+            error.statusCode = 400
             throw error
         }
         const logbookFormatado = {

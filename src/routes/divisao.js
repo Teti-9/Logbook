@@ -81,6 +81,8 @@ const divisaoRouter = (divisaoService) => {
      *     responses:
      *       200:
      *         description: Sucesso.
+     *       400:
+     *         description: Não é possível excluir uma divisão com exercícios associados.
      *       404:
      *         description: Divisão não encontrada.
      *       422:

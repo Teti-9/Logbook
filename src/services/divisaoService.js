@@ -34,12 +34,22 @@ export default class DivisaoService {
     }
 
     async deleteDivisao(id) {
-        const divisaoDeletada = await this.divisaoRepository.deleteById(id)
-        if (!divisaoDeletada) {
+        const divisaoExiste = await this.divisaoRepository.findById(id)
+
+        if (!divisaoExiste) {
             const error = new Error('Divisão não encontrada.')
             error.statusCode = 404
+            throw error           
+        }
+
+        if (divisaoExiste.exercicios.length > 0) {
+            const error = new Error('Não é possível excluir uma divisão com exercícios associados.')
+            error.statusCode = 400
             throw error
         }
+
+        await this.divisaoRepository.deleteById(id)
+
         return { message: 'Divisão excluída com sucesso.' }
     }
 }

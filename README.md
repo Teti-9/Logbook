@@ -1,10 +1,10 @@
-﻿# Logbook API
+# Logbook API
 
-API REST para gerenciamento de treino por divisao, exercicios e logbooks de progresso.
+API REST para gerenciamento de treinos por divisao, exercicios e logbooks de progresso.
 
 ## Visao geral
 
-Este projeto implementa uma API Node.js com arquitetura em camadas:
+Esta API segue arquitetura em camadas:
 
 - `routes`: entrada HTTP
 - `middleware`: validacao com Joi
@@ -12,12 +12,12 @@ Este projeto implementa uma API Node.js com arquitetura em camadas:
 - `repositories`: acesso ao MongoDB
 - `models`: schemas Mongoose
 
-Fluxo principal de negocio:
+Fluxo principal:
 
 1. Cadastro de divisao de treino por dia.
 2. Cadastro de exercicios vinculados a uma divisao.
 3. Registro de performance no logbook.
-4. Sincronizacao do logbook para atualizar os dados atuais do exercicio.
+4. Sincronizacao do logbook para atualizar os dados do exercicio.
 5. Registro de falhas inesperadas de sincronizacao em `LogErros`.
 
 ## Stack tecnica
@@ -25,6 +25,7 @@ Fluxo principal de negocio:
 - Node.js (ES Modules)
 - Express 5
 - MongoDB + Mongoose
+- Docker
 - Joi
 - Swagger (`swagger-jsdoc` + `swagger-ui-express`)
 - Jest + Supertest
@@ -33,9 +34,9 @@ Fluxo principal de negocio:
 
 - Node.js 20+ (recomendado)
 - NPM 10+
-- Instancia MongoDB disponivel
+- Instancia MongoDB disponivel (Nuvem ou Docker)
 
-## Instalacao
+## Instalacao (local)
 
 1. Instale as dependencias:
 
@@ -47,7 +48,7 @@ npm install
 
 ```env
 PORT=8000
-MONGODB=mongodb://localhost:27017/logbook
+MONGO_URI=mongodb+srv://user:password@cluster0.ynyrkdn.mongodb.net/logbook (conexão atlas nuvem)
 ```
 
 3. Inicie a API:
@@ -60,6 +61,25 @@ npm run dev
 
 - API base: `http://localhost:8000/api`
 - Swagger: `http://localhost:8000/docs`
+
+## Docker (opcional)
+
+O `docker-compose.yml` sobe MongoDB e API.
+
+1. Ajuste o `.env` para o container do MongoDB:
+
+```env
+PORT=8000
+MONGO_URI=mongodb://user:password@mongodb:27017/logbook?authSource=admin (conexão local)
+MONGO_USERNAME=user
+MONGO_PASSWORD=password
+```
+
+2. Suba os servicos:
+
+```bash
+docker compose up --build
+```
 
 ## Scripts
 
@@ -111,6 +131,8 @@ logbook/
 |- package.json
 |- jest.config.js
 |- babel.config.js
+|- docker-compose.yml
+|- Dockerfile
 ```
 
 ## Padrao de resposta
@@ -124,11 +146,11 @@ A API segue o formato:
 }
 ```
 
-Em erro de validacao (`422`), `data` retorna uma lista de mensagens Joi.
+Em erro de validacao (`422`), `data` retorna mensagens do Joi.
 
 ## Endpoints
 
-Base path: `/api`
+Base path: `/api` (use o prefixo antes das rotas, e.g /api/divisoes)
 
 ### Divisao
 
@@ -148,7 +170,7 @@ Exemplo `POST /divisao`:
 
 Regras:
 
-- `dia` deve ser um de: `Segunda`, `Terca`, `Quarta`, `Quinta`, `Sexta`, `Sabado`, `Domingo`
+- `dia` deve ser um de: `Segunda`, `Terça`, `Quarta`, `Quinta`, `Sexta`, `Sábado`, `Domingo`
 - nao pode existir mais de uma divisao para o mesmo dia
 
 ### Exercicio
@@ -164,8 +186,8 @@ Exemplo `POST /exercicio`:
 {
   "nome": "Supino Reto",
   "series": 3,
-  "repeticoes_alvo": 10,
   "carga_atual": 40,
+  "repeticoes_alvo": 10,
   "repeticoes_atuais": 8,
   "divisao": "65f000000000000000000000"
 }
@@ -211,6 +233,8 @@ Resposta de sincronizacao:
 ## Testes
 
 Suite de testes de rotas em `__tests__/routes`.
+
+O Jest carrega variaveis de `dotenv` a partir de `.env.test`. Crie esse arquivo se precisar de configuracoes especificas para testes.
 
 Execucao padrao:
 

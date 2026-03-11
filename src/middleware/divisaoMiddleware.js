@@ -12,8 +12,8 @@ const divisaoSchema = Joi.object({
             if (validDays.includes(capitalizedValue)) {
                 return capitalizedValue
             }
-            return helpers.error('any.only', { valid: validDays })
-        }, 'dia validation')
+            return helpers.message(`"{{#label}}" must be one of [${validDays.join(', ')}]`)
+        }, 'Validação do dia da semana')
         .required(),
 }).unknown(true)
 
