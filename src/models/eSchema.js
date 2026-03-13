@@ -10,6 +10,7 @@ const exercicioSchema = new mongoose.Schema({
     repeticoes_atuais: { type: Number, required: true },
     exercicio_criado_em: { type: Date, default: new Date() },
     exercicio_atualizado_em: { type: Date, default: new Date() },
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'Usuario' },
     divisao: { type: mongoose.Schema.Types.ObjectId, ref: 'Divisao', required: true },
 }, { versionKey: false })
 

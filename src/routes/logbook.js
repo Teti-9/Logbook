@@ -1,4 +1,4 @@
-import express from 'express'
+﻿import express from 'express'
 import validate from '../middleware/validate.js'
 import logbookSchema from '../middleware/logbookMiddleware.js'
 import sinclogbookSchema from '../middleware/sinclogbookMiddleware.js'
@@ -13,7 +13,13 @@ const logbookRouter = (logbookService) => {
      *   get:
      *     summary: Retorna todos os erros de sincronização dos logbooks.
      *     tags: [Logbook]
+     *     security:
+     *       - bearerAuth: []
      *     responses:
+     *       401:
+     *         description: Token não especificado.
+     *       403:
+     *         description: Token inválido ou expirado.
      *       200:
      *         description: Sucesso.
      *       404:
@@ -25,7 +31,13 @@ const logbookRouter = (logbookService) => {
      *   get:
      *     summary: Retorna todos os logbooks.
      *     tags: [Logbook]
+     *     security:
+     *       - bearerAuth: []
      *     responses:
+     *       401:
+     *         description: Token não especificado.
+     *       403:
+     *         description: Token inválido ou expirado.
      *       200:
      *         description: Sucesso.
      *       404:
@@ -37,6 +49,8 @@ const logbookRouter = (logbookService) => {
      *   post:
      *     summary: Sincroniza um ou mais logbook(s).
      *     tags: [Logbook]
+     *     security:
+     *       - bearerAuth: []
      *     requestBody:
      *       required: true
      *       content:
@@ -52,6 +66,10 @@ const logbookRouter = (logbookService) => {
      *                   type: string
      *                 example: ["699a18f7c9a487fe833a6984"]
      *     responses:
+     *       401:
+     *         description: Token não especificado.
+     *       403:
+     *         description: Token inválido ou expirado.
      *       200:
      *         description: Sucesso.
      *       400:
@@ -65,6 +83,8 @@ const logbookRouter = (logbookService) => {
      *   post:
      *     summary: Cadastra um novo logbook.
      *     tags: [Logbook]
+     *     security:
+     *       - bearerAuth: []
      *     requestBody:
      *       required: true
      *       content:
@@ -87,6 +107,10 @@ const logbookRouter = (logbookService) => {
      *                 description: ObjectId do exercicio.
      *                 example: "699a18f7c9a487fe833a6984"
      *     responses:
+     *       401:
+     *         description: Token não especificado.
+     *       403:
+     *         description: Token inválido ou expirado.
      *       201:
      *         description: Sucesso.
      *       404:
@@ -103,11 +127,13 @@ const logbookRouter = (logbookService) => {
     router.get("/logerros", async (req, res) => {
 
         try {
-            const resultado = await logbookService.getLogerros()
+
+            const resultado = await logbookService.getLogerros(req.dados)
             return res.status(200).json({
                 success: true,
                 data: resultado
             })
+
         } catch (erro) {
             return res.status(erro.statusCode || 500).json({
                 success: false,
@@ -119,11 +145,13 @@ const logbookRouter = (logbookService) => {
     router.get("/logbooks", async (req, res) => {
 
         try {
-            const resultado = await logbookService.getLogbooks()
+
+            const resultado = await logbookService.getLogbooks(req.dados)
             return res.status(200).json({
                 success: true,
                 data: resultado
             })
+
         } catch (erro) {
             return res.status(erro.statusCode || 500).json({
                 success: false,
@@ -135,11 +163,13 @@ const logbookRouter = (logbookService) => {
     router.post('/sinclogbook', validate(sinclogbookSchema, 'body'), async (req, res) => {
 
         try {
-            const sincronizado = await logbookService.sincLogbook(req.body)
+
+            const sincronizado = await logbookService.sincLogbook(req.body, req.dados)
             return res.status(200).json({
                 success: true,
                 data: sincronizado
             })
+
         } catch (erro) {
             return res.status(erro.statusCode || 500).json({
                 success: false,
@@ -151,11 +181,13 @@ const logbookRouter = (logbookService) => {
     router.post('/logbook', validate(logbookSchema, 'body'), async (req, res) => {
 
         try {
-            const logbookCriado = await logbookService.createLogbook(req.body)
+
+            const logbookCriado = await logbookService.createLogbook(req.body, req.dados)
             return res.status(201).json({
                 success: true,
                 data: logbookCriado
             })
+            
         } catch (erro) {
             return res.status(erro.statusCode || 500).json({
                 success: false,

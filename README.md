@@ -1,26 +1,26 @@
-# Logbook API
+﻿# Logbook API
 
-API REST para gerenciamento de treinos por divisao, exercicios e logbooks de progresso.
+API REST para gerenciamento de treinos por divisão, exercícios e logbooks de progresso, com autenticação via JWT.
 
-## Visao geral
+## Visão geral
 
 Esta API segue arquitetura em camadas:
 
 - `routes`: entrada HTTP
-- `middleware`: validacao com Joi
-- `services`: regras de negocio
+- `middleware`: validação com Joi + autenticação JWT
+- `services`: regras de negócio
 - `repositories`: acesso ao MongoDB
 - `models`: schemas Mongoose
 
 Fluxo principal:
 
-1. Cadastro de divisao de treino por dia.
-2. Cadastro de exercicios vinculados a uma divisao.
+1. Cadastro de divisão de treino por dia.
+2. Cadastro de exercícios vinculados a uma divisão.
 3. Registro de performance no logbook.
-4. Sincronizacao do logbook para atualizar os dados do exercicio.
-5. Registro de falhas inesperadas de sincronizacao em `LogErros`.
+4. Sincronização do logbook para atualizar os dados do exercício.
+5. Registro de falhas inesperadas de sincronização em `LogErros`.
 
-## Stack tecnica
+## Stack técnica
 
 - Node.js (ES Modules)
 - Express 5
@@ -34,11 +34,11 @@ Fluxo principal:
 
 - Node.js 20+ (recomendado)
 - NPM 10+
-- Instancia MongoDB disponivel (Nuvem ou Docker)
+- Instância MongoDB disponível (Nuvem ou Docker)
 
-## Instalacao (local)
+## Instalação (local)
 
-1. Instale as dependencias:
+1. Instale as dependências:
 
 ```bash
 npm install
@@ -49,6 +49,7 @@ npm install
 ```env
 PORT=8000
 MONGO_URI=mongodb+srv://user:password@cluster0.ynyrkdn.mongodb.net/logbook (conexão atlas nuvem)
+JWT_SECRET=sua_chave_jwt_forte
 ```
 
 3. Inicie a API:
@@ -73,9 +74,10 @@ PORT=8000
 MONGO_URI=mongodb://user:password@mongodb:27017/logbook?authSource=admin (conexão local)
 MONGO_USERNAME=user
 MONGO_PASSWORD=password
+JWT_SECRET=sua_chave_jwt_forte
 ```
 
-2. Suba os servicos:
+2. Suba os serviços:
 
 ```bash
 docker compose up --build
@@ -98,27 +100,34 @@ logbook/
 |  |- middleware/
 |  |  |- divisaoMiddleware.js
 |  |  |- exercicioMiddleware.js
+|  |  |- loginValidationMiddleware.js
+|  |  |- authMiddleware.js
 |  |  |- idMongoMiddleware.js
 |  |  |- logbookMiddleware.js
 |  |  |- sinclogbookMiddleware.js
+|  |  |- usuarioValidationMiddleware.js
 |  |  |- validate.js
 |  |- models/
 |  |  |- dSchema.js
 |  |  |- eSchema.js
 |  |  |- lSchema.js
 |  |  |- logErrosSchema.js
+|  |  |- uSchema.js
 |  |- repositories/
 |  |  |- divisaoRepository.js
 |  |  |- exercicioRepository.js
 |  |  |- logbookRepository.js
+|  |  |- usuarioRepository.js
 |  |- routes/
 |  |  |- divisao.js
 |  |  |- exercicio.js
 |  |  |- logbook.js
+|  |  |- usuario.js
 |  |- services/
 |  |  |- divisaoService.js
 |  |  |- exercicioService.js
 |  |  |- logbookService.js
+|  |  |- usuarioService.js
 |  |- utils/
 |  |  |- Capitalizar.js
 |  |  |- sincronizarExercicioComLogBook.js
@@ -135,7 +144,7 @@ logbook/
 |- Dockerfile
 ```
 
-## Padrao de resposta
+## Padrão de resposta
 
 A API segue o formato:
 
@@ -146,18 +155,69 @@ A API segue o formato:
 }
 ```
 
-Em erro de validacao (`422`), `data` retorna mensagens do Joi.
+Em erro de validação (`422`), `data` retorna mensagens do Joi.
+
+## Autenticação (JWT)
+
+- Registre um usuário e faça login para obter o token.
+- O token expira em **12h**.
+- Para rotas protegidas, envie o header:
+
+```http
+Authorization: Bearer <seu_token>
+```
+
+### Registrar usuário
+
+`POST /api/registrar`
+
+Exemplo:
+
+```json
+{
+  "nome": "Ana Silva",
+  "email": "ana@exemplo.com",
+  "senha": "1234"
+}
+```
+
+### Login
+
+`POST /api/logar`
+
+Exemplo:
+
+```json
+{
+  "email": "ana@exemplo.com",
+  "senha": "1234"
+}
+```
+
+Resposta (exemplo):
+
+```json
+{
+  "success": true,
+  "data": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
+```
 
 ## Endpoints
 
 Base path: `/api` (use o prefixo antes das rotas, e.g /api/divisoes)
 
-### Divisao
+### Autenticação (público)
 
-- `GET /divisoes` - lista todas as divisoes
-- `GET /divisao/:id` - busca uma divisao por ID
-- `POST /divisao` - cria uma divisao
-- `DELETE /deletar_divisao/:id` - exclui uma divisao
+- `POST /registrar` - cria usuário
+- `POST /logar` - autentica usuário e retorna token
+
+### Divisão (protegido)
+
+- `GET /divisoes` - lista todas as divisões
+- `GET /divisao/:id` - busca uma divisão por ID
+- `POST /divisao` - cria uma divisão
+- `DELETE /deletar_divisao/:id` - exclui uma divisão
 
 Exemplo `POST /divisao`:
 
@@ -171,14 +231,14 @@ Exemplo `POST /divisao`:
 Regras:
 
 - `dia` deve ser um de: `Segunda`, `Terça`, `Quarta`, `Quinta`, `Sexta`, `Sábado`, `Domingo`
-- nao pode existir mais de uma divisao para o mesmo dia
+- não pode existir mais de uma divisão para o mesmo dia
 
-### Exercicio
+### Exercício (protegido)
 
-- `GET /exercicios` - lista exercicios
-- `GET /exercicio/:id` - busca exercicio por ID
-- `POST /exercicio` - cria exercicio e vincula a uma divisao
-- `DELETE /deletar_exercicio/:id` - exclui exercicio
+- `GET /exercicios` - lista exercícios
+- `GET /exercicio/:id` - busca exercício por ID
+- `POST /exercicio` - cria exercício e vincula a uma divisão
+- `DELETE /deletar_exercicio/:id` - exclui exercício
 
 Exemplo `POST /exercicio`:
 
@@ -193,12 +253,12 @@ Exemplo `POST /exercicio`:
 }
 ```
 
-### Logbook
+### Logbook (protegido)
 
 - `GET /logbooks` - lista logbooks
-- `GET /logerros` - lista erros de sincronizacao nao resolvidos
-- `POST /logbook` - cria uma entrada de logbook para um exercicio
-- `POST /sinclogbook` - sincroniza um ou mais exercicios
+- `GET /logerros` - lista erros de sincronização não resolvidos
+- `POST /logbook` - cria uma entrada de logbook para um exercício
+- `POST /sinclogbook` - sincroniza um ou mais exercícios
 
 Exemplo `POST /logbook`:
 
@@ -218,32 +278,33 @@ Exemplo `POST /sinclogbook`:
 }
 ```
 
-Resposta de sincronizacao:
+Resposta de sincronização:
 
-- `sincronizados`: exercicios atualizados com sucesso
-- `falhas`: lista de exercicios nao sincronizados com motivo
+- `sincronizados`: exercícios atualizados com sucesso
+- `falhas`: lista de exercícios não sincronizados com motivo
 
-## Validacoes e regras importantes
+## Validações e regras importantes
 
-- IDs Mongo invalidos retornam `422`
-- corpo invalido retorna `422`
-- recursos nao encontrados retornam `404`
-- conflitos/regras de negocio podem retornar `400` ou `404` conforme implementacao atual das services
+- IDs Mongo inválidos retornam `422`
+- corpo inválido retorna `422`
+- recursos não encontrados retornam `404`
+- conflitos/regras de negócio podem retornar `400` ou `404` conforme implementação atual das services
 
 ## Testes
 
 Suite de testes de rotas em `__tests__/routes`.
 
-O Jest carrega variaveis de `dotenv` a partir de `.env.test`. Crie esse arquivo se precisar de configuracoes especificas para testes.
+O Jest carrega variáveis de `dotenv` a partir de `.env.test`. Crie esse arquivo se precisar de configurações específicas para testes.
 
-Execucao padrao:
+Execução padrão:
 
 ```bash
 npm test
 ```
 
-Se seu ambiente bloquear escrita de cache temporario, rode:
+Se seu ambiente bloquear escrita de cache temporário, rode:
 
 ```bash
-npx jest --runInBand --cacheDirectory .jest-cache
+npx jest --runInBand --cacheDirectory .jest-cache (Teste em paralelo)
+npx jest divisao.test.js --runInBand --cacheDirectory .jest-cache (Teste específico)
 ```

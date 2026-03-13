@@ -3,27 +3,27 @@ export default class DivisaoRepository {
         this.divisaoModel = divisaoModel
     }
 
-    async findAll() {
-        return await this.divisaoModel.find().populate('exercicios', ['_id', 'nome'])
+    async findAll(data) {
+        return await this.divisaoModel.find(data).populate('exercicios', ['_id', 'nome'])
     }
 
-    async findById(id) {
-        return await this.divisaoModel.findById(id).populate('exercicios', ['_id', 'nome'])
+    async findById(filters) {
+        return await this.divisaoModel.findOne(filters).populate('exercicios', ['_id', 'nome'])
     }
 
-    async findByIdAndUpdate(id, data, options) {
-        return await this.divisaoModel.findByIdAndUpdate(id, data, options)
+    async findByIdAndUpdate(id, property, options, data) {
+        return await this.divisaoModel.findByIdAndUpdate(id, property, options, data)
     }
 
-    async findOne(filter) {
-        return await this.divisaoModel.findOne(filter)
+    async findOne(filters) {
+        return await this.divisaoModel.findOne(filters)
     }
 
-    async create(data) {
-        return await this.divisaoModel.create(data)
+    async create(body) {
+        return await this.divisaoModel.create(body)
     }
 
-    async deleteById(id) {
-        return await this.divisaoModel.findByIdAndDelete({ _id: id })
+    async deleteById(filters) {
+        return await this.divisaoModel.findByIdAndDelete(filters)
     }
 }

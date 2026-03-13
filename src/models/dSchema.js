@@ -6,6 +6,7 @@ const divisaoSchema = new mongoose.Schema({
         type: String,
         enum: ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo'], 
         required: true },
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'Usuario' },
     exercicios: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Exercicio' }]
 }, { versionKey: false })
 

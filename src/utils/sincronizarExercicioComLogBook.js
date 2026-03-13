@@ -1,9 +1,12 @@
 import Exercicio from '../models/eSchema.js'
 import LogBook from '../models/lSchema.js'
 
-async function sincronizarExercicioComLogBook(id_exercicio) {
+async function sincronizarExercicioComLogBook(exercicioId, userId) {
 
-    const exercicioExiste = await Exercicio.findById(id_exercicio)
+    const exercicioExiste = await Exercicio.findOne({
+        _id: exercicioId,
+        userId: userId
+    })
 
     if (!exercicioExiste) {
         throw new Error('Exercício não encontrado.')
@@ -11,7 +14,8 @@ async function sincronizarExercicioComLogBook(id_exercicio) {
 
     const logbookExiste = await LogBook.findOne({
         exercicio: exercicioExiste._id,
-        sincronizado: false
+        sincronizado: false,
+        userId: userId
     })
 
     if (!logbookExiste) {
@@ -27,7 +31,7 @@ async function sincronizarExercicioComLogBook(id_exercicio) {
     }
 
     const exercicioAtualizado = await Exercicio.findByIdAndUpdate(
-        id_exercicio,
+        exercicioId,
         dados,
         { returnDocument: 'after' }
     )

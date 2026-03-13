@@ -6,29 +6,40 @@ export default class LogbookService {
         this.exercicioRepository = exercicioRepository
     }
 
-    async getLogerros() {
-        const logerros = await this.logbookRepository.findAll_errors({resolvido: false})
+    async getLogerros(data) {
+
+        const logerros = await this.logbookRepository.findAll_errors({ 
+            resolvido: false,
+            userId: data.userId 
+        })
+
         if (!logerros || logerros.length === 0) {
             const error = new Error("Nenhum erro encontrado.")
             error.statusCode = 404
             throw error
         }
+
         return logerros
     }
 
-    async getLogbooks() {
-        const logbooks = await this.logbookRepository.findAll()
+    async getLogbooks(data) {
+
+        const logbooks = await this.logbookRepository.findAll({
+            userId: data.userId
+        })
+        
         if (!logbooks || logbooks.length === 0) {
             const error = new Error("Nenhum logbook encontrado.")
             error.statusCode = 404
             throw error
         }
+
         return logbooks
     }
 
-    async sincLogbook(data) {
+    async sincLogbook(body, data) {
 
-        const { exercicios } = data
+        const { exercicios } = body
 
         const sincronizados = []
         const falhas = []
@@ -41,7 +52,7 @@ export default class LogbookService {
 
             try {
 
-                const sincResultado = await sincronizarExercicioComLogBook(exercicioId)
+                const sincResultado = await sincronizarExercicioComLogBook(exercicioId, data.userId )
                 sincronizados.push(sincResultado)
 
             } catch (error) {
@@ -78,26 +89,39 @@ export default class LogbookService {
         }
     }
 
-    async createLogbook(data) {
-        const exercicioExiste = await this.exercicioRepository.findById({ _id: data.exercicio })
+    async createLogbook(body, data) {
+
+        const exercicioExiste = await this.exercicioRepository.findById({ 
+            _id: body.exercicio, 
+            userId: data.userId})
+
         if (!exercicioExiste) {
             const error = new Error('Exercício não encontrado.')
             error.statusCode = 404
             throw error
         }
-        const logbookExiste = await this.logbookRepository.findOne({ exercicio: data.exercicio, sincronizado: false})
+
+        const logbookExiste = await this.logbookRepository.findOne({ 
+            exercicio: body.exercicio, 
+            sincronizado: false, 
+            userId: data.userId
+        })
+
         if (logbookExiste) {
             const error = new Error('LogBook para este exercício já existe, sincronize ou apague para criar um novo.')
             error.statusCode = 400
             throw error
         }
+
         const logbookFormatado = {
-            exercicio: data.exercicio,
+            exercicio: body.exercicio,
             nome: exercicioExiste.nome,
-            carga: data.carga,
-            repeticoes: data.repeticoes,
-            data: new Date()
+            carga: body.carga,
+            repeticoes: body.repeticoes,
+            data: new Date(),
+            userId: data.userId
         }
+
         return await this.logbookRepository.create(logbookFormatado)
     }
 }

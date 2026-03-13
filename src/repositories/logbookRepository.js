@@ -4,8 +4,8 @@ export default class logbookRepository {
         this.logerrosModel = logerrosModel
     }
 
-    async findAll() {
-        return await this.logbookModel.find().populate('exercicio', ['_id', 'carga_anterior', 'repeticoes_anteriores'])
+    async findAll(data) {
+        return await this.logbookModel.find(data).populate('exercicio', ['_id', 'carga_anterior', 'repeticoes_anteriores'])
     }
 
     async findAll_errors(filter) {
@@ -16,16 +16,16 @@ export default class logbookRepository {
         return await this.logbookModel.findOne(filters)
     }
 
-    async create(data) {
-        return await this.logbookModel.create(data)
+    async create(body) {
+        return await this.logbookModel.create(body)
     }
 
     async create_errors(data) {
         return await this.logerrosModel.create(data)
     }
 
-    async deleteById(id) {
-        return await this.logbookModel.findByIdAndDelete({ _id: id })
+    async deleteById(filters) {
+        return await this.logbookModel.findByIdAndDelete(filters)
     }
 
     async deleteMany(query) {

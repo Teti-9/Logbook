@@ -1,4 +1,4 @@
-import express from 'express'
+﻿import express from 'express'
 import validate from '../middleware/validate.js'
 import divisaoSchema from '../middleware/divisaoMiddleware.js'
 import idMongoSchema from '../middleware/idMongoMiddleware.js'
@@ -13,7 +13,13 @@ const divisaoRouter = (divisaoService) => {
      *   get:
      *     summary: Retorna todas as divisões.
      *     tags: [Divisão]
+     *     security:
+     *       - bearerAuth: []
      *     responses:
+     *       401:
+     *         description: Token não especificado.
+     *       403:
+     *         description: Token inválido ou expirado.
      *       200:
      *         description: Sucesso.
      *       404:
@@ -25,6 +31,8 @@ const divisaoRouter = (divisaoService) => {
      *   get:
      *     summary: Retorna uma divisão única.
      *     tags: [Divisão]
+     *     security:
+     *       - bearerAuth: []
      *     parameters:
      *      - in: path
      *        name: id
@@ -33,6 +41,10 @@ const divisaoRouter = (divisaoService) => {
      *          type: string
      *          description: ID da divisão.
      *     responses:
+     *       401:
+     *         description: Token não especificado.
+     *       403:
+     *         description: Token inválido ou expirado.
      *       200:
      *         description: Sucesso.
      *       404:
@@ -46,6 +58,8 @@ const divisaoRouter = (divisaoService) => {
      *   post:
      *     summary: Cadastra uma nova divisão.
      *     tags: [Divisão]
+     *     security:
+     *       - bearerAuth: []
      *     requestBody:
      *       required: true
      *       content:
@@ -60,6 +74,10 @@ const divisaoRouter = (divisaoService) => {
      *                 type: string
      *                 example: "Segunda, Terça, Quarta..."
      *     responses:
+     *       401:
+     *         description: Token não especificado.
+     *       403:
+     *         description: Token inválido ou expirado.
      *       201:
      *         description: Sucesso.
      *       400:
@@ -71,6 +89,8 @@ const divisaoRouter = (divisaoService) => {
      *   delete:
      *     summary: Deleta uma divisão.
      *     tags: [Divisão]
+     *     security:
+     *       - bearerAuth: []
      *     parameters:
      *      - in: path
      *        name: id
@@ -79,6 +99,10 @@ const divisaoRouter = (divisaoService) => {
      *          type: string
      *          description: ID da divisão a ser deletada.
      *     responses:
+     *       401:
+     *         description: Token não especificado.
+     *       403:
+     *         description: Token inválido ou expirado.
      *       200:
      *         description: Sucesso.
      *       400:
@@ -92,12 +116,15 @@ const divisaoRouter = (divisaoService) => {
      */
 
     router.get('/divisoes', async (req, res) => {
+
         try {
-            const resultado = await divisaoService.getDivisoes()
+
+            const resultado = await divisaoService.getDivisoes(req.dados)
             return res.status(200).json({
                 success: true,
                 data: resultado
             })
+
         } catch (erro) {
             return res.status(erro.statusCode || 500).json({
                 success: false,
@@ -107,13 +134,16 @@ const divisaoRouter = (divisaoService) => {
     })
 
     router.get('/divisao/:id', validate(idMongoSchema, 'params'), async (req, res) => {
+
         try {
+
             const { id } = req.params
-            const resultado = await divisaoService.getDivisaoById(id)
+            const resultado = await divisaoService.getDivisaoById(id, req.dados)
             return res.status(200).json({
                 success: true,
                 data: resultado
             })
+
         } catch (erro) {
             return res.status(erro.statusCode || 500).json({
                 success: false,
@@ -123,12 +153,15 @@ const divisaoRouter = (divisaoService) => {
     })
 
     router.post('/divisao', validate(divisaoSchema, 'body'), async (req, res) => {
+
         try {
-            const divisaoCriada = await divisaoService.createDivisao(req.body)
+
+            const divisaoCriada = await divisaoService.createDivisao(req.body, req.dados)
             return res.status(201).json({
                 success: true,
                 data: divisaoCriada
             })
+
         } catch (erro) {
             return res.status(erro.statusCode || 500).json({
                 success: false,
@@ -138,13 +171,16 @@ const divisaoRouter = (divisaoService) => {
     })
 
     router.delete('/deletar_divisao/:id', validate(idMongoSchema, 'params'), async (req, res) => {
+
         try {
+
             const { id } = req.params
-            await divisaoService.deleteDivisao(id)
+            await divisaoService.deleteDivisao(id, req.dados)
             return res.status(200).json({
                 success: true,
                 data: "Divisão excluída com sucesso."
             })
+            
         } catch (erro) {
             return res.status(erro.statusCode || 500).json({
                 success: false,

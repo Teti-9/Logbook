@@ -5,44 +5,71 @@ export default class ExercicioService {
         this.logbookRepository = logbookRepository
     }
 
-    async getExercicios() {
-        const exercicios = await this.exercicioRepository.findAll()
+    async getExercicios(data) {
+
+        const exercicios = await this.exercicioRepository.findAll({
+            userId: data.userId
+        })
+
         if (!exercicios || exercicios.length === 0) {
             const error = new Error('Nenhum exercício encontrado.')
             error.statusCode = 404
             throw error
         }
+
         return exercicios
     }
 
-    async getExercicioById(id) {
-        const exercicio = await this.exercicioRepository.findById(id)
+    async getExercicioById(id, data) {
+
+        const exercicio = await this.exercicioRepository.findById({
+            _id: id,
+            userId: data.userId
+        })
+
         if (!exercicio) {
             const error = new Error('Exercício não encontrado.')
             error.statusCode = 404
             throw error
         }
+
         return exercicio
     }
 
-    async createExercicio(data) {
-        const divisaoExistente = await this.divisaoRepository.findOne({ _id: data.divisao })
+    async createExercicio(body, data) {
+
+        const divisaoExistente = await this.divisaoRepository.findOne({ 
+            _id: body.divisao, 
+            userId: data.userId})
+
         if (!divisaoExistente) {
             const error = new Error('Divisão não encontrada.')
             error.statusCode = 404
             throw error
         }
-        const exercicioCriado = await this.exercicioRepository.create(data)
+
+        const newData = {
+            ...body,
+            userId: data.userId
+        }
+
+        const exercicioCriado = await this.exercicioRepository.create(newData)
+
         await this.divisaoRepository.findByIdAndUpdate(
-            data.divisao,
+            body.divisao,
             { $push: { exercicios: exercicioCriado._id } },
             { returnDocument: 'after' }
         )
+
         return exercicioCriado
     }
 
-    async deleteExercicio(id) {
-        const exercicioExiste = await this.exercicioRepository.findById(id)
+    async deleteExercicio(id, data) {
+
+        const exercicioExiste = await this.exercicioRepository.findById({
+            _id: id,
+            userId: data.userId
+        })
 
         if (!exercicioExiste) {
             const error = new Error("Exercício não encontrado.")
@@ -50,7 +77,10 @@ export default class ExercicioService {
             throw error
         }
 
-        const exercicioDeletado = await this.exercicioRepository.deleteById(id)
+        const exercicioDeletado = await this.exercicioRepository.deleteById({
+            _id: id,
+            userId: data.userId
+        })
 
         if (exercicioExiste && exercicioDeletado) {
 
@@ -59,7 +89,7 @@ export default class ExercicioService {
                 { $pull: { exercicios: exercicioDeletado._id } }
             )
             
-            await this.logbookRepository.deleteMany({ exercicio: id })
+            await this.logbookRepository.deleteMany({ exercicio: id, userId: data.userId })
         }
         
         return { message: "Exercício excluído com sucesso." }

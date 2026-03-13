@@ -1,6 +1,7 @@
 // Geral
 import express from "express"
 import connectDB from "./config/mongodb.js"
+import authMiddleware from "./middleware/authMiddleware.js"
 import swaggerUI from "swagger-ui-express"
 import swaggerJsdoc from "swagger-jsdoc"
 import cors from "cors"
@@ -24,6 +25,12 @@ import LogErros from "./models/logErrosSchema.js"
 import LogbookRepository from "./repositories/logbookRepository.js"
 import LogbookService from "./services/logbookService.js"
 
+// Usuário
+import usuarioRouter from "./routes/usuario.js"
+import Usuario from "./models/uSchema.js"
+import UsuarioRepository from "./repositories/usuarioRepository.js"
+import UsuarioService from "./services/usuarioService.js"
+
 
 const app = express()
 
@@ -37,6 +44,15 @@ const options = {
     info: {
       title: "Logbook Docs",
     },
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: "http",
+          scheme: "bearer",
+          bearerFormat: "JWT",
+        },
+      },
+    },
   },
   apis: ["./src/routes/*.js"],
 }
@@ -46,19 +62,24 @@ const specs = swaggerJsdoc(options)
 const divisaoRepository = new DivisaoRepository(Divisao)
 const exercicioRepository = new ExercicioRepository(Exercicio)
 const logbookRepository = new LogbookRepository(Logbook, LogErros)
+const usuarioRepository = new UsuarioRepository(Usuario)
+
 
 const divisaoService = new DivisaoService(divisaoRepository)
 const exercicioService = new ExercicioService(exercicioRepository, divisaoRepository, logbookRepository)
 const logbookService = new LogbookService(logbookRepository, exercicioRepository)
+const usuarioService = new UsuarioService(usuarioRepository)
 
 const divisao = divisaoRouter(divisaoService)
 const exercicio = exercicioRouter(exercicioService)
 const logbook = logbookRouter(logbookService)
+const usuario = usuarioRouter(usuarioService)
 
 app.use("/docs", swaggerUI.serve, swaggerUI.setup(specs))
-app.use("/api", divisao)
-app.use("/api", exercicio)
-app.use("/api", logbook)
+app.use("/api", usuario)
+app.use("/api", authMiddleware, divisao)
+app.use("/api", authMiddleware, exercicio)
+app.use("/api", authMiddleware, logbook)
 
 if (process.env.NODE_ENV !== 'test') {
   connectDB()
