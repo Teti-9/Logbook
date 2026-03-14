@@ -63,7 +63,7 @@ export default class LogbookService {
                 })
 
                 if (!ERROS_SEM_LOG.includes(error.message)) {
-                    await logbookRepository.create_errors({
+                    await this.logbookRepository.create_errors({
                         exercicio_id: exercicioId,
                         logbook_id: error.logbook_id ?? null,
                         erro: error.message

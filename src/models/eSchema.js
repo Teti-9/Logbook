@@ -8,11 +8,11 @@ const exercicioSchema = new mongoose.Schema({
     repeticoes_alvo: { type: Number, required: true },
     repeticoes_anteriores: { type: Number, default: 0 },
     repeticoes_atuais: { type: Number, required: true },
-    exercicio_criado_em: { type: Date, default: new Date() },
-    exercicio_atualizado_em: { type: Date, default: new Date() },
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'Usuario' },
-    divisao: { type: mongoose.Schema.Types.ObjectId, ref: 'Divisao', required: true },
-}, { versionKey: false })
+    divisao: { type: mongoose.Schema.Types.ObjectId, ref: 'Divisao', required: true, index: true },
+}, { versionKey: false, timestamps: true })
+
+exercicioSchema.index({ userId: 1, divisao: 1 })
 
 const Exercicio = mongoose.model('Exercicio', exercicioSchema)
 

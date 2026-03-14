@@ -7,8 +7,8 @@ const divisaoSchema = new mongoose.Schema({
         enum: ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo'], 
         required: true },
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'Usuario' },
-    exercicios: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Exercicio' }]
-}, { versionKey: false })
+    exercicios: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Exercicio', index: true }]
+}, { versionKey: false, timestamps: true })
 
 const Divisao = mongoose.model('Divisao', divisaoSchema)
 

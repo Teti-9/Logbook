@@ -64,44 +64,25 @@ const usuarioRouter = (usuarioService) => {
 
     router.post('/registrar', validate(usuarioSchema, 'body'), async (req, res) => {
 
-        try {
-            const usuarioCriado = await usuarioService.createUsuario(req.body)
+        const usuarioCriado = await usuarioService.createUsuario(req.body)
 
-            return res.status(201).json({
-                success: true,
-                data: "Usuário registrado com sucesso."
-            })
-        } catch (erro) {
-            if (erro.code === 11000) {
-                return res.status(401).json({
-                    success: false,
-                    data: "Email já cadastrado."
-                })
-            }
-            return res.status(erro.statusCode || 500).json({
-                success: false,
-                data: erro.message
-            })
-        }
+        return res.status(201).json({
+            success: true,
+            data: "Usuário registrado com sucesso."
+        })
+        
     })
 
     router.post('/logar', validate(loginSchema, 'body'), async (req, res) => {
 
         const { email, senha } = req.body
 
-        try {
-            const logar = await usuarioService.loginUsuario(email, senha)
+        const logar = await usuarioService.loginUsuario(email, senha)
 
-            return res.status(200).json({
-                success: true,
-                data: logar
-            })
-        } catch (erro) {
-            return res.status(erro.statusCode || 500).json({
-                success: false,
-                data: erro.message
-            })
-        }
+        return res.status(200).json({
+            success: true,
+            data: logar
+        })
 
     })
 

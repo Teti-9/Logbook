@@ -117,76 +117,50 @@ const divisaoRouter = (divisaoService) => {
 
     router.get('/divisoes', async (req, res) => {
 
-        try {
+        const resultado = await divisaoService.getDivisoes(req.dados)
 
-            const resultado = await divisaoService.getDivisoes(req.dados)
-            return res.status(200).json({
-                success: true,
-                data: resultado
-            })
+        return res.status(200).json({
+            success: true,
+            data: resultado
+        })
 
-        } catch (erro) {
-            return res.status(erro.statusCode || 500).json({
-                success: false,
-                data: erro.message
-            })
-        }
     })
 
     router.get('/divisao/:id', validate(idMongoSchema, 'params'), async (req, res) => {
 
-        try {
+        const { id } = req.params
 
-            const { id } = req.params
-            const resultado = await divisaoService.getDivisaoById(id, req.dados)
-            return res.status(200).json({
-                success: true,
-                data: resultado
-            })
+        const resultado = await divisaoService.getDivisaoById(id, req.dados)
 
-        } catch (erro) {
-            return res.status(erro.statusCode || 500).json({
-                success: false,
-                data: erro.message
-            })
-        }
+        return res.status(200).json({
+            success: true,
+            data: resultado
+        })
+
     })
 
     router.post('/divisao', validate(divisaoSchema, 'body'), async (req, res) => {
 
-        try {
+        const divisaoCriada = await divisaoService.createDivisao(req.body, req.dados)
 
-            const divisaoCriada = await divisaoService.createDivisao(req.body, req.dados)
-            return res.status(201).json({
-                success: true,
-                data: divisaoCriada
-            })
+        return res.status(201).json({
+            success: true,
+            data: divisaoCriada
+        })
 
-        } catch (erro) {
-            return res.status(erro.statusCode || 500).json({
-                success: false,
-                data: erro.message
-            })
-        }
     })
 
     router.delete('/deletar_divisao/:id', validate(idMongoSchema, 'params'), async (req, res) => {
 
-        try {
+        const { id } = req.params
 
-            const { id } = req.params
-            await divisaoService.deleteDivisao(id, req.dados)
-            return res.status(200).json({
-                success: true,
-                data: "Divisão excluída com sucesso."
-            })
+        await divisaoService.deleteDivisao(id, req.dados)
+        
+        return res.status(200).json({
+            success: true,
+            data: "Divisão excluída com sucesso."
+        })
             
-        } catch (erro) {
-            return res.status(erro.statusCode || 500).json({
-                success: false,
-                data: erro.message
-            })
-        }
     })
 
     return router

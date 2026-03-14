@@ -140,76 +140,50 @@ const exercicioRouter = (exercicioService) => {
 
     router.get('/exercicios', async (req, res) => {
 
-        try {
+        const resultado = await exercicioService.getExercicios(req.dados)
 
-            const resultado = await exercicioService.getExercicios(req.dados)
-            return res.status(200).json({
-                success: true,
-                data: resultado
-            })
+        return res.status(200).json({
+            success: true,
+            data: resultado
+        })
 
-        } catch (erro) {
-            return res.status(erro.statusCode || 500).json({
-                success: false,
-                data: erro.message
-            })
-        }
     })
 
     router.get('/exercicio/:id', validate(idMongoSchema, 'params'), async (req, res) => { 
 
-        try {
+        const { id } = req.params
 
-            const { id } = req.params
-            const resultado = await exercicioService.getExercicioById(id, req.dados)
-            return res.status(200).json({
-                success: true,
-                data: resultado
-            })
+        const resultado = await exercicioService.getExercicioById(id, req.dados)
 
-        } catch (erro) {
-            return res.status(erro.statusCode || 500).json({
-                success: false,
-                data: erro.message
-            })
-        }
+        return res.status(200).json({
+            success: true,
+            data: resultado
+        })
+
     })
 
     router.post('/exercicio', validate(exercicioSchema, 'body'), async (req, res) => {
 
-        try {
+        const exercicioCriado = await exercicioService.createExercicio(req.body, req.dados)
 
-            const exercicioCriado = await exercicioService.createExercicio(req.body, req.dados)
-            return res.status(201).json({
-                success: true,
-                data: exercicioCriado
-            })
-
-        } catch (erro) {
-            return res.status(erro.statusCode || 500).json({
-                success: false,
-                data: erro.message
-            })
-        }
+        return res.status(201).json({
+            success: true,
+            data: exercicioCriado
+        })
+        
     })
 
     router.delete('/deletar_exercicio/:id', validate(idMongoSchema, 'params'), async (req, res) => {
 
-        try {
+        const { id } = req.params
 
-            const { id } = req.params
-            await exercicioService.deleteExercicio(id, req.dados)
-            return res.status(200).json({
-                success: true,
-                data: "Exercício excluído com sucesso."
-            })
-            
-        } catch (erro) {
-            return res.status(erro.statusCode || 500).json({
-                success: false,
-                data: erro.message
-            })
-        }
+        await exercicioService.deleteExercicio(id, req.dados)
+        
+        return res.status(200).json({
+            success: true,
+            data: "Exercício excluído com sucesso."
+        })
+
     })
 
     return router

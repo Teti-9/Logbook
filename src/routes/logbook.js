@@ -126,74 +126,46 @@ const logbookRouter = (logbookService) => {
 
     router.get("/logerros", async (req, res) => {
 
-        try {
+        const resultado = await logbookService.getLogerros(req.dados)
+        
+        return res.status(200).json({
+            success: true,
+            data: resultado
+        })
 
-            const resultado = await logbookService.getLogerros(req.dados)
-            return res.status(200).json({
-                success: true,
-                data: resultado
-            })
-
-        } catch (erro) {
-            return res.status(erro.statusCode || 500).json({
-                success: false,
-                data: erro.message
-            })
-        }
     })
 
     router.get("/logbooks", async (req, res) => {
 
-        try {
+        const resultado = await logbookService.getLogbooks(req.dados)
 
-            const resultado = await logbookService.getLogbooks(req.dados)
-            return res.status(200).json({
-                success: true,
-                data: resultado
-            })
+        return res.status(200).json({
+            success: true,
+            data: resultado
+        })
 
-        } catch (erro) {
-            return res.status(erro.statusCode || 500).json({
-                success: false,
-                data: erro.message
-            })
-        }
     })
 
     router.post('/sinclogbook', validate(sinclogbookSchema, 'body'), async (req, res) => {
 
-        try {
+        const sincronizado = await logbookService.sincLogbook(req.body, req.dados)
 
-            const sincronizado = await logbookService.sincLogbook(req.body, req.dados)
-            return res.status(200).json({
-                success: true,
-                data: sincronizado
-            })
+        return res.status(200).json({
+            success: true,
+            data: sincronizado
+        })
 
-        } catch (erro) {
-            return res.status(erro.statusCode || 500).json({
-                success: false,
-                data: erro.data || erro.message
-            })
-        }
     })
 
     router.post('/logbook', validate(logbookSchema, 'body'), async (req, res) => {
+        
+        const logbookCriado = await logbookService.createLogbook(req.body, req.dados)
 
-        try {
+        return res.status(201).json({
+            success: true,
+            data: logbookCriado
+        })
 
-            const logbookCriado = await logbookService.createLogbook(req.body, req.dados)
-            return res.status(201).json({
-                success: true,
-                data: logbookCriado
-            })
-            
-        } catch (erro) {
-            return res.status(erro.statusCode || 500).json({
-                success: false,
-                data: erro.message
-            })
-        }
     })
 
     return router 

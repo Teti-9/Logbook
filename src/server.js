@@ -1,6 +1,7 @@
 // Geral
 import express from "express"
 import connectDB from "./config/mongodb.js"
+import errorMiddleware from "./middleware/errorMiddleware.js"
 import authMiddleware from "./middleware/authMiddleware.js"
 import swaggerUI from "swagger-ui-express"
 import swaggerJsdoc from "swagger-jsdoc"
@@ -80,6 +81,8 @@ app.use("/api", usuario)
 app.use("/api", authMiddleware, divisao)
 app.use("/api", authMiddleware, exercicio)
 app.use("/api", authMiddleware, logbook)
+
+app.use(errorMiddleware)
 
 if (process.env.NODE_ENV !== 'test') {
   connectDB()
