@@ -9,7 +9,7 @@ const logbookRouter = (logbookService) => {
     /**
      * @swagger
      * 
-     * /api/logerros:
+     * /api/v1/logerros:
      *   get:
      *     summary: Retorna todos os erros de sincronização dos logbooks.
      *     tags: [Logbook]
@@ -27,7 +27,7 @@ const logbookRouter = (logbookService) => {
      *       500:
      *         description: Erro interno do servidor.
      * 
-     * /api/logbooks:
+     * /api/v1/logbooks:
      *   get:
      *     summary: Retorna todos os logbooks.
      *     tags: [Logbook]
@@ -45,7 +45,7 @@ const logbookRouter = (logbookService) => {
      *       500:
      *         description: Erro interno do servidor.
      * 
-     * /api/sinclogbook:
+     * /api/v1/sinclogbook:
      *   post:
      *     summary: Sincroniza um ou mais logbook(s).
      *     tags: [Logbook]
@@ -79,7 +79,7 @@ const logbookRouter = (logbookService) => {
      *       500:
      *         description: Erro interno do servidor.
      * 
-     * /api/logbook:
+     * /api/v1/logbook:
      *   post:
      *     summary: Cadastra um novo logbook.
      *     tags: [Logbook]

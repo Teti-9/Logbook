@@ -8,7 +8,8 @@ const usuarioRouter = (usuarioService) => {
 
     /**
      * @swagger
-     * /api/registrar:
+     * 
+     * /api/v1/registrar:
      *   post:
      *     summary: Registra o usuário
      *     tags: [Autenticação]
@@ -34,7 +35,7 @@ const usuarioRouter = (usuarioService) => {
      *         description: Erro validação middleware.
      *       500:
      *         description: Erro interno do servidor.
-     * /api/logar:
+     * /api/v1/logar:
      *   post:
      *     summary: Faz login do usuário
      *     tags: [Autenticação]

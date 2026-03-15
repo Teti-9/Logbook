@@ -9,7 +9,7 @@ const divisaoRouter = (divisaoService) => {
     /**
      * @swagger
      * 
-     * /api/divisoes:
+     * /api/v1/divisoes:
      *   get:
      *     summary: Retorna todas as divisões.
      *     tags: [Divisão]
@@ -27,7 +27,7 @@ const divisaoRouter = (divisaoService) => {
      *       500:
      *         description: Erro interno do servidor.
      * 
-     * /api/divisao/{id}:
+     * /api/v1/divisao/{id}:
      *   get:
      *     summary: Retorna uma divisão única.
      *     tags: [Divisão]
@@ -54,7 +54,7 @@ const divisaoRouter = (divisaoService) => {
      *       500:
      *         description: Erro interno do servidor.
      * 
-     * /api/divisao:
+     * /api/v1/divisao:
      *   post:
      *     summary: Cadastra uma nova divisão.
      *     tags: [Divisão]
@@ -85,7 +85,7 @@ const divisaoRouter = (divisaoService) => {
      *       500:
      *         description: Erro interno do servidor.
      * 
-     * /api/deletar_divisao/{id}:
+     * /api/v1/deletar_divisao/{id}:
      *   delete:
      *     summary: Deleta uma divisão.
      *     tags: [Divisão]

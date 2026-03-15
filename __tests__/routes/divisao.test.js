@@ -3,6 +3,7 @@ import express from 'express'
 import mongoose from 'mongoose'
 import divisaoRouter from '../../src/routes/divisao.js'
 import DivisaoService from '../../src/services/divisaoService.js'
+import errorMiddleware from '../../src/middleware/errorMiddleware.js'
 
 jest.mock('../../src/services/divisaoService.js')
 
@@ -10,9 +11,10 @@ const app = express()
 app.use(express.json())
 
 const mockDivisaoService = new DivisaoService()
-app.use('/api', divisaoRouter(mockDivisaoService))
+app.use('/api/v1', divisaoRouter(mockDivisaoService))
+app.use(errorMiddleware)
 
-describe('GET /api/divisoes', () => {
+describe('GET /api/v1/divisoes', () => {
 
     beforeEach(() => {
         jest.clearAllMocks()
@@ -24,7 +26,7 @@ describe('GET /api/divisoes', () => {
         mockDivisaoService.getDivisoes.mockRejectedValue(error)
 
         const res = await request(app)
-            .get('/api/divisoes')
+            .get('/api/v1/divisoes')
 
         expect(res.status).toBe(404)
         expect(res.body.success).toBe(false)
@@ -39,7 +41,7 @@ describe('GET /api/divisoes', () => {
         })
 
         const res = await request(app)
-            .get('/api/divisoes')
+            .get('/api/v1/divisoes')
 
         expect(res.status).toBe(200)
         expect(res.body.success).toBe(true)
@@ -49,7 +51,7 @@ describe('GET /api/divisoes', () => {
         mockDivisaoService.getDivisoes.mockRejectedValue(new Error('Erro no banco de dados.'))
 
         const res = await request(app)
-            .get('/api/divisoes')
+            .get('/api/v1/divisoes')
 
         expect(res.status).toBe(500)
         expect(res.body.success).toBe(false)
@@ -57,7 +59,7 @@ describe('GET /api/divisoes', () => {
     })
 })
 
-describe('GET /api/divisao/:id', () => {
+describe('GET /api/v1/divisao/:id', () => {
     const idValido = new mongoose.Types.ObjectId().toString()
 
     beforeEach(() => {
@@ -70,7 +72,7 @@ describe('GET /api/divisao/:id', () => {
         mockDivisaoService.getDivisaoById.mockRejectedValue(error)
 
         const res = await request(app)
-            .get(`/api/divisao/${idValido}`)
+            .get(`/api/v1/divisao/${idValido}`)
 
         expect(res.status).toBe(404)
         expect(res.body.success).toBe(false)
@@ -85,7 +87,7 @@ describe('GET /api/divisao/:id', () => {
         })
 
         const res = await request(app)
-            .get(`/api/divisao/${idValido}`)
+            .get(`/api/v1/divisao/${idValido}`)
 
         expect(res.status).toBe(200)
         expect(res.body.success).toBe(true)
@@ -95,7 +97,7 @@ describe('GET /api/divisao/:id', () => {
         mockDivisaoService.getDivisaoById.mockRejectedValue(new Error('Erro no banco de dados.'))
 
         const res = await request(app)
-            .get(`/api/divisao/${idValido}`)
+            .get(`/api/v1/divisao/${idValido}`)
 
         expect(res.status).toBe(500)
         expect(res.body.success).toBe(false)
@@ -103,7 +105,7 @@ describe('GET /api/divisao/:id', () => {
     })
 })
 
-describe('POST /api/divisao', () => {
+describe('POST /api/v1/divisao', () => {
 
     beforeEach(() => {
         jest.clearAllMocks()
@@ -115,7 +117,7 @@ describe('POST /api/divisao', () => {
         mockDivisaoService.createDivisao.mockRejectedValue(error)
 
         const res = await request(app)
-            .post('/api/divisao')
+            .post('/api/v1/divisao')
             .send({ nome: 'Push 1', dia: 'Segunda' })
 
         expect(res.status).toBe(400)
@@ -130,7 +132,7 @@ describe('POST /api/divisao', () => {
         })
 
         const res = await request(app)
-            .post('/api/divisao')
+            .post('/api/v1/divisao')
             .send({ nome: 'Push 1', dia: 'Segunda' })
 
         expect(res.status).toBe(201)
@@ -141,7 +143,7 @@ describe('POST /api/divisao', () => {
         mockDivisaoService.createDivisao.mockRejectedValue(new Error('Erro no banco de dados.'))
 
         const res = await request(app)
-            .post('/api/divisao')
+            .post('/api/v1/divisao')
             .send({ nome: 'Push 1', dia: 'Segunda' })
 
         expect(res.status).toBe(500)
@@ -151,7 +153,7 @@ describe('POST /api/divisao', () => {
 
 })
 
-describe('DELETE /api/deletar_divisao/:id', () => {
+describe('DELETE /api/v1/deletar_divisao/:id', () => {
     const idValido = new mongoose.Types.ObjectId().toString()
 
     beforeEach(() => {
@@ -164,7 +166,7 @@ describe('DELETE /api/deletar_divisao/:id', () => {
         mockDivisaoService.deleteDivisao.mockRejectedValue(error)
 
         const res = await request(app)
-            .delete(`/api/deletar_divisao/${idValido}`)
+            .delete(`/api/v1/deletar_divisao/${idValido}`)
 
         expect(res.status).toBe(404)
         expect(res.body.success).toBe(false)
@@ -175,7 +177,7 @@ describe('DELETE /api/deletar_divisao/:id', () => {
         mockDivisaoService.deleteDivisao.mockResolvedValue({ message: 'Divisão excluída com sucesso.' })
 
         const res = await request(app)
-            .delete(`/api/deletar_divisao/${idValido}`)
+            .delete(`/api/v1/deletar_divisao/${idValido}`)
 
         expect(res.status).toBe(200)
         expect(res.body.success).toBe(true)
@@ -186,7 +188,7 @@ describe('DELETE /api/deletar_divisao/:id', () => {
         mockDivisaoService.deleteDivisao.mockRejectedValue(new Error('Erro no banco de dados.'))
 
         const res = await request(app)
-            .delete(`/api/deletar_divisao/${idValido}`)
+            .delete(`/api/v1/deletar_divisao/${idValido}`)
 
         expect(res.status).toBe(500)
         expect(res.body.success).toBe(false)

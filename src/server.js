@@ -34,6 +34,7 @@ import UsuarioService from "./services/usuarioService.js"
 
 
 const app = express()
+const v1 = express.Router()
 
 app.use(cors())
 
@@ -43,7 +44,8 @@ const options = {
   definition: {
     openapi: "3.0.0",
     info: {
-      title: "Logbook Docs",
+      title: "Logbook API",
+      version: "1.0.0"
     },
     components: {
       securitySchemes: {
@@ -76,11 +78,13 @@ const exercicio = exercicioRouter(exercicioService)
 const logbook = logbookRouter(logbookService)
 const usuario = usuarioRouter(usuarioService)
 
-app.use("/docs", swaggerUI.serve, swaggerUI.setup(specs))
-app.use("/api", usuario)
-app.use("/api", authMiddleware, divisao)
-app.use("/api", authMiddleware, exercicio)
-app.use("/api", authMiddleware, logbook)
+v1.use("/", usuario)
+v1.use("/", authMiddleware, divisao)
+v1.use("/", authMiddleware, exercicio)
+v1.use("/", authMiddleware, logbook)
+
+app.use("/docs/v1", swaggerUI.serve, swaggerUI.setup(specs))
+app.use("/api/v1", v1)
 
 app.use(errorMiddleware)
 

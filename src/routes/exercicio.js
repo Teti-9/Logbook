@@ -9,7 +9,7 @@ const exercicioRouter = (exercicioService) => {
     /**
      * @swagger
      * 
-     * /api/exercicios:
+     * /api/v1/exercicios:
      *   get:
      *     summary: Retorna todos os exercícios.
      *     tags: [Exercício]
@@ -27,7 +27,7 @@ const exercicioRouter = (exercicioService) => {
      *       500:
      *         description: Erro interno do servidor.
      * 
-     * /api/exercicio/{id}:
+     * /api/v1/exercicio/{id}:
      *   get:
      *     summary: Retorna um exercício único.
      *     tags: [Exercício]
@@ -54,7 +54,7 @@ const exercicioRouter = (exercicioService) => {
      *       500:
      *         description: Erro interno do servidor.
      * 
-     * /api/exercicio:
+     * /api/v1/exercicio:
      *   post:
      *     summary: Cadastra um novo exercício.
      *     tags: [Exercício]
@@ -109,7 +109,7 @@ const exercicioRouter = (exercicioService) => {
      *       500:
      *         description: Erro interno do servidor.
      * 
-     * /api/deletar_exercicio/{id}:
+     * /api/v1/deletar_exercicio/{id}:
      *   delete:
      *     summary: Deleta um exercício.
      *     tags: [Exercício]

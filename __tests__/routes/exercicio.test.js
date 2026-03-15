@@ -3,6 +3,7 @@ import express from 'express'
 import mongoose from 'mongoose'
 import exercicioRouter from '../../src/routes/exercicio.js'
 import ExercicioService from '../../src/services/exercicioService.js'
+import errorMiddleware from '../../src/middleware/errorMiddleware.js'
 
 jest.mock('../../src/services/exercicioService.js')
 
@@ -10,9 +11,10 @@ const app = express()
 app.use(express.json())
 
 const mockExercicioService = new ExercicioService()
-app.use('/api', exercicioRouter(mockExercicioService))
+app.use('/api/v1', exercicioRouter(mockExercicioService))
+app.use(errorMiddleware)
 
-describe('GET /api/exercicios', () => {
+describe('GET /api/v1/exercicios', () => {
 
     beforeEach(() => {
         jest.clearAllMocks()
@@ -24,7 +26,7 @@ describe('GET /api/exercicios', () => {
         mockExercicioService.getExercicios.mockRejectedValue(error)
 
         const res = await request(app)
-            .get('/api/exercicios')
+            .get('/api/v1/exercicios')
 
         expect(res.status).toBe(404)
         expect(res.body.success).toBe(false)
@@ -39,7 +41,7 @@ describe('GET /api/exercicios', () => {
         })
 
         const res = await request(app)
-            .get('/api/exercicios')
+            .get('/api/v1/exercicios')
 
         expect(res.status).toBe(200)
         expect(res.body.success).toBe(true)
@@ -49,7 +51,7 @@ describe('GET /api/exercicios', () => {
         mockExercicioService.getExercicios.mockRejectedValue(new Error('Erro no banco de dados.'))
 
         const res = await request(app)
-            .get('/api/exercicios')
+            .get('/api/v1/exercicios')
 
         expect(res.status).toBe(500)
         expect(res.body.success).toBe(false)
@@ -57,7 +59,7 @@ describe('GET /api/exercicios', () => {
     })
 })
 
-describe('GET /api/exercicio/:id', () => {
+describe('GET /api/v1/exercicio/:id', () => {
     const idValido = new mongoose.Types.ObjectId().toString()
 
     beforeEach(() => {
@@ -70,7 +72,7 @@ describe('GET /api/exercicio/:id', () => {
         mockExercicioService.getExercicioById.mockRejectedValue(error)
 
         const res = await request(app)
-            .get(`/api/exercicio/${idValido}`)
+            .get(`/api/v1/exercicio/${idValido}`)
 
         expect(res.status).toBe(404)
         expect(res.body.success).toBe(false)
@@ -85,7 +87,7 @@ describe('GET /api/exercicio/:id', () => {
         })
 
         const res = await request(app)
-            .get(`/api/exercicio/${idValido}`)
+            .get(`/api/v1/exercicio/${idValido}`)
 
         expect(res.status).toBe(200)
         expect(res.body.success).toBe(true)
@@ -95,7 +97,7 @@ describe('GET /api/exercicio/:id', () => {
         mockExercicioService.getExercicioById.mockRejectedValue(new Error('Erro no banco de dados.'))
 
         const res = await request(app)
-            .get(`/api/exercicio/${idValido}`)
+            .get(`/api/v1/exercicio/${idValido}`)
 
         expect(res.status).toBe(500)
         expect(res.body.success).toBe(false)
@@ -103,7 +105,7 @@ describe('GET /api/exercicio/:id', () => {
     })
 })
 
-describe('POST /api/exercicio', () => {
+describe('POST /api/v1/exercicio', () => {
     const idDivisao = new mongoose.Types.ObjectId().toString()
     const exercicioData = { 
         nome: 't-bar',
@@ -124,7 +126,7 @@ describe('POST /api/exercicio', () => {
         mockExercicioService.createExercicio.mockRejectedValue(error)
 
         const res = await request(app)
-            .post('/api/exercicio')
+            .post('/api/v1/exercicio')
             .send(exercicioData)
 
         expect(res.status).toBe(404)
@@ -138,7 +140,7 @@ describe('POST /api/exercicio', () => {
         })
 
         const res = await request(app)
-            .post('/api/exercicio')
+            .post('/api/v1/exercicio')
             .send(exercicioData)
 
         expect(res.status).toBe(201)
@@ -150,7 +152,7 @@ describe('POST /api/exercicio', () => {
         mockExercicioService.createExercicio.mockRejectedValue(new Error('Erro no banco de dados.'))
 
         const res = await request(app)
-            .post('/api/exercicio')
+            .post('/api/v1/exercicio')
             .send(exercicioData)
 
         expect(res.status).toBe(500)
@@ -160,7 +162,7 @@ describe('POST /api/exercicio', () => {
 
 })
 
-describe('DELETE /api/deletar_exercicio/:id', () => {
+describe('DELETE /api/v1/deletar_exercicio/:id', () => {
     const idValido = new mongoose.Types.ObjectId().toString()
 
     beforeEach(() => {
@@ -173,7 +175,7 @@ describe('DELETE /api/deletar_exercicio/:id', () => {
         mockExercicioService.deleteExercicio.mockRejectedValue(error)
 
         const res = await request(app)
-            .delete(`/api/deletar_exercicio/${idValido}`)
+            .delete(`/api/v1/deletar_exercicio/${idValido}`)
 
         expect(res.status).toBe(404)
         expect(res.body.success).toBe(false)
@@ -184,7 +186,7 @@ describe('DELETE /api/deletar_exercicio/:id', () => {
         mockExercicioService.deleteExercicio.mockResolvedValue({ message: 'Exercício excluído com sucesso.' })
 
         const res = await request(app)
-            .delete(`/api/deletar_exercicio/${idValido}`)
+            .delete(`/api/v1/deletar_exercicio/${idValido}`)
 
         expect(res.status).toBe(200)
         expect(res.body.success).toBe(true)
@@ -195,7 +197,7 @@ describe('DELETE /api/deletar_exercicio/:id', () => {
         mockExercicioService.deleteExercicio.mockRejectedValue(new Error('Erro no banco de dados.'))
 
         const res = await request(app)
-            .delete(`/api/deletar_exercicio/${idValido}`)
+            .delete(`/api/v1/deletar_exercicio/${idValido}`)
 
         expect(res.status).toBe(500)
         expect(res.body.success).toBe(false)

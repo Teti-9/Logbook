@@ -3,6 +3,7 @@ import express from 'express'
 import mongoose from 'mongoose'
 import logbookRouter from '../../src/routes/logbook.js'
 import LogbookService from '../../src/services/logbookService.js'
+import errorMiddleware from '../../src/middleware/errorMiddleware.js'
 
 jest.mock('../../src/services/logbookService.js')
 
@@ -13,9 +14,10 @@ const idValido1 = new mongoose.Types.ObjectId().toString()
 const idValido2 = new mongoose.Types.ObjectId().toString()
 
 const mockLogbookService = new LogbookService()
-app.use('/api', logbookRouter(mockLogbookService))
+app.use('/api/v1', logbookRouter(mockLogbookService))
+app.use(errorMiddleware)
 
-describe('GET /api/logerros', () => {
+describe('GET /api/v1/logerros', () => {
 
     beforeEach(() => {
         jest.clearAllMocks()
@@ -27,7 +29,7 @@ describe('GET /api/logerros', () => {
         mockLogbookService.getLogerros.mockRejectedValue(error)
 
         const res = await request(app)
-            .get('/api/logerros')
+            .get('/api/v1/logerros')
 
         expect(res.status).toBe(404)
         expect(res.body.success).toBe(false)
@@ -44,7 +46,7 @@ describe('GET /api/logerros', () => {
         })
 
         const res = await request(app)
-            .get('/api/logerros')
+            .get('/api/v1/logerros')
 
         expect(res.status).toBe(200)
         expect(res.body.success).toBe(true)
@@ -54,7 +56,7 @@ describe('GET /api/logerros', () => {
         mockLogbookService.getLogerros.mockRejectedValue(new Error('Erro no banco de dados.'))
 
         const res = await request(app)
-            .get('/api/logerros')
+            .get('/api/v1/logerros')
 
         expect(res.status).toBe(500)
         expect(res.body.success).toBe(false)
@@ -62,7 +64,7 @@ describe('GET /api/logerros', () => {
     })
 })
 
-describe('GET /api/logbooks', () => {
+describe('GET /api/v1/logbooks', () => {
 
     beforeEach(() => {
         jest.clearAllMocks()
@@ -74,7 +76,7 @@ describe('GET /api/logbooks', () => {
         mockLogbookService.getLogbooks.mockRejectedValue(error)
 
         const res = await request(app)
-            .get('/api/logbooks')
+            .get('/api/v1/logbooks')
 
         expect(res.status).toBe(404)
         expect(res.body.success).toBe(false)
@@ -89,7 +91,7 @@ describe('GET /api/logbooks', () => {
         })
 
         const res = await request(app)
-            .get('/api/logbooks')
+            .get('/api/v1/logbooks')
 
         expect(res.status).toBe(200)
         expect(res.body.success).toBe(true)
@@ -99,7 +101,7 @@ describe('GET /api/logbooks', () => {
         mockLogbookService.getLogbooks.mockRejectedValue(new Error('Erro no banco de dados.'))
 
         const res = await request(app)
-            .get('/api/logbooks')
+            .get('/api/v1/logbooks')
 
         expect(res.status).toBe(500)
         expect(res.body.success).toBe(false)
@@ -107,7 +109,7 @@ describe('GET /api/logbooks', () => {
     })
 })
 
-describe('POST /api/sinclogbook', () => {
+describe('POST /api/v1/sinclogbook', () => {
 
     beforeEach(() => {
         jest.clearAllMocks()
@@ -121,7 +123,7 @@ describe('POST /api/sinclogbook', () => {
         })
 
         const res = await request(app)
-            .post('/api/sinclogbook')
+            .post('/api/v1/sinclogbook')
             .send({ exercicios: [idValido1, idValido2] })
 
         expect(res.status).toBe(200)
@@ -139,7 +141,7 @@ describe('POST /api/sinclogbook', () => {
         })
 
         const res = await request(app)
-            .post('/api/sinclogbook')
+            .post('/api/v1/sinclogbook')
             .send({ exercicios: [idValido1, idValido2] })
 
         expect(res.status).toBe(200)
@@ -157,16 +159,16 @@ describe('POST /api/sinclogbook', () => {
         mockLogbookService.sincLogbook.mockRejectedValue(error)
 
         const res = await request(app)
-            .post('/api/sinclogbook')
+            .post('/api/v1/sinclogbook')
             .send({ exercicios: [idValido1] })
 
         expect(res.status).toBe(400)
         expect(res.body.success).toBe(false)
-        expect(res.body.data.falhas).toHaveLength(1)
+        expect(res.body.data).toBe('Nenhuma sincronização bem-sucedida.')
     })
 })
 
-describe('POST /api/logbook', () => {
+describe('POST /api/v1/logbook', () => {
 
     beforeEach(() => {
         jest.clearAllMocks()
@@ -178,7 +180,7 @@ describe('POST /api/logbook', () => {
         mockLogbookService.createLogbook.mockRejectedValue(error)
 
         const res = await request(app)
-            .post('/api/logbook')
+            .post('/api/v1/logbook')
             .send({
                 exercicio: '699e17fbd37a44173612ae8d',
                 carga: 61,
@@ -196,7 +198,7 @@ describe('POST /api/logbook', () => {
         mockLogbookService.createLogbook.mockRejectedValue(error)
 
         const res = await request(app)
-            .post('/api/logbook')
+            .post('/api/v1/logbook')
             .send({
                 exercicio: '699e17fbd37a44173612ae8d',
                 carga: 61,
@@ -217,7 +219,7 @@ describe('POST /api/logbook', () => {
         })
 
         const res = await request(app)
-            .post('/api/logbook')
+            .post('/api/v1/logbook')
             .send({
                 exercicio: idValido,
                 carga: 61,
@@ -232,7 +234,7 @@ describe('POST /api/logbook', () => {
         mockLogbookService.createLogbook.mockRejectedValue(new Error('Erro no banco de dados.'))
 
         const res = await request(app)
-            .post('/api/logbook')
+            .post('/api/v1/logbook')
             .send({
                 exercicio: '699e1821d37a44173612ae93',
                 carga: 61,
