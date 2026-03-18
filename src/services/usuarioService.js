@@ -14,7 +14,10 @@ export default class UsuarioService {
             email: data.email,
             senha: senhaHashed
         }
-        return await this.usuarioRepository.create(user)
+
+        await this.usuarioRepository.create(user)
+
+        return { message: 'Usuário criado com sucesso.' }
     }
 
     async loginUsuario(email, senha) {

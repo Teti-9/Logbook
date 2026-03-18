@@ -1,3 +1,5 @@
+import { formatarData } from '../utils/formatarData.js' 
+
 export default class DivisaoService {
     constructor(divisaoRepository) {
         this.divisaoRepository = divisaoRepository
@@ -14,8 +16,18 @@ export default class DivisaoService {
             error.statusCode = 404
             throw error
         }
+
+        const divisoesFormatada = divisoes.map(item => ({
+            _id: `Divisão Id: ${item._id}`,
+            divisão: `${item.nome} 🗴 ${item.dia}`,
+            userId: item.userId,
+            createdAt: formatarData(item.createdAt),
+            updatedAt: formatarData(item.updatedAt),
+            exercicios: item.exercicios
+
+    }))
         
-        return divisoes
+        return divisoesFormatada
     }
 
     async getDivisaoById(id, data) {
@@ -31,7 +43,16 @@ export default class DivisaoService {
             throw error
         }
 
-        return divisao
+        const divisaoFormatada = {
+            _id: `Divisão Id: ${divisao._id}`,
+            divisão: `${divisao.nome} 🗴 ${divisao.dia}`,
+            userId: divisao.userId,
+            createdAt: formatarData(divisao.createdAt),
+            updatedAt: formatarData(divisao.updatedAt),
+            exercicios: divisao.exercicios
+        }
+
+        return divisaoFormatada
     }
 
     async createDivisao(body, data) {
@@ -52,7 +73,9 @@ export default class DivisaoService {
             userId: data.userId
         }
 
-        return await this.divisaoRepository.create(newData)
+        await this.divisaoRepository.create(newData)
+
+        return { message: 'Divisão criada com sucesso.' }
     }
 
     async deleteDivisao(id, data) {

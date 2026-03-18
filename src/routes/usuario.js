@@ -69,7 +69,7 @@ const usuarioRouter = (usuarioService) => {
 
         return res.status(201).json({
             success: true,
-            data: "Usuário registrado com sucesso."
+            data: usuarioCriado
         })
         
     })

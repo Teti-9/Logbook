@@ -154,11 +154,11 @@ const divisaoRouter = (divisaoService) => {
 
         const { id } = req.params
 
-        await divisaoService.deleteDivisao(id, req.dados)
+        const divisaoExcluida = await divisaoService.deleteDivisao(id, req.dados)
         
         return res.status(200).json({
             success: true,
-            data: "Divisão excluída com sucesso."
+            data: divisaoExcluida
         })
             
     })

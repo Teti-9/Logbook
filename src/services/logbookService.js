@@ -1,4 +1,5 @@
 import sincronizarExercicioComLogBook from '../utils/sincronizarExercicioComLogBook.js'
+import { formatarData } from '../utils/formatarData.js' 
 
 export default class LogbookService {
     constructor(logbookRepository, exercicioRepository) {
@@ -34,7 +35,19 @@ export default class LogbookService {
             throw error
         }
 
-        return logbooks
+        const logbooksFormatado = logbooks.map(item => ({
+            _id: `Logbook Id: ${item._id}`,
+            nome: `${item.nome} - ${item.exercicio._id}`,
+            carga: `${item.exercicio.carga_anterior} ➡️ ${item.carga}`,
+            repeticoes: `${item.exercicio.repeticoes_anteriores} ➡️ ${item.repeticoes}`,
+            sincronizado: item.sincronizado,
+            userId: item.userId,
+            createdAt: formatarData(item.createdAt),
+            updatedAt: formatarData(item.updatedAt)
+
+    }))
+
+        return logbooksFormatado
     }
 
     async sincLogbook(body, data) {
@@ -118,10 +131,11 @@ export default class LogbookService {
             nome: exercicioExiste.nome,
             carga: body.carga,
             repeticoes: body.repeticoes,
-            data: new Date(),
             userId: data.userId
         }
 
-        return await this.logbookRepository.create(logbookFormatado)
+        await this.logbookRepository.create(logbookFormatado)
+
+        return { message: 'Logbook criado com sucesso.' }
     }
 }

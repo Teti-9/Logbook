@@ -1,3 +1,5 @@
+import { formatarData } from '../utils/formatarData.js'
+
 export default class ExercicioService {
     constructor(exercicioRepository, divisaoRepository, logbookRepository) {
         this.exercicioRepository = exercicioRepository
@@ -17,7 +19,20 @@ export default class ExercicioService {
             throw error
         }
 
-        return exercicios
+        const exerciciosFormatado = exercicios.map(item => ({
+            _id: `Exercício Id: ${item._id}`,
+            exercício: `${item.nome}`,
+            series: `${item.series} 🗴 ${item.repeticoes_alvo}`,
+            carga: `Anterior: ${item.carga_anterior} | Atual: ${item.carga_atual}`,
+            repeticoes: `Anterior: ${item.repeticoes_anteriores} | Atual: ${item.repeticoes_atuais}`,
+            userId: item.userId,
+            createdAt: formatarData(item.createdAt),
+            updatedAt: formatarData(item.updatedAt),
+            divisao: item.divisao
+
+    }))
+
+        return exerciciosFormatado
     }
 
     async getExercicioById(id, data) {
@@ -33,7 +48,19 @@ export default class ExercicioService {
             throw error
         }
 
-        return exercicio
+        const exercicioFormatado = {
+            _id: `Exercício Id: ${exercicio._id}`,
+            exercício: `${exercicio.nome}`,
+            series: `${exercicio.series} 🗴 ${exercicio.repeticoes_alvo}`,
+            carga: `Anterior: ${item.carga_anterior} | Atual: ${item.carga_atual}`,
+            repeticoes: `Anterior: ${item.repeticoes_anteriores} | Atual: ${item.repeticoes_atuais}`,
+            userId: exercicio.userId,
+            createdAt: formatarData(exercicio.createdAt),
+            updatedAt: formatarData(exercicio.updatedAt),
+            divisao: exercicio.divisao
+    }
+
+        return exercicioFormatado
     }
 
     async createExercicio(body, data) {
@@ -53,7 +80,7 @@ export default class ExercicioService {
             userId: data.userId
         }
 
-        const exercicioCriado = await this.exercicioRepository.create(newData)
+        await this.exercicioRepository.create(newData)
 
         await this.divisaoRepository.findByIdAndUpdate(
             body.divisao,
@@ -61,7 +88,7 @@ export default class ExercicioService {
             { returnDocument: 'after' }
         )
 
-        return exercicioCriado
+        return { message: 'Exercício criado com sucesso.' }
     }
 
     async deleteExercicio(id, data) {

@@ -181,7 +181,7 @@ describe('DELETE /api/v1/deletar_divisao/:id', () => {
 
         expect(res.status).toBe(200)
         expect(res.body.success).toBe(true)
-        expect(res.body.data).toBe('Divisão excluída com sucesso.')
+        expect(res.body.data).toStrictEqual({message: "Divisão excluída com sucesso."})
     })
 
     it('Deve retornar 500 em caso de erro interno.', async () => {

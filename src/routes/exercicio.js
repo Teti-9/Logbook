@@ -177,11 +177,11 @@ const exercicioRouter = (exercicioService) => {
 
         const { id } = req.params
 
-        await exercicioService.deleteExercicio(id, req.dados)
+        const exercicioDeletado = await exercicioService.deleteExercicio(id, req.dados)
         
         return res.status(200).json({
             success: true,
-            data: "Exercício excluído com sucesso."
+            data: exercicioDeletado
         })
 
     })

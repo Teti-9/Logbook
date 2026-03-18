@@ -190,7 +190,7 @@ describe('DELETE /api/v1/deletar_exercicio/:id', () => {
 
         expect(res.status).toBe(200)
         expect(res.body.success).toBe(true)
-        expect(res.body.data).toBe('Exercício excluído com sucesso.')
+        expect(res.body.data).toStrictEqual({message: "Exercício excluído com sucesso."})
     })
 
     it('Deve retornar 500 em caso de erro interno.', async () => {
