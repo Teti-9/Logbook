@@ -7,12 +7,12 @@ export default class LogbookService {
         this.exercicioRepository = exercicioRepository
     }
 
-    async getLogerros(data) {
+    async getLogerros(data, { page = 1, limit = 10 } = {}) {
 
-        const logerros = await this.logbookRepository.findAll_errors({ 
-            resolvido: false,
-            userId: data.userId 
-        })
+        const { logerros, total } = await this.logbookRepository.findAll_errors(
+            { userId: data.userId },
+            { page, limit }
+        )
 
         if (!logerros || logerros.length === 0) {
             const error = new Error("Nenhum erro encontrado.")
@@ -20,15 +20,24 @@ export default class LogbookService {
             throw error
         }
 
-        return logerros
+        return {
+            logerros,
+            pagination: {
+                total,
+                page: Number(page) || 1,
+                limit: Number(limit) || 10,
+                totalPages: Math.ceil(total / (Number(limit) || 10))
+            }
+        }
     }
 
-    async getLogbooks(data) {
+    async getLogbooks(data, { page = 1, limit = 10 } = {}) {
 
-        const logbooks = await this.logbookRepository.findAll({
-            userId: data.userId
-        })
-        
+        const { logbooks, total } = await this.logbookRepository.findAll(
+            { userId: data.userId },
+            { page, limit }
+        )
+
         if (!logbooks || logbooks.length === 0) {
             const error = new Error("Nenhum logbook encontrado.")
             error.statusCode = 404
@@ -47,7 +56,15 @@ export default class LogbookService {
 
     }))
 
-        return logbooksFormatado
+        return {
+            logbooks: logbooksFormatado,
+            pagination: {
+                total,
+                page: Number(page) || 1,
+                limit: Number(limit) || 10,
+                totalPages: Math.ceil(total / (Number(limit) || 10))
+            }
+        }
     }
 
     async sincLogbook(body, data) {

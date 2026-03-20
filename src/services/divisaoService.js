@@ -5,11 +5,12 @@ export default class DivisaoService {
         this.divisaoRepository = divisaoRepository
     }
 
-    async getDivisoes(data) {
+    async getDivisoes(data, { page = 1, limit = 10 } = {}) {
 
-        const divisoes = await this.divisaoRepository.findAll({ 
-            userId: data.userId 
-        })
+        const { divisoes, total } = await this.divisaoRepository.findAll(
+            { userId: data.userId, isDeleted: false },
+            { page, limit }
+        )
 
         if (!divisoes || divisoes.length === 0) {
             const error = new Error('Nenhuma divisão encontrada.')
@@ -17,7 +18,7 @@ export default class DivisaoService {
             throw error
         }
 
-        const divisoesFormatada = divisoes.map(item => ({
+        const divisoesFormatadas = divisoes.map(item => ({
             _id: `Divisão Id: ${item._id}`,
             divisão: `${item.nome} 🗴 ${item.dia}`,
             userId: item.userId,
@@ -27,14 +28,23 @@ export default class DivisaoService {
 
     }))
         
-        return divisoesFormatada
+        return {
+            divisoes: divisoesFormatadas,
+            pagination: {
+                total,
+                page: Number(page) || 1,
+                limit: Number(limit) || 10,
+                totalPages: Math.ceil(total / (Number(limit) || 10))
+            }
+        }
     }
 
     async getDivisaoById(id, data) {
 
         const divisao = await this.divisaoRepository.findById({ 
             _id: id, 
-            userId: data.userId 
+            userId: data.userId,
+            isDeleted: false
         })
 
         if (!divisao) {
@@ -59,7 +69,8 @@ export default class DivisaoService {
 
         const diaUsado = await this.divisaoRepository.findOne({ 
             dia: body.dia, 
-            userId: data.userId 
+            userId: data.userId,
+            isDeleted: false
         })
 
         if (diaUsado) {
@@ -82,7 +93,8 @@ export default class DivisaoService {
 
         const divisaoExiste = await this.divisaoRepository.findById({
             _id: id,
-            userId: data.userId
+            userId: data.userId,
+            isDeleted: false
         })
 
         if (!divisaoExiste) {
@@ -97,10 +109,11 @@ export default class DivisaoService {
             throw error
         }
 
-        await this.divisaoRepository.deleteById({
-            _id: id,
-            userId: data.userId
-        })
+        await this.divisaoRepository.findByIdAndUpdate(
+            id,
+            { isDeleted: true, deletedAt: new Date() },
+            { returnDocument: 'after' }
+        )
 
         return { message: 'Divisão excluída com sucesso.' }
     }

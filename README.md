@@ -1,4 +1,4 @@
-﻿# Logbook API
+# Logbook API
 
 API REST para gerenciamento de treinos por divisão, exercícios e logbooks de progresso, com autenticação via JWT.
 
@@ -60,8 +60,8 @@ npm run dev
 
 4. Acesse:
 
-- API base: `http://localhost:8000/api`
-- Swagger: `http://localhost:8000/docs`
+- API base: `http://localhost:8000/api/v1`
+- Swagger: `http://localhost:8000/docs/v1`
 
 ## Docker (opcional)
 
@@ -214,10 +214,10 @@ Base path: `/api` (use o prefixo antes das rotas, e.g /api/divisoes)
 
 ### Divisão (protegido)
 
-- `GET /divisoes` - lista todas as divisões
+- `GET /divisoes?page=1&limit=10` - lista divisões ativas com paginação
 - `GET /divisao/:id` - busca uma divisão por ID
 - `POST /divisao` - cria uma divisão
-- `DELETE /deletar_divisao/:id` - exclui uma divisão
+- `DELETE /deletar_divisao/:id` - realiza soft delete (marca como excluída)
 
 Exemplo `POST /divisao`:
 
@@ -235,10 +235,10 @@ Regras:
 
 ### Exercício (protegido)
 
-- `GET /exercicios` - lista exercícios
+- `GET /exercicios?page=1&limit=10` - lista exercícios ativos com paginação
 - `GET /exercicio/:id` - busca exercício por ID
 - `POST /exercicio` - cria exercício e vincula a uma divisão
-- `DELETE /deletar_exercicio/:id` - exclui exercício
+- `DELETE /deletar_exercicio/:id` - realiza soft delete (marca como excluído)
 
 Exemplo `POST /exercicio`:
 
@@ -289,6 +289,8 @@ Resposta de sincronização:
 - corpo inválido retorna `422`
 - recursos não encontrados retornam `404`
 - conflitos/regras de negócio podem retornar `400` ou `404` conforme implementação atual das services
+- listagens de divisão/exercício retornam apenas registros com `isDeleted: false`
+- exclusões de divisão/exercício são lógicas (`isDeleted: true` + `deletedAt`)
 
 ## Testes
 

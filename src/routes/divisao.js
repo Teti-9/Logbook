@@ -1,4 +1,4 @@
-﻿import express from 'express'
+import express from 'express'
 import validate from '../middleware/validate.js'
 import divisaoSchema from '../middleware/divisaoMiddleware.js'
 import idMongoSchema from '../middleware/idMongoMiddleware.js'
@@ -11,10 +11,27 @@ const divisaoRouter = (divisaoService) => {
      * 
      * /api/v1/divisoes:
      *   get:
-     *     summary: Retorna todas as divisões.
+     *     summary: Retorna divisões ativas com paginação.
      *     tags: [Divisão]
      *     security:
      *       - bearerAuth: []
+     *     parameters:
+     *       - in: query
+     *         name: page
+     *         required: false
+     *         schema:
+     *           type: integer
+     *           minimum: 1
+     *           default: 1
+     *         description: Página da listagem.
+     *       - in: query
+     *         name: limit
+     *         required: false
+     *         schema:
+     *           type: integer
+     *           minimum: 1
+     *           default: 10
+     *         description: Quantidade de itens por página.
      *     responses:
      *       401:
      *         description: Token não especificado.
@@ -87,7 +104,7 @@ const divisaoRouter = (divisaoService) => {
      * 
      * /api/v1/deletar_divisao/{id}:
      *   delete:
-     *     summary: Deleta uma divisão.
+     *     summary: Realiza soft delete de uma divisão.
      *     tags: [Divisão]
      *     security:
      *       - bearerAuth: []
@@ -104,7 +121,7 @@ const divisaoRouter = (divisaoService) => {
      *       403:
      *         description: Token inválido ou expirado.
      *       200:
-     *         description: Sucesso.
+     *         description: Divisão marcada como excluída (soft delete).
      *       400:
      *         description: Não é possível excluir uma divisão com exercícios associados.
      *       404:
@@ -117,7 +134,12 @@ const divisaoRouter = (divisaoService) => {
 
     router.get('/divisoes', async (req, res) => {
 
-        const resultado = await divisaoService.getDivisoes(req.dados)
+        const { page, limit } = req.query
+
+        const resultado = await divisaoService.getDivisoes(req.dados, { 
+            page: Number(page), 
+            limit: Number(limit)
+        })
 
         return res.status(200).json({
             success: true,

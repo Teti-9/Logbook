@@ -4,12 +4,38 @@ export default class logbookRepository {
         this.logerrosModel = logerrosModel
     }
 
-    async findAll(data) {
-        return await this.logbookModel.find(data).populate('exercicio', ['_id', 'carga_anterior', 'repeticoes_anteriores'])
+    async findAll(data, { page = 1, limit = 10 } = {}   ) {
+        const skip = (page - 1) * limit
+    
+        const [logbooks, total] = await Promise.all([
+            this.logbookModel
+                .find(data)
+                .sort({ createdAt: -1, _id: -1 })
+                .populate('exercicio', ['_id', 'carga_anterior', 'repeticoes_anteriores'])
+                .skip(skip)
+                .limit(limit)
+                .lean(),
+            this.logbookModel.countDocuments(data)
+        ])
+    
+        return { logbooks, total }
     }
 
-    async findAll_errors(filter) {
-        return await this.logerrosModel.find(filter)
+    async findAll_errors(data, { page = 1, limit = 10 } = {}) {
+        const skip = (page - 1) * limit
+    
+        const [logerros, total] = await Promise.all([
+            this.logerrosModel
+                .find(data)
+                .sort({ createdAt: -1, _id: -1 })
+                .populate('exercicio_id', ['_id', 'nome'])
+                .skip(skip)
+                .limit(limit)
+                .lean(),
+            this.logerrosModel.countDocuments(data)
+        ])
+    
+        return { logerros, total }
     }
 
     async findOne(filters) {
@@ -24,11 +50,7 @@ export default class logbookRepository {
         return await this.logerrosModel.create(data)
     }
 
-    async deleteById(filters) {
-        return await this.logbookModel.findByIdAndDelete(filters)
-    }
-
-    async deleteMany(query) {
-        return await this.logbookModel.deleteMany(query)
+    async deleteMany(filters) {
+        return await this.logbookModel.deleteMany(filters)
     }
 }

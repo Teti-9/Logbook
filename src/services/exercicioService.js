@@ -7,11 +7,12 @@ export default class ExercicioService {
         this.logbookRepository = logbookRepository
     }
 
-    async getExercicios(data) {
+    async getExercicios(data, { page = 1, limit = 10 } = {}) {
 
-        const exercicios = await this.exercicioRepository.findAll({
-            userId: data.userId
-        })
+        const { exercicios, total } = await this.exercicioRepository.findAll(
+            { userId: data.userId, isDeleted: false },
+            { page, limit }
+        )
 
         if (!exercicios || exercicios.length === 0) {
             const error = new Error('Nenhum exercício encontrado.')
@@ -30,16 +31,25 @@ export default class ExercicioService {
             updatedAt: formatarData(item.updatedAt),
             divisao: item.divisao
 
-    }))
+        }))
 
-        return exerciciosFormatado
+        return {
+            exercicios: exerciciosFormatado,
+            pagination: {
+                total,
+                page: Number(page) || 1,
+                limit: Number(limit) || 10,
+                totalPages: Math.ceil(total / (Number(limit) || 10))
+            }
+        }
     }
 
     async getExercicioById(id, data) {
 
         const exercicio = await this.exercicioRepository.findById({
             _id: id,
-            userId: data.userId
+            userId: data.userId,
+            isDeleted: false
         })
 
         if (!exercicio) {
@@ -67,7 +77,9 @@ export default class ExercicioService {
 
         const divisaoExistente = await this.divisaoRepository.findOne({ 
             _id: body.divisao, 
-            userId: data.userId})
+            userId: data.userId,
+            isDeleted: false
+        })
 
         if (!divisaoExistente) {
             const error = new Error('Divisão não encontrada.')
@@ -80,7 +92,7 @@ export default class ExercicioService {
             userId: data.userId
         }
 
-        await this.exercicioRepository.create(newData)
+        const exercicioCriado = await this.exercicioRepository.create(newData)
 
         await this.divisaoRepository.findByIdAndUpdate(
             body.divisao,
@@ -95,7 +107,8 @@ export default class ExercicioService {
 
         const exercicioExiste = await this.exercicioRepository.findById({
             _id: id,
-            userId: data.userId
+            userId: data.userId,
+            isDeleted: false
         })
 
         if (!exercicioExiste) {
@@ -104,21 +117,22 @@ export default class ExercicioService {
             throw error
         }
 
-        const exercicioDeletado = await this.exercicioRepository.deleteById({
-            _id: id,
-            userId: data.userId
-        })
-
-        if (exercicioExiste && exercicioDeletado) {
+        if (exercicioExiste && exercicioExiste.divisao) {
 
             await this.divisaoRepository.findByIdAndUpdate(
-                exercicioDeletado.divisao,
-                { $pull: { exercicios: exercicioDeletado._id } }
+                exercicioExiste.divisao,
+                { $pull: { exercicios: exercicioExiste._id } }
             )
             
+            await this.exercicioRepository.findByIdAndUpdate(
+                id,
+                { isDeleted: true, deletedAt: new Date() },
+                { returnDocument: 'after' }
+            )
+
             await this.logbookRepository.deleteMany({ exercicio: id, userId: data.userId })
+
+            return { message: "Exercício excluído com sucesso." }
         }
-        
-        return { message: "Exercício excluído com sucesso." }
     }
 }

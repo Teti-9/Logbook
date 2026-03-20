@@ -1,4 +1,4 @@
-﻿import express from 'express'
+import express from 'express'
 import validate from '../middleware/validate.js'
 import exercicioSchema from '../middleware/exercicioMiddleware.js'
 import idMongoSchema from '../middleware/idMongoMiddleware.js'
@@ -11,10 +11,27 @@ const exercicioRouter = (exercicioService) => {
      * 
      * /api/v1/exercicios:
      *   get:
-     *     summary: Retorna todos os exercícios.
+     *     summary: Retorna exercícios ativos com paginação.
      *     tags: [Exercício]
      *     security:
      *       - bearerAuth: []
+     *     parameters:
+     *       - in: query
+     *         name: page
+     *         required: false
+     *         schema:
+     *           type: integer
+     *           minimum: 1
+     *           default: 1
+     *         description: Página da listagem.
+     *       - in: query
+     *         name: limit
+     *         required: false
+     *         schema:
+     *           type: integer
+     *           minimum: 1
+     *           default: 10
+     *         description: Quantidade de itens por página.
      *     responses:
      *       401:
      *         description: Token não especificado.
@@ -111,7 +128,7 @@ const exercicioRouter = (exercicioService) => {
      * 
      * /api/v1/deletar_exercicio/{id}:
      *   delete:
-     *     summary: Deleta um exercício.
+     *     summary: Realiza soft delete de um exercício.
      *     tags: [Exercício]
      *     security:
      *       - bearerAuth: []
@@ -128,7 +145,7 @@ const exercicioRouter = (exercicioService) => {
      *       403:
      *         description: Token inválido ou expirado.
      *       200:
-     *         description: Sucesso.
+     *         description: Exercício marcado como excluído (soft delete).
      *       404:
      *         description: Exercício não encontrado.
      *       422:
@@ -139,8 +156,13 @@ const exercicioRouter = (exercicioService) => {
      */
 
     router.get('/exercicios', async (req, res) => {
+        
+        const { page, limit } = req.query
 
-        const resultado = await exercicioService.getExercicios(req.dados)
+        const resultado = await exercicioService.getExercicios(req.dados, { 
+            page: Number(page), 
+            limit: Number(limit)
+        })
 
         return res.status(200).json({
             success: true,

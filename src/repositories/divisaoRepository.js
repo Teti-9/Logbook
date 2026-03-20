@@ -3,8 +3,21 @@ export default class DivisaoRepository {
         this.divisaoModel = divisaoModel
     }
 
-    async findAll(data) {
-        return await this.divisaoModel.find(data).populate('exercicios', ['_id', 'nome'])
+    async findAll(data, { page = 1, limit = 10 } = {}) {
+        const skip = (page - 1) * limit
+    
+        const [divisoes, total] = await Promise.all([
+            this.divisaoModel
+                .find(data)
+                .sort({ createdAt: -1, _id: -1 })
+                .populate('exercicios', ['_id', 'nome'])
+                .skip(skip)
+                .limit(limit)
+                .lean(),
+            this.divisaoModel.countDocuments(data)
+        ])
+    
+        return { divisoes, total }
     }
 
     async findById(filters) {
@@ -21,9 +34,5 @@ export default class DivisaoRepository {
 
     async create(body) {
         return await this.divisaoModel.create(body)
-    }
-
-    async deleteById(filters) {
-        return await this.divisaoModel.findByIdAndDelete(filters)
     }
 }

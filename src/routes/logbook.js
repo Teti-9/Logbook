@@ -125,8 +125,13 @@ const logbookRouter = (logbookService) => {
      */
 
     router.get("/logerros", async (req, res) => {
+        
+        const { page, limit } = req.query
 
-        const resultado = await logbookService.getLogerros(req.dados)
+        const resultado = await logbookService.getLogerros(req.dados, { 
+            page: Number(page), 
+            limit: Number(limit)
+        })
         
         return res.status(200).json({
             success: true,
@@ -137,7 +142,12 @@ const logbookRouter = (logbookService) => {
 
     router.get("/logbooks", async (req, res) => {
 
-        const resultado = await logbookService.getLogbooks(req.dados)
+        const { page, limit } = req.query
+        
+        const resultado = await logbookService.getLogbooks(req.dados, { 
+            page: Number(page), 
+            limit: Number(limit)
+        })
 
         return res.status(200).json({
             success: true,

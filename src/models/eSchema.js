@@ -10,6 +10,8 @@ const exercicioSchema = new mongoose.Schema({
     repeticoes_atuais: { type: Number, required: true },
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'Usuario' },
     divisao: { type: mongoose.Schema.Types.ObjectId, ref: 'Divisao', required: true, index: true },
+    isDeleted: { type: Boolean, default: false },
+    deletedAt: { type: Date, default: null },
 }, { versionKey: false, timestamps: true })
 
 exercicioSchema.index({ userId: 1, divisao: 1 })

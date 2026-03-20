@@ -7,7 +7,9 @@ const divisaoSchema = new mongoose.Schema({
         enum: ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo'], 
         required: true },
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'Usuario' },
-    exercicios: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Exercicio', index: true }]
+    exercicios: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Exercicio', index: true }],
+    isDeleted: { type: Boolean, default: false },
+    deletedAt: { type: Date, default: null },
 }, { versionKey: false, timestamps: true })
 
 const Divisao = mongoose.model('Divisao', divisaoSchema)
