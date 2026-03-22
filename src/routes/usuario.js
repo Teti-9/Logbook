@@ -2,6 +2,7 @@ import express from 'express'
 import validate from '../middleware/validate.js'
 import usuarioSchema from '../middleware/usuarioValidationMiddleware.js'
 import loginSchema from '../middleware/loginValidationMiddleware.js'
+import { loginLimiter } from '../middleware/rateLimitMiddleware.js'
 
 const usuarioRouter = (usuarioService) => {
     const router = express.Router()
@@ -74,7 +75,7 @@ const usuarioRouter = (usuarioService) => {
         
     })
 
-    router.post('/logar', validate(loginSchema, 'body'), async (req, res) => {
+    router.post('/logar', loginLimiter, validate(loginSchema, 'body'), async (req, res) => {
 
         const { email, senha } = req.body
 

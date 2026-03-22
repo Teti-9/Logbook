@@ -3,6 +3,7 @@ import express from "express"
 import connectDB from "./config/mongodb.js"
 import errorMiddleware from "./middleware/errorMiddleware.js"
 import authMiddleware from "./middleware/authMiddleware.js"
+import { apiLimiter } from './middleware/rateLimitMiddleware.js'
 import swaggerUI from "swagger-ui-express"
 import swaggerJsdoc from "swagger-jsdoc"
 import cors from "cors"
@@ -40,6 +41,8 @@ app.use(cors())
 
 app.use(express.json())
 
+app.use('/api/', apiLimiter)
+
 const options = {
   definition: {
     openapi: "3.0.0",
@@ -66,7 +69,6 @@ const divisaoRepository = new DivisaoRepository(Divisao)
 const exercicioRepository = new ExercicioRepository(Exercicio)
 const logbookRepository = new LogbookRepository(Logbook, LogErros)
 const usuarioRepository = new UsuarioRepository(Usuario)
-
 
 const divisaoService = new DivisaoService(divisaoRepository)
 const exercicioService = new ExercicioService(exercicioRepository, divisaoRepository, logbookRepository)

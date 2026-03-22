@@ -2,6 +2,7 @@ import express from 'express'
 import validate from '../middleware/validate.js'
 import divisaoSchema from '../middleware/divisaoMiddleware.js'
 import idMongoSchema from '../middleware/idMongoMiddleware.js'
+import paramsSchema from '../middleware/paramsMiddleware.js'
 
 const divisaoRouter = (divisaoService) => {
     const router = express.Router()
@@ -132,13 +133,13 @@ const divisaoRouter = (divisaoService) => {
      *         description: Erro interno do servidor.
      */
 
-    router.get('/divisoes', async (req, res) => {
+    router.get('/divisoes', validate(paramsSchema, 'query'), async (req, res) => {
 
         const { page, limit } = req.query
 
         const resultado = await divisaoService.getDivisoes(req.dados, { 
-            page: Number(page), 
-            limit: Number(limit)
+            page, 
+            limit
         })
 
         return res.status(200).json({

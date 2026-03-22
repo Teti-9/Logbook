@@ -2,6 +2,7 @@
 import validate from '../middleware/validate.js'
 import logbookSchema from '../middleware/logbookMiddleware.js'
 import sinclogbookSchema from '../middleware/sinclogbookMiddleware.js'
+import paramsSchema from '../middleware/paramsMiddleware.js'
 
 const logbookRouter = (logbookService) => {
     const router = express.Router()
@@ -124,13 +125,13 @@ const logbookRouter = (logbookService) => {
 
      */
 
-    router.get("/logerros", async (req, res) => {
+    router.get("/logerros", validate(paramsSchema, 'query'), async (req, res) => {
         
         const { page, limit } = req.query
 
         const resultado = await logbookService.getLogerros(req.dados, { 
-            page: Number(page), 
-            limit: Number(limit)
+            page, 
+            limit
         })
         
         return res.status(200).json({
@@ -140,13 +141,13 @@ const logbookRouter = (logbookService) => {
 
     })
 
-    router.get("/logbooks", async (req, res) => {
+    router.get("/logbooks", validate(paramsSchema, 'query'), async (req, res) => {
 
         const { page, limit } = req.query
         
         const resultado = await logbookService.getLogbooks(req.dados, { 
-            page: Number(page), 
-            limit: Number(limit)
+            page, 
+            limit
         })
 
         return res.status(200).json({

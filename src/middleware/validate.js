@@ -8,7 +8,11 @@ const validate = (schema, type) => (req, res, next) => {
         })
     }
     
-    req[type] = value
+    if (value && typeof value === 'object' && req[type] && typeof req[type] === 'object') {
+        Object.assign(req[type], value)
+    } else {
+        req[type] = value
+    }
     next()
 }
 

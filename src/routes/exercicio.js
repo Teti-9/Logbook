@@ -2,6 +2,7 @@ import express from 'express'
 import validate from '../middleware/validate.js'
 import exercicioSchema from '../middleware/exercicioMiddleware.js'
 import idMongoSchema from '../middleware/idMongoMiddleware.js'
+import paramsSchema from '../middleware/paramsMiddleware.js'
 
 const exercicioRouter = (exercicioService) => {
     const router = express.Router()
@@ -155,13 +156,13 @@ const exercicioRouter = (exercicioService) => {
 
      */
 
-    router.get('/exercicios', async (req, res) => {
+    router.get('/exercicios', validate(paramsSchema, 'query'), async (req, res) => {
         
         const { page, limit } = req.query
 
         const resultado = await exercicioService.getExercicios(req.dados, { 
-            page: Number(page), 
-            limit: Number(limit)
+            page,
+            limit
         })
 
         return res.status(200).json({
