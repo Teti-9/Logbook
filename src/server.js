@@ -7,6 +7,7 @@ import { apiLimiter } from './middleware/rateLimitMiddleware.js'
 import swaggerUI from "swagger-ui-express"
 import swaggerJsdoc from "swagger-jsdoc"
 import cors from "cors"
+import helmet from "helmet"
 
 // Divisão
 import divisaoRouter from "./routes/divisao.js"
@@ -33,10 +34,10 @@ import Usuario from "./models/uSchema.js"
 import UsuarioRepository from "./repositories/usuarioRepository.js"
 import UsuarioService from "./services/usuarioService.js"
 
-
 const app = express()
 const v1 = express.Router()
 
+app.use(helmet())
 app.use(cors())
 
 app.use(express.json())
