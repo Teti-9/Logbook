@@ -4,18 +4,18 @@ import mongoose from 'mongoose'
 import exercicioRouter from '../../src/routes/exercicio.js'
 import ExercicioService from '../../src/services/exercicioService.js'
 import errorMiddleware from '../../src/middleware/errorMiddleware.js'
+import { stubAuthMiddleware, TEST_USER_ID } from '../../src/utils/testsAuth.js'
 
 jest.mock('../../src/services/exercicioService.js')
 
+const mockExercicioService = new ExercicioService()
+
 const app = express()
 app.use(express.json())
-
-const mockExercicioService = new ExercicioService()
-app.use('/api/v1', exercicioRouter(mockExercicioService))
+app.use('/api/v1', stubAuthMiddleware, exercicioRouter(mockExercicioService))
 app.use(errorMiddleware)
 
 describe('GET /api/v1/exercicios', () => {
-
     beforeEach(() => {
         jest.clearAllMocks()
     })
@@ -25,8 +25,7 @@ describe('GET /api/v1/exercicios', () => {
         error.statusCode = 404
         mockExercicioService.getExercicios.mockRejectedValue(error)
 
-        const res = await request(app)
-            .get('/api/v1/exercicios')
+        const res = await request(app).get('/api/v1/exercicios')
 
         expect(res.status).toBe(404)
         expect(res.body.success).toBe(false)
@@ -34,24 +33,41 @@ describe('GET /api/v1/exercicios', () => {
     })
 
     it('Deve retornar 200 para sucesso.', async () => {
-        mockExercicioService.getExercicios.mockResolvedValue({
-            _id: '699e161a8de7be224a19c494',
-            nome: 'Supino Reto',
-            series: 3
-        })
+        const payload = {
+            exercicios: [
+                {
+                    _id: 'Exercício Id: 699e161a8de7be224a19c494',
+                    exercício: 'Supino Reto',
+                    series: '3 🗴 10',
+                    userId: TEST_USER_ID
+                }
+            ],
+            pagination: { total: 1, page: 1, limit: 10, totalPages: 1 }
+        }
+        mockExercicioService.getExercicios.mockResolvedValue(payload)
 
-        const res = await request(app)
-            .get('/api/v1/exercicios')
+        const res = await request(app).get('/api/v1/exercicios')
 
         expect(res.status).toBe(200)
         expect(res.body.success).toBe(true)
+        expect(res.body.data).toEqual(payload)
+        expect(mockExercicioService.getExercicios).toHaveBeenCalledWith(
+            { userId: TEST_USER_ID },
+            { page: undefined, limit: undefined }
+        )
+    })
+
+    it('Deve retornar 422 para query inválida (page).', async () => {
+        const res = await request(app).get('/api/v1/exercicios?page=0')
+
+        expect(res.status).toBe(422)
+        expect(res.body.success).toBe(false)
     })
 
     it('Deve retornar 500 em caso de erro interno.', async () => {
         mockExercicioService.getExercicios.mockRejectedValue(new Error('Erro no banco de dados.'))
 
-        const res = await request(app)
-            .get('/api/v1/exercicios')
+        const res = await request(app).get('/api/v1/exercicios')
 
         expect(res.status).toBe(500)
         expect(res.body.success).toBe(false)
@@ -71,8 +87,7 @@ describe('GET /api/v1/exercicio/:id', () => {
         error.statusCode = 404
         mockExercicioService.getExercicioById.mockRejectedValue(error)
 
-        const res = await request(app)
-            .get(`/api/v1/exercicio/${idValido}`)
+        const res = await request(app).get(`/api/v1/exercicio/${idValido}`)
 
         expect(res.status).toBe(404)
         expect(res.body.success).toBe(false)
@@ -80,24 +95,35 @@ describe('GET /api/v1/exercicio/:id', () => {
     })
 
     it('Deve retornar 200 para sucesso.', async () => {
-        mockExercicioService.getExercicioById.mockResolvedValue({
-            _id: idValido,
-            nome: 'Supino Reto',
-            series: 3
-        })
+        const payload = {
+            _id: `Exercício Id: ${idValido}`,
+            exercício: 'Supino Reto',
+            series: '3 🗴 10',
+            userId: TEST_USER_ID
+        }
+        mockExercicioService.getExercicioById.mockResolvedValue(payload)
 
-        const res = await request(app)
-            .get(`/api/v1/exercicio/${idValido}`)
+        const res = await request(app).get(`/api/v1/exercicio/${idValido}`)
 
         expect(res.status).toBe(200)
         expect(res.body.success).toBe(true)
+        expect(res.body.data).toEqual(payload)
+        expect(mockExercicioService.getExercicioById).toHaveBeenCalledWith(idValido, {
+            userId: TEST_USER_ID
+        })
+    })
+
+    it('Deve retornar 422 se o id não for um ObjectId válido.', async () => {
+        const res = await request(app).get('/api/v1/exercicio/id-invalido')
+
+        expect(res.status).toBe(422)
+        expect(res.body.success).toBe(false)
     })
 
     it('Deve retornar 500 em caso de erro interno.', async () => {
         mockExercicioService.getExercicioById.mockRejectedValue(new Error('Erro no banco de dados.'))
 
-        const res = await request(app)
-            .get(`/api/v1/exercicio/${idValido}`)
+        const res = await request(app).get(`/api/v1/exercicio/${idValido}`)
 
         expect(res.status).toBe(500)
         expect(res.body.success).toBe(false)
@@ -107,7 +133,7 @@ describe('GET /api/v1/exercicio/:id', () => {
 
 describe('POST /api/v1/exercicio', () => {
     const idDivisao = new mongoose.Types.ObjectId().toString()
-    const exercicioData = { 
+    const exercicioData = {
         nome: 't-bar',
         series: 2,
         repeticoes_alvo: 8,
@@ -125,41 +151,49 @@ describe('POST /api/v1/exercicio', () => {
         error.statusCode = 404
         mockExercicioService.createExercicio.mockRejectedValue(error)
 
-        const res = await request(app)
-            .post('/api/v1/exercicio')
-            .send(exercicioData)
+        const res = await request(app).post('/api/v1/exercicio').send(exercicioData)
 
         expect(res.status).toBe(404)
+        expect(res.body.success).toBe(false)
         expect(res.body.data).toBe('Divisão não encontrada.')
     })
 
     it('Deve criar um exercício com sucesso (201).', async () => {
-        mockExercicioService.createExercicio.mockResolvedValue({
-            _id: 'exercicio123',
-            ...exercicioData
-        })
+        const criado = { message: 'Exercício criado com sucesso.' }
+        mockExercicioService.createExercicio.mockResolvedValue(criado)
 
-        const res = await request(app)
-            .post('/api/v1/exercicio')
-            .send(exercicioData)
+        const res = await request(app).post('/api/v1/exercicio').send(exercicioData)
 
         expect(res.status).toBe(201)
         expect(res.body.success).toBe(true)
-        expect(res.body.data.nome).toBe('t-bar')
+        expect(res.body.data).toEqual(criado)
+        expect(mockExercicioService.createExercicio).toHaveBeenCalledWith(
+            expect.objectContaining({
+                divisao: idDivisao,
+                series: 2
+            }),
+            { userId: TEST_USER_ID }
+        )
+    })
+
+    it('Deve retornar 422 para corpo inválido.', async () => {
+        const res = await request(app)
+            .post('/api/v1/exercicio')
+            .send({ nome: 'tb', series: 2, divisao: idDivisao })
+
+        expect(res.status).toBe(422)
+        expect(res.body.success).toBe(false)
     })
 
     it('Deve retornar 500 em caso de erro interno.', async () => {
         mockExercicioService.createExercicio.mockRejectedValue(new Error('Erro no banco de dados.'))
 
-        const res = await request(app)
-            .post('/api/v1/exercicio')
-            .send(exercicioData)
+        const res = await request(app).post('/api/v1/exercicio').send(exercicioData)
 
         expect(res.status).toBe(500)
         expect(res.body.success).toBe(false)
         expect(res.body.data).toBe('Erro no banco de dados.')
     })
-
 })
 
 describe('DELETE /api/v1/deletar_exercicio/:id', () => {
@@ -174,30 +208,38 @@ describe('DELETE /api/v1/deletar_exercicio/:id', () => {
         error.statusCode = 404
         mockExercicioService.deleteExercicio.mockRejectedValue(error)
 
-        const res = await request(app)
-            .delete(`/api/v1/deletar_exercicio/${idValido}`)
+        const res = await request(app).delete(`/api/v1/deletar_exercicio/${idValido}`)
 
         expect(res.status).toBe(404)
         expect(res.body.success).toBe(false)
-        expect(res.body.data).toBe('Exercício não encontrado.')        
+        expect(res.body.data).toBe('Exercício não encontrado.')
     })
 
     it('Deve retornar 200 se excluir o exercício com sucesso.', async () => {
-        mockExercicioService.deleteExercicio.mockResolvedValue({ message: 'Exercício excluído com sucesso.' })
+        const excluido = { message: 'Exercício excluído com sucesso.' }
+        mockExercicioService.deleteExercicio.mockResolvedValue(excluido)
 
-        const res = await request(app)
-            .delete(`/api/v1/deletar_exercicio/${idValido}`)
+        const res = await request(app).delete(`/api/v1/deletar_exercicio/${idValido}`)
 
         expect(res.status).toBe(200)
         expect(res.body.success).toBe(true)
-        expect(res.body.data).toStrictEqual({message: "Exercício excluído com sucesso."})
+        expect(res.body.data).toEqual(excluido)
+        expect(mockExercicioService.deleteExercicio).toHaveBeenCalledWith(idValido, {
+            userId: TEST_USER_ID
+        })
+    })
+
+    it('Deve retornar 422 se o id não for um ObjectId válido.', async () => {
+        const res = await request(app).delete('/api/v1/deletar_exercicio/invalido')
+
+        expect(res.status).toBe(422)
+        expect(res.body.success).toBe(false)
     })
 
     it('Deve retornar 500 em caso de erro interno.', async () => {
         mockExercicioService.deleteExercicio.mockRejectedValue(new Error('Erro no banco de dados.'))
 
-        const res = await request(app)
-            .delete(`/api/v1/deletar_exercicio/${idValido}`)
+        const res = await request(app).delete(`/api/v1/deletar_exercicio/${idValido}`)
 
         expect(res.status).toBe(500)
         expect(res.body.success).toBe(false)
