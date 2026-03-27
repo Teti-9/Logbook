@@ -33,6 +33,8 @@ import usuarioRouter from "./routes/usuario.js"
 import Usuario from "./models/uSchema.js"
 import UsuarioRepository from "./repositories/usuarioRepository.js"
 import UsuarioService from "./services/usuarioService.js"
+import RefreshToken from "./models/refreshTokenSchema.js"
+import RefreshTokenRepository from "./repositories/refreshTokenRepository.js"
 
 const app = express()
 const v1 = express.Router()
@@ -70,11 +72,12 @@ const divisaoRepository = new DivisaoRepository(Divisao)
 const exercicioRepository = new ExercicioRepository(Exercicio)
 const logbookRepository = new LogbookRepository(Logbook, LogErros)
 const usuarioRepository = new UsuarioRepository(Usuario)
+const refreshTokenRepository = new RefreshTokenRepository(RefreshToken)
 
 const divisaoService = new DivisaoService(divisaoRepository)
 const exercicioService = new ExercicioService(exercicioRepository, divisaoRepository, logbookRepository)
 const logbookService = new LogbookService(logbookRepository, exercicioRepository)
-const usuarioService = new UsuarioService(usuarioRepository)
+const usuarioService = new UsuarioService(usuarioRepository, refreshTokenRepository)
 
 const divisao = divisaoRouter(divisaoService)
 const exercicio = exercicioRouter(exercicioService)

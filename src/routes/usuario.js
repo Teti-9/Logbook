@@ -88,6 +88,42 @@ const usuarioRouter = (usuarioService) => {
 
     })
 
+    router.post('/refresh', async (req, res) => {
+
+        const { refreshToken } = req.body
+
+        if (!refreshToken) return res.status(401).json({ 
+            success: false, 
+            data: 'Refresh token não fornecido.' 
+        })
+    
+        const tokens = await usuarioService.refreshTokens(refreshToken)
+
+        return res.status(200).json({ 
+            success: true, 
+            data: tokens 
+        })
+
+    })
+    
+    router.post('/logout', async (req, res) => {
+
+        const { refreshToken } = req.body
+
+        if (!refreshToken) return res.status(401).json({ 
+            success: false, 
+            data: 'Refresh token não fornecido.' 
+        })
+    
+        const result = await usuarioService.logoutUsuario(refreshToken)
+
+        return res.status(200).json({ 
+            success: true, 
+            data: result 
+        })
+        
+    })
+
     return router
 }
 
