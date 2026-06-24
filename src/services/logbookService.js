@@ -1,9 +1,10 @@
 import sincLogbooks from "../utils/sinclogbooks.js"
 
 export default class LogbookService {
-    constructor(logbookRepo, exercisesRepo) {
+    constructor(logbookRepo, exercisesRepo, historicalRepo) {
         this.logbookRepo = logbookRepo
         this.exercisesRepo = exercisesRepo
+        this.historicalRepo = historicalRepo
     }
 
     async getLogbooks() {
@@ -79,14 +80,14 @@ export default class LogbookService {
 
     async sincLogbook(body) {
 
-        const { exercises } = body
+        const { logbooks } = body
         const sincronizados = []
 
-        for (const exerciseId of exercises) {
+        for (const exerciseId of logbooks) {
 
             try {
 
-                const sincResult = await sincLogbooks(exerciseId, this.exercisesRepo, this.logbookRepo)
+                const sincResult = await sincLogbooks(exerciseId, this.exercisesRepo, this.logbookRepo, this.historicalRepo)
                 sincronizados.push(sincResult)
 
             } catch (error) {

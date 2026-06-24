@@ -1,4 +1,4 @@
-async function sincLogbooks(exerciseId, exercisesRepo, logbookRepo) {
+async function sincLogbooks(exerciseId, exercisesRepo, logbookRepo, historicalRepo) {
 
     const exerciseExists = await exercisesRepo.findById({
         id: exerciseId,
@@ -23,6 +23,18 @@ async function sincLogbooks(exerciseId, exercisesRepo, logbookRepo) {
         weight: logbookExists.weight,
         reps: logbookExists.reps
     }
+
+    const historical_data = {
+        exerciseId: exerciseId,
+        name: exerciseExists.name,
+        series: exerciseExists.series,
+        weight: logbookExists.weight,
+        reps: logbookExists.reps,
+        previous_weight: exerciseExists.weight,
+        previous_reps: exerciseExists.reps,
+    }
+
+    const create_historical = await historicalRepo.create(historical_data)
 
     const sincExercise = await exercisesRepo.findByIdAndUpdate(
         exerciseId,

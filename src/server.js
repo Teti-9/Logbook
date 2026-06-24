@@ -3,6 +3,10 @@ import cors from "cors"
 import errorMiddleware from "./middleware/error.js"
 import { prisma, connectDB } from "./config/database.js"
 
+import HistoricalRepo from "./repositories/historicalRepo.js"
+import HistoricalService from "./services/historicalService.js"
+import HistoricalRouter from "./routes/historicalRoute.js"
+
 import DivisionRepo from "./repositories/divisionRepo.js"
 import DivisionService from "./services/divisionService.js"
 import DivisionRouter from "./routes/divisionRoute.js"
@@ -18,6 +22,10 @@ import LogbookRouter from "./routes/logbookRoute.js"
 const app = express()
 const PORT = 8000
 
+const historicalRepo = new HistoricalRepo(prisma)
+const historicalService = new HistoricalService(historicalRepo)
+const historicalRouter = HistoricalRouter(historicalService)
+
 const divisionRepo = new DivisionRepo(prisma)
 const divisionService = new DivisionService(divisionRepo)
 const divisionRouter = DivisionRouter(divisionService)
@@ -27,7 +35,7 @@ const exercisesService = new ExercisesService(exercisesRepo, divisionRepo)
 const exercisesRouter = ExercisesRouter(exercisesService)
 
 const logbookRepo = new LogbookRepo(prisma)
-const logbookService = new LogbookService(logbookRepo, exercisesRepo)
+const logbookService = new LogbookService(logbookRepo, exercisesRepo, historicalRepo)
 const logbookRouter = LogbookRouter(logbookService)
 
 app.use(cors())
@@ -37,6 +45,7 @@ app.use(express.json())
 app.use("/api", divisionRouter)
 app.use("/api", exercisesRouter)
 app.use("/api", logbookRouter)
+app.use("/api", historicalRouter)
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}.`)
