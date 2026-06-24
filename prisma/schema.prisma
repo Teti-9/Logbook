@@ -1,0 +1,62 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Division {
+  id  Int @id @default(autoincrement())
+  name  String
+  day  Day
+  exercises Exercises[]
+  isDeleted Boolean @default(false)
+  deletedAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum Day {
+  monday
+  tuesday
+  wednesday
+  thursday
+  friday
+  saturday
+  sunday
+}
+
+model Exercises {
+  id  Int     @id @default(autoincrement())
+  name  String
+  series  Int
+  weight  Float
+  reps  Int
+  divisionId  Int
+  logbook Logbook[]
+  division  Division  @relation(fields: [divisionId], references: [id])
+  isDeleted Boolean    @default(false)
+  deletedAt DateTime?
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model Logbook {
+  id  Int     @id @default(autoincrement())
+  exerciseId Int
+  weight  Float
+  reps  Int
+  sinc  Boolean  @default(false)
+  exercise  Exercises @relation(fields: [exerciseId], references: [id])
+  isDeleted Boolean    @default(false)
+  deletedAt DateTime?
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
