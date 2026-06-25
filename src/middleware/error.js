@@ -1,12 +1,14 @@
+import { Prisma } from '@prisma/client'
+
 const errorMiddleware = (err, req, res, next) => {
 
     const statusCode = err.statusCode || 500
-    const message = err.message || 'Ocorreu um erro interno no servidor.'
+    const message = err.message || "There was a internal server error."
 
-    if (err.code === 11000) {
+    if (err instanceof Prisma.PrismaClientValidationError) {
         res.status(409).json({
             success: false,
-            data: 'Esse email está em uso, digite outro email.'
+            data: 'Invalid data sent, please check the fields again.'
         })
 
     } else {

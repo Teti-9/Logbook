@@ -6,7 +6,7 @@ async function sincLogbooks(exerciseId, exercisesRepo, logbookRepo, historicalRe
     })
 
     if (!exerciseExists) {
-        throw new Error('Exercise not found.')
+        throw new Error('Exercise associated with this logbook not found.')
     }
 
     const logbookExists = await logbookRepo.findById({
@@ -20,18 +20,20 @@ async function sincLogbooks(exerciseId, exercisesRepo, logbookRepo, historicalRe
     }
 
     const data = {
-        weight: logbookExists.weight,
-        reps: logbookExists.reps
+        topset_weight: logbookExists.topset_weight,
+        topset_reps: logbookExists.topset_reps,
+        backoff_weight: logbookExists.backoff_weight,
+        backoff_reps: logbookExists.backoff_reps
     }
 
     const historical_data = {
         exerciseId: exerciseId,
         name: exerciseExists.name,
         series: exerciseExists.series,
-        weight: logbookExists.weight,
-        reps: logbookExists.reps,
-        previous_weight: exerciseExists.weight,
-        previous_reps: exerciseExists.reps,
+        previous_topset_weight: exerciseExists.topset_weight,
+        previous_topset_reps: exerciseExists.topset_reps,
+        previous_backoff_weight: exerciseExists.backoff_weight,
+        previous_backoff_reps: exerciseExists.backoff_reps
     }
 
     const create_historical = await historicalRepo.create(historical_data)

@@ -37,8 +37,10 @@ model Exercises {
   id  Int     @id @default(autoincrement())
   name  String
   series  Int
-  weight  Float
-  reps  Int
+  topset_weight  Float
+  topset_reps  Int
+  backoff_weight  Float?
+  backoff_reps  Int?
   divisionId  Int
   logbook Logbook[]
   division  Division  @relation(fields: [divisionId], references: [id])
@@ -51,8 +53,10 @@ model Exercises {
 model Logbook {
   id  Int     @id @default(autoincrement())
   exerciseId Int
-  weight  Float
-  reps  Int
+  topset_weight  Float
+  topset_reps  Int
+  backoff_weight  Float?
+  backoff_reps  Int?
   sinc  Boolean  @default(false)
   exercise  Exercises @relation(fields: [exerciseId], references: [id])
   isDeleted Boolean    @default(false)
@@ -66,10 +70,10 @@ model Historical {
   exerciseId  Int
   name  String
   series  Int
-  weight  Float
-  previous_weight Float
-  reps  Int
-  previous_reps Int
+  previous_topset_weight Float
+  previous_topset_reps Int
+  previous_backoff_weight  Float?
+  previous_backoff_reps  Int?
   isDeleted Boolean    @default(false)
   deletedAt DateTime?
   createdAt DateTime   @default(now())

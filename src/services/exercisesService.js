@@ -1,3 +1,5 @@
+import capitalizeEachWord from "../utils/capitalize.js"
+
 export default class ExercisesService {
     constructor(exercisesRepo, divisionRepo) {
         this.exercisesRepo = exercisesRepo
@@ -38,6 +40,7 @@ export default class ExercisesService {
 
     async createExercise(body) {
         const divisionId = Number(body.divisionId)
+        body.name = capitalizeEachWord(body.name)
 
         const divisionExists = await this.divisionRepo.findById({
             id: divisionId,
