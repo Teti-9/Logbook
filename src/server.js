@@ -35,7 +35,7 @@ const exercisesService = new ExercisesService(exercisesRepo, divisionRepo)
 const exercisesRouter = ExercisesRouter(exercisesService)
 
 const logbookRepo = new LogbookRepo(prisma)
-const logbookService = new LogbookService(logbookRepo, exercisesRepo, historicalRepo)
+const logbookService = new LogbookService(logbookRepo, exercisesRepo, prisma)
 const logbookRouter = LogbookRouter(logbookService)
 
 app.use(cors())

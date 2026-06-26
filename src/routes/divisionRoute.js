@@ -1,4 +1,7 @@
 import express from 'express'
+import validateId from "../schemas/id.js"
+import validateFields from "../schemas/divisionFields.js"
+import zodError from "../utils/zoderror.js"
 
 const DivisionRouter = (divisionService) => {
     const router = express.Router()
@@ -14,11 +17,15 @@ const DivisionRouter = (divisionService) => {
 
     })
 
-    router.get('/division/:id', async (req, res) => {
+    router.get('/divisions/:id', async (req, res) => {
 
-        const { id } = req.params
+        const id = validateId(Number(req.params.id))
 
-        const result = await divisionService.getDivisionById(id)
+        if (!id.success) {
+            throw new Error(zodError(id.error))
+        }
+
+        const result = await divisionService.getDivisionById(id.data.id)
 
         return res.status(200).json({
             success: true,
@@ -27,7 +34,15 @@ const DivisionRouter = (divisionService) => {
 
     })
 
-    router.post('/division', async (req, res) => {
+    router.post('/divisions', async (req, res) => {
+
+        const fieldConfig = { name: "string", day: "string" }
+
+        const result = validateFields(req.body, fieldConfig)
+
+        if (!result.success) {
+            throw new Error(zodError(result.error))
+        }
 
         const divisionCreated = await divisionService.createDivision(req.body)
 
@@ -38,11 +53,15 @@ const DivisionRouter = (divisionService) => {
 
     })
 
-    router.delete('/delete_division/:id', async (req, res) => {
+    router.delete('/divisions/:id', async (req, res) => {
 
-        const { id } = req.params
+        const id = validateId(Number(req.params.id))
 
-        const divisionDeleted = await divisionService.deleteDivision(id)
+        if (!id.success) {
+            throw new Error(zodError(id.error))
+        }
+
+        const divisionDeleted = await divisionService.deleteDivision(id.data.id)
 
         return res.status(200).json({
             success: true,
