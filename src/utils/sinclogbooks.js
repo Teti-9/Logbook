@@ -1,4 +1,13 @@
+import validateId from "../schemas/ids.js"
+import zodError from "../utils/zoderror.js"
+
 async function sincLogbooks(exerciseId, prisma) {
+
+    const id = validateId(Number(exerciseId))
+
+    if (!id.success) {
+        throw new Error(zodError(id.error))
+    }
 
     const exerciseExists = await prisma.exercises.findFirst({
         where: {

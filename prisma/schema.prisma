@@ -21,6 +21,8 @@ model Division {
   deletedAt DateTime?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([day, isDeleted])
 }
 
 enum Day {
@@ -48,6 +50,8 @@ model Exercises {
   deletedAt DateTime?
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
+
+  @@index([divisionId, isDeleted])
 }
 
 model Logbook {
@@ -63,6 +67,8 @@ model Logbook {
   deletedAt DateTime?
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
+
+  @@index([exerciseId, isDeleted])
 }
 
 model Historical {
@@ -78,4 +84,6 @@ model Historical {
   deletedAt DateTime?
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
+
+  @@index([exerciseId, isDeleted])
 }

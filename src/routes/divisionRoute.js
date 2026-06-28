@@ -1,6 +1,6 @@
 import express from 'express'
-import validateId from "../schemas/id.js"
-import validateFields from "../schemas/divisionFields.js"
+import validateId from "../schemas/ids.js"
+import validateFields from "../schemas/fields.js"
 import zodError from "../utils/zoderror.js"
 
 const DivisionRouter = (divisionService) => {

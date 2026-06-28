@@ -1,9 +1,12 @@
 import express from 'express'
+import validateId from "../schemas/ids.js"
+import validateFields from "../schemas/fields.js"
+import zodError from "../utils/zoderror.js"
 
 const HistoricalRouter = (historicalService) => {
     const router = express.Router()
 
-    router.get('/historical', async (req, res) => {
+    router.get('/historicals', async (req, res) => {
 
         const result = await historicalService.getHistorical()
 
@@ -14,11 +17,15 @@ const HistoricalRouter = (historicalService) => {
 
     })
 
-    router.get('/historical/:id', async (req, res) => {
+    router.get('/historicals/:id', async (req, res) => {
 
-        const { id } = req.params
+        const id = validateId(Number(req.params.id))
 
-        const result = await historicalService.getHistoricalById(id)
+        if (!id.success) {
+            throw new Error(zodError(id.error))
+        }
+
+        const result = await historicalService.getHistoricalById(id.data.id)
 
         return res.status(200).json({
             success: true,
@@ -27,11 +34,15 @@ const HistoricalRouter = (historicalService) => {
 
     })
 
-    router.delete('/delete_historical/:id', async (req, res) => {
+    router.delete('/historicals/:id', async (req, res) => {
 
-        const { id } = req.params
+        const id = validateId(Number(req.params.id))
 
-        const historicalDeleted = await historicalService.deleteHistorical(id)
+        if (!id.success) {
+            throw new Error(zodError(id.error))
+        }
+
+        const historicalDeleted = await historicalService.deleteHistorical(id.data.id)
 
         return res.status(200).json({
             success: true,

@@ -1,4 +1,7 @@
 import express from 'express'
+import validateId from "../schemas/ids.js"
+import validateFields from "../schemas/fields.js"
+import zodError from "../utils/zoderror.js"
 
 const ExercisesRouter = (exercisesService) => {
     const router = express.Router()
@@ -14,11 +17,15 @@ const ExercisesRouter = (exercisesService) => {
 
     })
 
-    router.get('/exercise/:id', async (req, res) => {
+    router.get('/exercises/:id', async (req, res) => {
 
-        const { id } = req.params
+        const id = validateId(Number(req.params.id))
 
-        const result = await exercisesService.getExerciseById(id)
+        if (!id.success) {
+            throw new Error(zodError(id.error))
+        }
+
+        const result = await exercisesService.getExerciseById(id.data.id)
 
         return res.status(200).json({
             success: true,
@@ -27,7 +34,21 @@ const ExercisesRouter = (exercisesService) => {
 
     })
 
-    router.post('/exercise', async (req, res) => {
+    router.post('/exercises', async (req, res) => {
+
+        const fieldConfig = {
+            name: "string",
+            series: "number",
+            topset_weight: "number",
+            topset_reps: "number",
+            divisionId: "number",
+        }
+
+        const result = validateFields(req.body, fieldConfig)
+
+        if (!result.success) {
+            throw new Error(zodError(result.error))
+        }
 
         const exerciseCreated = await exercisesService.createExercise(req.body)
 
@@ -38,11 +59,15 @@ const ExercisesRouter = (exercisesService) => {
 
     })
 
-    router.delete('/delete_exercise/:id', async (req, res) => {
+    router.delete('/exercises/:id', async (req, res) => {
 
-        const { id } = req.params
+        const id = validateId(Number(req.params.id))
 
-        const exerciseDeleted = await exercisesService.deleteExercise(id)
+        if (!id.success) {
+            throw new Error(zodError(id.error))
+        }
+
+        const exerciseDeleted = await exercisesService.deleteExercise(id.data.id)
 
         return res.status(200).json({
             success: true,
