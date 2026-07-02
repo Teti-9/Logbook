@@ -16,13 +16,15 @@ model Division {
   id  Int @id @default(autoincrement())
   name  String
   day  Day
+  userId  Int
+  user  User  @relation(fields: [userId], references: [id])
   exercises Exercises[]
   isDeleted Boolean @default(false)
   deletedAt DateTime?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([day, isDeleted])
+  @@index([userId, day, isDeleted])
 }
 
 enum Day {
@@ -44,14 +46,16 @@ model Exercises {
   backoff_weight  Float?
   backoff_reps  Int?
   divisionId  Int
+  userId  Int
   logbook Logbook[]
+  user  User  @relation(fields: [userId], references: [id])
   division  Division  @relation(fields: [divisionId], references: [id])
   isDeleted Boolean    @default(false)
   deletedAt DateTime?
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
 
-  @@index([divisionId, isDeleted])
+  @@index([userId, divisionId, isDeleted])
 }
 
 model Logbook {
@@ -62,13 +66,15 @@ model Logbook {
   backoff_weight  Float?
   backoff_reps  Int?
   sinc  Boolean  @default(false)
+  userId  Int
+  user  User  @relation(fields: [userId], references: [id])
   exercise  Exercises @relation(fields: [exerciseId], references: [id])
   isDeleted Boolean    @default(false)
   deletedAt DateTime?
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
 
-  @@index([exerciseId, isDeleted])
+  @@index([userId, exerciseId, isDeleted])
 }
 
 model Historical {
@@ -80,10 +86,27 @@ model Historical {
   previous_topset_reps Int
   previous_backoff_weight  Float?
   previous_backoff_reps  Int?
+  userId  Int
+  user  User  @relation(fields: [userId], references: [id])
   isDeleted Boolean    @default(false)
   deletedAt DateTime?
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
 
-  @@index([exerciseId, isDeleted])
+  @@index([userId, exerciseId, isDeleted])
+}
+
+model User {
+  id  Int     @id @default(autoincrement())
+  email  String @unique
+  password  String
+  isDeleted Boolean    @default(false)
+  deletedAt DateTime?
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  divisions Division[]
+  exercises Exercises[]
+  logbooks Logbook[]
+  historicals Historical[]
 }

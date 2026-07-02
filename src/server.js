@@ -1,6 +1,8 @@
+import "dotenv/config"
 import express from "express"
 import cors from "cors"
 import errorMiddleware from "./middleware/error.js"
+import authMiddleware from "./middleware/auth.js"
 import { prisma, connectDB } from "./config/database.js"
 
 import HistoricalRepo from "./repositories/historicalRepo.js"
@@ -18,6 +20,10 @@ import ExercisesRouter from "./routes/exercisesRoute.js"
 import LogbookRepo from "./repositories/logbookRepo.js"
 import LogbookService from "./services/logbookService.js"
 import LogbookRouter from "./routes/logbookRoute.js"
+
+import UserRepo from "./repositories/userRepo.js"
+import UserService from "./services/userService.js"
+import UserRouter from "./routes/userRoute.js"
 
 const app = express()
 const PORT = 8000
@@ -38,14 +44,19 @@ const logbookRepo = new LogbookRepo(prisma)
 const logbookService = new LogbookService(logbookRepo, exercisesRepo, prisma)
 const logbookRouter = LogbookRouter(logbookService)
 
+const userRepo = new UserRepo(prisma)
+const userService = new UserService(userRepo)
+const userRouter = UserRouter(userService)
+
 app.use(cors())
 
 app.use(express.json())
 
-app.use("/api", divisionRouter)
-app.use("/api", exercisesRouter)
-app.use("/api", logbookRouter)
-app.use("/api", historicalRouter)
+app.use("/api", userRouter)
+app.use("/api", authMiddleware, divisionRouter)
+app.use("/api", authMiddleware, exercisesRouter)
+app.use("/api", authMiddleware, logbookRouter)
+app.use("/api", authMiddleware, historicalRouter)
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}.`)
