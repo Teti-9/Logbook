@@ -8,7 +8,7 @@ const HistoricalRouter = (historicalService) => {
 
     router.get('/historicals', async (req, res) => {
 
-        const result = await historicalService.getHistorical()
+        const result = await historicalService.getHistorical(req.user.id)
 
         return res.status(200).json({
             success: true,
@@ -25,7 +25,7 @@ const HistoricalRouter = (historicalService) => {
             throw new Error(zodError(id.error))
         }
 
-        const result = await historicalService.getHistoricalById(id.data.id)
+        const result = await historicalService.getHistoricalById(req.user.id, id.data.id)
 
         return res.status(200).json({
             success: true,
@@ -42,7 +42,7 @@ const HistoricalRouter = (historicalService) => {
             throw new Error(zodError(id.error))
         }
 
-        const historicalDeleted = await historicalService.deleteHistorical(id.data.id)
+        const historicalDeleted = await historicalService.deleteHistorical(req.user.id, id.data.id)
 
         return res.status(200).json({
             success: true,

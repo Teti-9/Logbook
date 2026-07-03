@@ -3,9 +3,10 @@ export default class HistoricalService {
         this.historicalRepo = historicalRepo
     }
 
-    async getHistorical() {
+    async getHistorical(userId) {
 
         const historical = await this.historicalRepo.findAll({
+            userId: userId,
             isDeleted: false
         })
 
@@ -18,10 +19,11 @@ export default class HistoricalService {
         return historical
     }
 
-    async getHistoricalById(id) {
+    async getHistoricalById(userId, id) {
         const historicalId = Number(id)
 
         const historical = await this.historicalRepo.findById({
+            userId: userId,
             id: historicalId,
             isDeleted: false
         })
@@ -35,10 +37,11 @@ export default class HistoricalService {
         return historical
     }
 
-    async deleteHistorical(id) {
+    async deleteHistorical(userId, id) {
         const historicalId = Number(id)
 
         const historical = await this.historicalRepo.findById({
+            userId: userId,
             id: historicalId,
             isDeleted: false
         })

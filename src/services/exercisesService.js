@@ -6,9 +6,10 @@ export default class ExercisesService {
         this.divisionRepo = divisionRepo
     }
 
-    async getExercises() {
+    async getExercises(userId) {
 
         const exercises = await this.exercisesRepo.findAll({
+            userId: userId,
             isDeleted: false
         })
 
@@ -21,10 +22,11 @@ export default class ExercisesService {
         return exercises
     }
 
-    async getExerciseById(id) {
+    async getExerciseById(userId, id) {
         const exerciseId = Number(id)
 
         const exercise = await this.exercisesRepo.findById({
+            userId: userId,
             id: exerciseId,
             isDeleted: false
         })
@@ -38,11 +40,12 @@ export default class ExercisesService {
         return exercise
     }
 
-    async createExercise(body) {
+    async createExercise(userId, body) {
         const divisionId = Number(body.divisionId)
         body.name = capitalizeEachWord(body.name)
 
         const divisionExists = await this.divisionRepo.findById({
+            userId: userId,
             id: divisionId,
             isDeleted: false
         })
@@ -54,7 +57,8 @@ export default class ExercisesService {
         }
 
         const newData = {
-            ...body
+            ...body,
+            userId: userId
         }
 
         await this.exercisesRepo.create(newData)
@@ -62,10 +66,11 @@ export default class ExercisesService {
         return { message: 'Exercise successfully created.' }
     }
 
-    async deleteExercise(id) {
+    async deleteExercise(userId, id) {
         const exerciseId = Number(id)
 
         const exercise = await this.exercisesRepo.findById({
+            userId: userId,
             id: exerciseId,
             isDeleted: false
         })

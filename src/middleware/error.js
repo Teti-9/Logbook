@@ -8,7 +8,7 @@ const errorMiddleware = (err, req, res, next) => {
     if (err instanceof Prisma.PrismaClientValidationError) {
         res.status(409).json({
             success: false,
-            data: 'Invalid data sent, please check the fields again.'
+            data: err.message
         })
 
     } else {

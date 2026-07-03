@@ -5,9 +5,10 @@ export default class DivisionService {
         this.divisionRepo = divisionRepo
     }
 
-    async getDivisions() {
+    async getDivisions(userId) {
 
         const divisions = await this.divisionRepo.findAll({
+            userId: userId,
             isDeleted: false
         })
 
@@ -20,10 +21,11 @@ export default class DivisionService {
         return divisions
     }
 
-    async getDivisionById(id) {
+    async getDivisionById(userId, id) {
         const divisionId = Number(id)
 
         const division = await this.divisionRepo.findById({
+            userId: userId,
             id: divisionId,
             isDeleted: false
         })
@@ -37,12 +39,13 @@ export default class DivisionService {
         return division
     }
 
-    async createDivision(body) {
+    async createDivision(userId, body) {
 
         const lowercaseDay = body.day.toLowerCase()
         body.name = capitalizeEachWord(body.name)
 
         const dayUsed = await this.divisionRepo.findOne({
+            userId: userId,
             day: lowercaseDay,
             isDeleted: false
         })
@@ -54,7 +57,8 @@ export default class DivisionService {
         }
 
         const newData = {
-            ...body
+            ...body,
+            userId: userId
         }
 
         await this.divisionRepo.create(newData)
@@ -62,10 +66,11 @@ export default class DivisionService {
         return { message: 'Training split successfully created.' }
     }
 
-    async deleteDivision(id) {
+    async deleteDivision(userId, id) {
         const divisionId = Number(id)
 
         const divisionExists = await this.divisionRepo.findById({
+            userId: userId,
             id: divisionId,
             isDeleted: false
         })

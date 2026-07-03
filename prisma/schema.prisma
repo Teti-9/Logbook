@@ -96,6 +96,16 @@ model Historical {
   @@index([userId, exerciseId, isDeleted])
 }
 
+model RefreshToken {
+  id  Int     @id @default(autoincrement())
+  userId  Int
+  tokenHash  String
+  expiresAt DateTime
+  revoked Boolean @default(false)
+  replacedBy String?
+  user  User  @relation(fields: [userId], references: [id])
+}
+
 model User {
   id  Int     @id @default(autoincrement())
   email  String @unique
@@ -109,4 +119,5 @@ model User {
   exercises Exercises[]
   logbooks Logbook[]
   historicals Historical[]
+  tokens RefreshToken[]
 }

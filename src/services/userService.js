@@ -2,8 +2,9 @@ import jwt from 'jsonwebtoken'
 import bcrypt from 'bcryptjs'
 
 export default class UserService {
-    constructor(userRepo) {
+    constructor(userRepo, refreshTokenService) {
         this.userRepo = userRepo
+        this.refreshTokenService = refreshTokenService
     }
 
     async createUser(body) {
@@ -40,13 +41,6 @@ export default class UserService {
             throw error
         }
 
-        const token = jwt.sign({
-            id: user.id,
-            email: user.email
-        },
-            process.env.JWT_SECRET, { expiresIn: '6h' }
-        )
-
-        return `Bearer ${token}`
+        return this.refreshTokenService._tokenPair(user)
     }
 }

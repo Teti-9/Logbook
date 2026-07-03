@@ -7,9 +7,10 @@ export default class LogbookService {
         this.prisma = prisma
     }
 
-    async getLogbooks() {
+    async getLogbooks(userId) {
 
         const logbooks = await this.logbookRepo.findAll({
+            userId: userId,
             sinc: false,
             isDeleted: false
         })
@@ -23,10 +24,11 @@ export default class LogbookService {
         return logbooks
     }
 
-    async getLogbookById(id) {
+    async getLogbookById(userId, id) {
         const logbookId = Number(id)
 
         const logbook = await this.logbookRepo.findById({
+            userId: userId,
             id: logbookId,
             sinc: false,
             isDeleted: false
@@ -41,10 +43,11 @@ export default class LogbookService {
         return logbook
     }
 
-    async createLogbook(body) {
+    async createLogbook(userId, body) {
         const exerciseId = Number(body.exerciseId)
 
         const exerciseExists = await this.exercisesRepo.findById({
+            userId: userId,
             id: exerciseId,
             isDeleted: false
         })
@@ -56,6 +59,7 @@ export default class LogbookService {
         }
 
         const logbookExists = await this.logbookRepo.findById({
+            userId: userId,
             exerciseId,
             sinc: false,
             isDeleted: false,
@@ -68,7 +72,8 @@ export default class LogbookService {
         }
 
         const newData = {
-            ...body
+            ...body,
+            userId: userId
         }
 
         await this.logbookRepo.create(newData)
@@ -76,7 +81,7 @@ export default class LogbookService {
         return { message: 'Logbook successfully created.' }
     }
 
-    async sincLogbook(body) {
+    async sincLogbook(userId, body) {
 
         const { logbooks } = body
         const sincronizados = []
@@ -85,7 +90,7 @@ export default class LogbookService {
 
             try {
 
-                const sincResult = await sincLogbooks(exerciseId, this.prisma)
+                const sincResult = await sincLogbooks(userId, exerciseId, this.prisma)
                 sincronizados.push(sincResult)
 
             } catch (error) {
@@ -100,10 +105,11 @@ export default class LogbookService {
         }
     }
 
-    async deleteLogbook(id) {
+    async deleteLogbook(userId, id) {
         const logbookId = Number(id)
 
         const logbook = await this.logbookRepo.findById({
+            userId: userId,
             id: logbookId,
             isDeleted: false
         })

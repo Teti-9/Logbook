@@ -1,7 +1,7 @@
 import validateId from "../schemas/ids.js"
 import zodError from "../utils/zoderror.js"
 
-async function sincLogbooks(exerciseId, prisma) {
+async function sincLogbooks(userId, exerciseId, prisma) {
 
     const id = validateId(Number(exerciseId))
 
@@ -11,6 +11,7 @@ async function sincLogbooks(exerciseId, prisma) {
 
     const exerciseExists = await prisma.exercises.findFirst({
         where: {
+            userId: userId,
             id: exerciseId,
             isDeleted: false
         }
@@ -22,6 +23,7 @@ async function sincLogbooks(exerciseId, prisma) {
 
     const logbookExists = await prisma.logbook.findFirst({
         where: {
+            userId: userId,
             exerciseId,
             sinc: false,
             isDeleted: false
@@ -40,6 +42,7 @@ async function sincLogbooks(exerciseId, prisma) {
     }
 
     const historical_data = {
+        userId: userId,
         exerciseId: exerciseId,
         name: exerciseExists.name,
         series: exerciseExists.series,
@@ -51,8 +54,8 @@ async function sincLogbooks(exerciseId, prisma) {
 
     await prisma.$transaction([
         prisma.historical.create({ data: historical_data }),
-        prisma.exercises.update({ where: { id: exerciseId }, data }),
-        prisma.logbook.update({ where: { id: logbookExists.id }, data: { sinc: true } })
+        prisma.exercises.update({ where: { userId: userId, id: exerciseId }, data }),
+        prisma.logbook.update({ where: { userId: userId, id: logbookExists.id }, data: { sinc: true } })
     ])
 
     return { message: 'Logbook successfully synchronized.' }

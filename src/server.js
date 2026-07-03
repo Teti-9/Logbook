@@ -5,6 +5,9 @@ import errorMiddleware from "./middleware/error.js"
 import authMiddleware from "./middleware/auth.js"
 import { prisma, connectDB } from "./config/database.js"
 
+import RefreshTokenRepo from "./repositories/refreshTokenRepo.js"
+import RefreshTokenService from "./services/refreshTokenService.js"
+
 import HistoricalRepo from "./repositories/historicalRepo.js"
 import HistoricalService from "./services/historicalService.js"
 import HistoricalRouter from "./routes/historicalRoute.js"
@@ -28,6 +31,8 @@ import UserRouter from "./routes/userRoute.js"
 const app = express()
 const PORT = 8000
 
+const refreshTokenRepo = new RefreshTokenRepo(prisma)
+
 const historicalRepo = new HistoricalRepo(prisma)
 const historicalService = new HistoricalService(historicalRepo)
 const historicalRouter = HistoricalRouter(historicalService)
@@ -45,8 +50,9 @@ const logbookService = new LogbookService(logbookRepo, exercisesRepo, prisma)
 const logbookRouter = LogbookRouter(logbookService)
 
 const userRepo = new UserRepo(prisma)
-const userService = new UserService(userRepo)
-const userRouter = UserRouter(userService)
+const refreshTokenService = new RefreshTokenService(userRepo, refreshTokenRepo)
+const userService = new UserService(userRepo, refreshTokenService)
+const userRouter = UserRouter(userService, refreshTokenService)
 
 app.use(cors())
 

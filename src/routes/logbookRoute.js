@@ -8,7 +8,7 @@ const LogbookRouter = (logbookService) => {
 
     router.get('/logbooks', async (req, res) => {
 
-        const result = await logbookService.getLogbooks()
+        const result = await logbookService.getLogbooks(req.user.id)
 
         return res.status(200).json({
             success: true,
@@ -25,7 +25,7 @@ const LogbookRouter = (logbookService) => {
             throw new Error(zodError(id.error))
         }
 
-        const result = await logbookService.getLogbookById(id.data.id)
+        const result = await logbookService.getLogbookById(req.user.id, id.data.id)
 
         return res.status(200).json({
             success: true,
@@ -50,7 +50,7 @@ const LogbookRouter = (logbookService) => {
             throw new Error(zodError(result.error))
         }
 
-        const logbookCreated = await logbookService.createLogbook(req.body)
+        const logbookCreated = await logbookService.createLogbook(req.user.id, req.body)
 
         return res.status(201).json({
             success: true,
@@ -61,7 +61,7 @@ const LogbookRouter = (logbookService) => {
 
     router.post('/sinclogbooks', async (req, res) => {
 
-        const result = await logbookService.sincLogbook(req.body)
+        const result = await logbookService.sincLogbook(req.user.id, req.body)
 
         return res.status(200).json({
             success: true,
@@ -78,7 +78,7 @@ const LogbookRouter = (logbookService) => {
             throw new Error(zodError(id.error))
         }
 
-        const logbookDeleted = await logbookService.deleteLogbook(id.data.id)
+        const logbookDeleted = await logbookService.deleteLogbook(req.user.id, id.data.id)
 
         return res.status(200).json({
             success: true,

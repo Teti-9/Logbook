@@ -8,7 +8,7 @@ const ExercisesRouter = (exercisesService) => {
 
     router.get('/exercises', async (req, res) => {
 
-        const result = await exercisesService.getExercises()
+        const result = await exercisesService.getExercises(req.user.id)
 
         return res.status(200).json({
             success: true,
@@ -25,7 +25,7 @@ const ExercisesRouter = (exercisesService) => {
             throw new Error(zodError(id.error))
         }
 
-        const result = await exercisesService.getExerciseById(id.data.id)
+        const result = await exercisesService.getExerciseById(req.user.id, id.data.id)
 
         return res.status(200).json({
             success: true,
@@ -50,7 +50,7 @@ const ExercisesRouter = (exercisesService) => {
             throw new Error(zodError(result.error))
         }
 
-        const exerciseCreated = await exercisesService.createExercise(req.body)
+        const exerciseCreated = await exercisesService.createExercise(req.user.id, req.body)
 
         return res.status(201).json({
             success: true,
@@ -67,7 +67,7 @@ const ExercisesRouter = (exercisesService) => {
             throw new Error(zodError(id.error))
         }
 
-        const exerciseDeleted = await exercisesService.deleteExercise(id.data.id)
+        const exerciseDeleted = await exercisesService.deleteExercise(req.user.id, id.data.id)
 
         return res.status(200).json({
             success: true,

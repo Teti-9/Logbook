@@ -8,7 +8,7 @@ const DivisionRouter = (divisionService) => {
 
     router.get('/divisions', async (req, res) => {
 
-        const result = await divisionService.getDivisions()
+        const result = await divisionService.getDivisions(req.user.id)
 
         return res.status(200).json({
             success: true,
@@ -25,7 +25,7 @@ const DivisionRouter = (divisionService) => {
             throw new Error(zodError(id.error))
         }
 
-        const result = await divisionService.getDivisionById(id.data.id)
+        const result = await divisionService.getDivisionById(req.user.id, id.data.id)
 
         return res.status(200).json({
             success: true,
@@ -44,7 +44,7 @@ const DivisionRouter = (divisionService) => {
             throw new Error(zodError(result.error))
         }
 
-        const divisionCreated = await divisionService.createDivision(req.body)
+        const divisionCreated = await divisionService.createDivision(req.user.id, req.body)
 
         return res.status(201).json({
             success: true,
@@ -61,7 +61,7 @@ const DivisionRouter = (divisionService) => {
             throw new Error(zodError(id.error))
         }
 
-        const divisionDeleted = await divisionService.deleteDivision(id.data.id)
+        const divisionDeleted = await divisionService.deleteDivision(req.user.id, id.data.id)
 
         return res.status(200).json({
             success: true,
