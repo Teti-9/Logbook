@@ -1,5 +1,3 @@
-import capitalizeEachWord from "../utils/capitalize.js"
-
 export default class DivisionService {
     constructor(divisionRepo) {
         this.divisionRepo = divisionRepo
@@ -42,7 +40,6 @@ export default class DivisionService {
     async createDivision(userId, body) {
 
         const lowercaseDay = body.day.toLowerCase()
-        body.name = capitalizeEachWord(body.name)
 
         const dayUsed = await this.divisionRepo.findOne({
             userId: userId,
@@ -57,7 +54,8 @@ export default class DivisionService {
         }
 
         const newData = {
-            ...body,
+            name: body.name,
+            day: lowercaseDay,
             userId: userId
         }
 

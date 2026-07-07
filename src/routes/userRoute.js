@@ -23,7 +23,7 @@ const UserRouter = (userService, refreshTokenService) => {
 
     })
 
-    router.post('/users', async (req, res) => {
+    router.post('/registers', async (req, res) => {
 
         const fieldConfig = { email: "string", password: "string" }
 

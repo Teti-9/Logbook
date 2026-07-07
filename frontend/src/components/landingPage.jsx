@@ -13,7 +13,7 @@ const LogbookLanding = (props) => {
                     <li><a href="#pricing" className="hover:text-indigo-600 transition">Placeholder</a></li>
                 </ul>
                 <button
-                    onClick={() => setPage(1)}
+                    onClick={() => setPage(2)}
                     className="bg-indigo-600 text-white px-6 py-2.5 rounded-lg hover:bg-indigo-700 transition font-bold shadow-md shadow-indigo-200">
                     Start Tracking
                 </button>
