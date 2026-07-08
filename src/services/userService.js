@@ -8,11 +8,12 @@ export default class UserService {
     }
 
     async createUser(body) {
-        body.email = body.email.toLowerCase()
+
+        const lowercaseEmail = body.email.toLowerCase()
         const hashedPassword = await bcrypt.hash(body.password, 8)
 
         const user = {
-            email: body.email,
+            email: lowercaseEmail,
             password: hashedPassword
         }
 

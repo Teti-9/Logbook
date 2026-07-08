@@ -39,6 +39,7 @@ export default class DivisionService {
 
     async createDivision(userId, body) {
 
+        const lowercaseName = body.name.toLowerCase()
         const lowercaseDay = body.day.toLowerCase()
 
         const dayUsed = await this.divisionRepo.findOne({
@@ -54,7 +55,7 @@ export default class DivisionService {
         }
 
         const newData = {
-            name: body.name,
+            name: lowercaseName,
             day: lowercaseDay,
             userId: userId
         }

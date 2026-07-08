@@ -12,8 +12,9 @@ function App() {
   const [page, setPage] = useState(3)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [divisions, setDivisions] = useState([])
   const [division, setDivision] = useState({ name: '', day: 'Monday' })
-  const [exercises, setExercises] = useState([])
+  const [exercises, setExercises] = useState({ name: '', series: '', topset_weight: '', topset_reps: '', divisionId: '' })
 
   const pages = {
     0: <LogbookLanding setPage={setPage} />,
@@ -22,7 +23,7 @@ function App() {
 
     2: <LoginPage email={email} password={password} setPassword={setPassword} setEmail={setEmail} setPage={setPage} />,
 
-    3: <DivisionBuilder division={division} setDivision={setDivision} exercises={exercises} setExercises={setExercises} />,
+    3: <DivisionBuilder division={division} divisions={divisions} setDivisions={setDivisions} setDivision={setDivision} exercises={exercises} setExercises={setExercises} />,
 
     4: <ActiveWorkout />,
   }

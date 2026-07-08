@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react'
-import loginUser from '../services/login.js'
+import loginUser from '../services/loginService.js'
 
 const LoginPage = (props) => {
     const { email, password, setEmail, setPassword, setPage } = props

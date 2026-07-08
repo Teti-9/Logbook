@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken'
 import bcrypt from 'bcryptjs'
 import { generateRefreshToken, hashRefreshToken } from '../utils/token.js'
 
-const ACCESS_TOKEN_TTL = '15m'
+const ACCESS_TOKEN_TTL = '12h'
 const REFRESH_TOKEN_DAYS = 30
 
 export default class RefreshTokenService {

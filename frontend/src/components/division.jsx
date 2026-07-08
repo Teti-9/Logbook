@@ -1,12 +1,32 @@
-import React from 'react'
-import createDivision from '../services/division.js'
+import React, { useEffect } from 'react'
+import ExercisesService from '../services/exercisesService.js'
+import DivisionsService from '../services/divisionService.js'
+import capitalizeEachWord from '../utils/capitalize.js'
 
 const DivisionBuilder = (props) => {
-    const { division, setDivision } = props
+    const { division, exercises, divisions, setDivision, setDivisions, setExercises } = props
 
     const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 
-    async function Create(e) {
+    async function loadDivisions() {
+        const response = await DivisionsService('GET', '')
+
+        if (response?.sucess) {
+            setDivisions(response.data || [])
+        }
+    }
+
+    useEffect(() => {
+        loadDivisions()
+    }, [])
+
+    async function getDivisions(e) {
+        e.preventDefault()
+
+        await loadDivisions()
+    }
+
+    async function createDivision(e) {
 
         e.preventDefault()
 
@@ -15,10 +35,39 @@ const DivisionBuilder = (props) => {
             day: division.day
         }
 
-        const response = await createDivision(data)
+        const response = await DivisionsService('POST', data)
 
         if (response?.sucess) {
+            setDivision({ name: '', day: 'Monday' })
+            await loadDivisions()
             alert('Training split successfully created.')
+        } else {
+            alert(response?.message)
+        }
+    }
+
+    async function createExercise(e) {
+
+        e.preventDefault()
+
+        if (!exercises.divisionId) {
+            alert('Please select a division first.')
+            return
+        }
+
+        const data = {
+            name: exercises.name,
+            series: Number(exercises.series),
+            topset_weight: Number(exercises.topset_weight),
+            topset_reps: Number(exercises.topset_reps),
+            divisionId: Number(exercises.divisionId)
+        }
+
+        const response = await ExercisesService('POST', data)
+
+        if (response?.sucess) {
+            setExercises({ name: '', series: '', topset_weight: '', topset_reps: '', divisionId: '' })
+            alert('Exercise successfully created.')
         } else {
             alert(response?.message)
         }
@@ -59,9 +108,105 @@ const DivisionBuilder = (props) => {
                 </div>
             </header>
 
+            <main className="p-6 space-y-6 max-w-2xl mx-auto mt-4">
+                <div className="flex justify-between items-center mb-2">
+                    <h2 className="text-xl font-extrabold text-slate-900">Exercises</h2>
+                </div>
+
+                <div className="bg-white rounded-3xl p-5 shadow-sm border border-slate-200 relative group transition-all hover:shadow-md">
+
+                    <div className="mb-4">
+                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Exercise</label>
+                        <input
+                            type="text"
+                            placeholder="e.g., Barbell Bench Press"
+                            value={exercises.name}
+                            onChange={(e) => setExercises((current) => ({ ...current, name: e.target.value }))}
+                            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-lg font-bold text-slate-900 focus:ring-2 focus:ring-indigo-500 outline-none transition"
+                        />
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-3">
+                        <div>
+                            <label className="block text-xs font-bold text-slate-500 mb-1">Series</label>
+                            <input
+                                type="number"
+                                placeholder="3"
+                                value={exercises.series}
+                                onChange={(e) => setExercises((current) => ({ ...current, series: e.target.value }))}
+                                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-3 text-center text-lg font-bold text-slate-900 focus:ring-2 focus:ring-indigo-500 outline-none transition"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs font-bold text-slate-500 mb-1">Top Set Weight</label>
+                            <input
+                                type="number"
+                                placeholder="50"
+                                value={exercises.topset_weight}
+                                onChange={(e) => setExercises((current) => ({ ...current, topset_weight: e.target.value }))}
+                                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-3 text-center text-lg font-bold text-slate-900 focus:ring-2 focus:ring-indigo-500 outline-none transition"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs font-bold text-slate-500 mb-1">Top Set Reps</label>
+                            <input
+                                type="number"
+                                placeholder="kg"
+                                value={exercises.topset_reps}
+                                onChange={(e) => setExercises((current) => ({ ...current, topset_reps: e.target.value }))}
+                                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-3 text-center text-lg font-bold text-slate-900 focus:ring-2 focus:ring-indigo-500 outline-none transition"
+                            />
+                        </div>
+                    </div>
+                </div>
+
+                <div className="bg-white rounded-3xl p-5 shadow-sm border border-slate-200">
+                    <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-lg font-black text-slate-900">Available Divisions</h3>
+                        <button
+                            onClick={getDivisions}
+                            className="text-sm font-bold text-indigo-600 hover:text-indigo-700 cursor-pointer text-indigo-600"
+                        >
+                            Refresh
+                        </button>
+                    </div>
+
+                    {divisions.length > 0 ? (
+                        <div className="grid gap-3">
+                            {divisions.map((item) => (
+                                <button
+                                    key={item.id}
+                                    type="button"
+                                    onClick={() => setExercises((current) => ({ ...current, divisionId: String(item.id) }))}
+                                    className={`w-full text-left rounded-2xl border px-4 py-3 transition ${Number(exercises.divisionId) === item.id
+                                        ? 'border-indigo-500 bg-indigo-50'
+                                        : 'border-slate-200 bg-slate-50 hover:border-slate-300 hover:bg-slate-100'
+                                        }`}
+                                >
+                                    <div className="flex items-center justify-between gap-3">
+                                        <span className="font-bold text-slate-900">{capitalizeEachWord(item.name)}</span>
+                                        <span className="text-sm font-semibold text-slate-500">{capitalizeEachWord(item.day)}</span>
+                                    </div>
+                                </button>
+                            ))}
+                        </div>
+                    ) : (
+                        <p className="text-sm text-slate-500">Create a division first, then pick it for the exercise.</p>
+                    )}
+                </div>
+
+                <button
+                    onClick={createExercise}
+                    className="w-full py-4 border-2 border-dashed border-slate-300 rounded-3xl text-slate-500 font-bold hover:bg-slate-100 hover:border-slate-400 hover:text-slate-700 transition flex items-center justify-center space-x-2"
+                >
+                    <span className="text-xl">+</span>
+                    <span>Add Exercise</span>
+                </button>
+            </main>
+
             <div className="fixed bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-slate-50 via-slate-50 to-transparent pt-12 z-20">
                 <button
-                    onClick={Create}
+                    onClick={createDivision}
                     className="w-full max-w-2xl mx-auto flex justify-center items-center py-4 px-6 rounded-2xl shadow-xl shadow-indigo-200 text-lg font-bold text-white bg-indigo-600 hover:bg-indigo-700 active:scale-95 transition transform"
                 >
                     Save Division

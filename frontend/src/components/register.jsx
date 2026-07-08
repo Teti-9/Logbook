@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react'
-import registerUser from '../services/register.js'
+import registerUser from '../services/registerService.js'
 
 const RegisterPage = (props) => {
     const { email, password, setEmail, setPassword, setPage } = props
