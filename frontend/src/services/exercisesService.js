@@ -16,12 +16,12 @@ export default async function ExercisesService(method, body) {
             })
             if (response.ok) {
                 const data = await response.json()
-                return { sucess: true, data: data }
+                return { success: true, data: data }
             } else {
                 const errorData = await response.json()
                 let errorMessage = errorData.data
 
-                return { sucess: false, message: errorMessage }
+                return { success: false, message: errorMessage }
             }
         } catch (error) {
             console.error('Error:', error)

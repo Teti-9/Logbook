@@ -15,12 +15,12 @@ export default async function DivisionsService(method, body) {
             })
             if (response.ok) {
                 const payload = await response.json()
-                return { sucess: true, data: payload.data }
+                return { success: true, data: payload.data }
             } else {
                 const errorData = await response.json()
                 let errorMessage = errorData.data
 
-                return { sucess: false, message: errorMessage }
+                return { success: false, message: errorMessage }
             }
         } catch (error) {
             console.error('Error:', error)

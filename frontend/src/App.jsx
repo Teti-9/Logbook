@@ -5,6 +5,7 @@ import RegisterPage from './components/register.jsx'
 import LoginPage from './components/login.jsx'
 import ActiveWorkout from './components/activeworkout.jsx'
 import DivisionBuilder from './components/division.jsx'
+import Dashboard from './components/dashboard.jsx'
 import './App.css'
 
 function App() {
@@ -23,9 +24,11 @@ function App() {
 
     2: <LoginPage email={email} password={password} setPassword={setPassword} setEmail={setEmail} setPage={setPage} />,
 
-    3: <DivisionBuilder division={division} divisions={divisions} setDivisions={setDivisions} setDivision={setDivision} exercises={exercises} setExercises={setExercises} />,
+    3: <Dashboard division={division} divisions={divisions} setDivisions={setDivisions} setDivision={setDivision} exercises={exercises} setExercises={setExercises} setPage={setPage} />,
 
-    4: <ActiveWorkout />,
+    4: <DivisionBuilder division={division} divisions={divisions} setDivisions={setDivisions} setDivision={setDivision} exercises={exercises} setExercises={setExercises} setPage={setPage} />,
+
+    5: <ActiveWorkout />,
   }
 
   return (

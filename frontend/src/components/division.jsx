@@ -4,14 +4,14 @@ import DivisionsService from '../services/divisionService.js'
 import capitalizeEachWord from '../utils/capitalize.js'
 
 const DivisionBuilder = (props) => {
-    const { division, exercises, divisions, setDivision, setDivisions, setExercises } = props
+    const { division, exercises, divisions, setDivision, setDivisions, setExercises, setPage } = props
 
     const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 
     async function loadDivisions() {
         const response = await DivisionsService('GET', '')
 
-        if (response?.sucess) {
+        if (response?.success) {
             setDivisions(response.data || [])
         }
     }
@@ -37,7 +37,7 @@ const DivisionBuilder = (props) => {
 
         const response = await DivisionsService('POST', data)
 
-        if (response?.sucess) {
+        if (response?.success) {
             setDivision({ name: '', day: 'Monday' })
             await loadDivisions()
             alert('Training split successfully created.')
@@ -65,7 +65,7 @@ const DivisionBuilder = (props) => {
 
         const response = await ExercisesService('POST', data)
 
-        if (response?.sucess) {
+        if (response?.success) {
             setExercises({ name: '', series: '', topset_weight: '', topset_reps: '', divisionId: '' })
             alert('Exercise successfully created.')
         } else {
@@ -75,6 +75,15 @@ const DivisionBuilder = (props) => {
 
     return (
         <div className="min-h-screen bg-slate-50 pb-32 font-sans text-slate-900">
+
+            <nav className="flex justify-between items-center p-6 bg-white shadow-sm border-b border-slate-100">
+                <div className="text-2xl font-black uppercase tracking-widest text-slate-900">Logbook</div>
+                <button
+                    onClick={() => setPage(3)}
+                    className="bg-indigo-600 text-white px-6 py-2.5 rounded-lg hover:bg-indigo-700 transition font-bold shadow-md shadow-indigo-200 cursor-pointer text-indigo-600">
+                    Dashboard
+                </button>
+            </nav>
 
             <header className="bg-white border-b border-slate-200 pt-12 pb-8 px-6 shadow-sm sticky top-0 z-20">
                 <div className="max-w-2xl mx-auto">

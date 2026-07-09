@@ -5,7 +5,8 @@ export default class DivisionRepo {
 
     async findAll(where) {
         return this.prisma.division.findMany({
-            where
+            where,
+            include: { exercises: { select: { id: true, name: true } } },
         })
     }
 

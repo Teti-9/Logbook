@@ -20,7 +20,7 @@ const RegisterPage = (props) => {
 
         const response = await registerUser(data)
 
-        if (response.sucess) {
+        if (response.success) {
             setEmail('')
             setPassword('')
             alert('User successfully created.')

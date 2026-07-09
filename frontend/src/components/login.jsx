@@ -20,7 +20,7 @@ const LoginPage = (props) => {
 
         const response = await loginUser(data)
 
-        if (response.sucess) {
+        if (response.success) {
             setEmail('')
             setPassword('')
             const token = response.data['data']['accessToken'].split(' ')[1]
