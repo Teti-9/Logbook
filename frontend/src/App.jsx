@@ -10,7 +10,7 @@ import './App.css'
 
 function App() {
 
-  const [page, setPage] = useState(3)
+  const [page, setPage] = useState(0)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [divisions, setDivisions] = useState([])

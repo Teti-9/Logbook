@@ -13,8 +13,10 @@ const ActiveWorkout = (props) => {
                 </div>
                 <div className="flex justify-between items-center">
                     <h1 className="text-3xl font-black tracking-tight">{capitalizeEachWord(division?.name) ?? 'Active Workout'} Day</h1>
-                    <div className="bg-slate-800 px-3 py-1 rounded-lg text-sm font-bold border border-slate-700">
-                        {exercises.length} Exercises
+                    <div className="mt-6 text-center">
+                        <a onClick={() => setPage(3)} className="uppercase bg-slate-900 font-bold text-white pt-12 pb-6 px-6 sticky top-0 z-10 shadow-md cursor-pointer text-indigo-600" >
+                            Dashboard
+                        </a>
                     </div>
                 </div>
             </header>
@@ -29,9 +31,9 @@ const ActiveWorkout = (props) => {
                                     <h2 className="text-xl font-extrabold text-slate-900 mb-1">
                                         {index + 1}. {capitalizeEachWord(exercise.name)}
                                     </h2>
-                                    {/* <p className="text-sm font-medium text-slate-500">
-                                        Target: {exercise.targetSeries} sets x {exercise.targetReps} reps @ {exercise.targetWeight}lbs
-                                    </p> */}
+                                    <p className="text-sm font-medium text-slate-500">
+                                        Series: {exercise.series}
+                                    </p>
                                 </div>
                             </div>
 
@@ -42,23 +44,21 @@ const ActiveWorkout = (props) => {
                                     <div className="grid grid-cols-2 gap-4">
                                         <div>
                                             <label className="block text-xs font-bold text-slate-700 mb-1">Weight</label>
-                                            {/* <input
+                                            <input
                                                 type="number"
-                                                placeholder={exercise.targetWeight}
-                                                value={exercise.logbook.newWeight}
-                                                onChange={(e) => handleInputChange(exercise.id, 'newWeight', e.target.value)}
+                                                placeholder='0'
+                                                // value={exercise.topset_weight}
                                                 className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-lg font-bold text-slate-900 focus:ring-2 focus:ring-indigo-500 outline-none transition"
-                                            /> */}
+                                            />
                                         </div>
                                         <div>
                                             <label className="block text-xs font-bold text-slate-700 mb-1">Reps</label>
-                                            {/* <input
+                                            <input
                                                 type="number"
-                                                placeholder={exercise.targetReps}
-                                                value={exercise.logbook.newReps}
-                                                onChange={(e) => handleInputChange(exercise.id, 'newReps', e.target.value)}
+                                                placeholder='0'
+                                                // value={exercise.topset_reps}
                                                 className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-lg font-bold text-slate-900 focus:ring-2 focus:ring-indigo-500 outline-none transition"
-                                            /> */}
+                                            />
                                         </div>
                                     </div>
                                 </div>
@@ -68,21 +68,21 @@ const ActiveWorkout = (props) => {
                                     <div className="grid grid-cols-2 gap-4">
                                         <div>
                                             <label className="block text-xs font-bold text-slate-700 mb-1">Weight</label>
-                                            {/* <input
+                                            <input
                                                 type="number"
-                                                value={exercise.logbook.backOffWeight}
-                                                onChange={(e) => handleInputChange(exercise.id, 'backOffWeight', e.target.value)}
+                                                placeholder='0'
+                                                // value={exercise.backoff_weight}
                                                 className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-lg font-bold text-slate-900 focus:ring-2 focus:ring-indigo-500 outline-none transition"
-                                            /> */}
+                                            />
                                         </div>
                                         <div>
                                             <label className="block text-xs font-bold text-slate-700 mb-1">Reps</label>
-                                            {/* <input
+                                            <input
                                                 type="number"
-                                                value={exercise.logbook.backOffReps}
-                                                onChange={(e) => handleInputChange(exercise.id, 'backOffReps', e.target.value)}
+                                                placeholder='0'
+                                                // value={exercise.backoff_reps}
                                                 className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-lg font-bold text-slate-900 focus:ring-2 focus:ring-indigo-500 outline-none transition"
-                                            /> */}
+                                            />
                                         </div>
                                     </div>
                                 </div>

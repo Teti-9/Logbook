@@ -64,7 +64,11 @@ const Dashboard = (props) => {
 
             <nav className="bg-white px-6 py-4 flex justify-between items-center shadow-sm border-b border-slate-100">
                 <div className="text-xl font-black uppercase tracking-widest text-slate-900">Logbook</div>
-                <div className="h-10 w-10 bg-indigo-100 text-indigo-700 rounded-full flex items-center justify-center font-bold border border-indigo-200">
+                <div
+                    onClick={() => {
+                        setPage(0)
+                    }}
+                    className="h-10 w-10 bg-indigo-100 text-indigo-700 rounded-full flex items-center justify-center font-bold border border-indigo-200 cursor-pointer text-indigo-600">
                     RC
                 </div>
             </nav>
@@ -129,7 +133,16 @@ const Dashboard = (props) => {
                                             {capitalizeEachWord(division.name)}
                                         </h3>
                                     </div>
-                                    <button className="text-slate-400 hover:text-slate-600 bg-slate-50 p-2 rounded-lg cursor-pointer text-indigo-600">
+                                    <button
+                                        onClick={() => {
+                                            setDivision({
+                                                name: division.name,
+                                                day: division.day,
+                                                exercises: division.exercises,
+                                            })
+                                            setPage(5)
+                                        }}
+                                        className="text-slate-400 hover:text-slate-600 bg-slate-50 p-2 rounded-lg cursor-pointer text-indigo-600">
                                         ⚙️
                                     </button>
                                 </div>
