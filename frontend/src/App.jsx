@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Layout from './components/layout.jsx'
 import LogbookLanding from './components/landingPage.jsx'
 import RegisterPage from './components/register.jsx'
@@ -14,7 +14,7 @@ function App() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [divisions, setDivisions] = useState([])
-  const [division, setDivision] = useState({ name: '', day: 'Monday' })
+  const [division, setDivision] = useState({ name: '', day: '', exercises: [] })
   const [exercises, setExercises] = useState({ name: '', series: '', topset_weight: '', topset_reps: '', divisionId: '' })
 
   const pages = {
@@ -24,11 +24,11 @@ function App() {
 
     2: <LoginPage email={email} password={password} setPassword={setPassword} setEmail={setEmail} setPage={setPage} />,
 
-    3: <Dashboard division={division} divisions={divisions} setDivisions={setDivisions} setDivision={setDivision} exercises={exercises} setExercises={setExercises} setPage={setPage} />,
+    3: <Dashboard division={division} divisions={divisions} setDivisions={setDivisions} setDivision={setDivision} setPage={setPage} />,
 
     4: <DivisionBuilder division={division} divisions={divisions} setDivisions={setDivisions} setDivision={setDivision} exercises={exercises} setExercises={setExercises} setPage={setPage} />,
 
-    5: <ActiveWorkout />,
+    5: <ActiveWorkout division={division} divisions={divisions} setDivisions={setDivisions} setDivision={setDivision} setPage={setPage} />,
   }
 
   return (

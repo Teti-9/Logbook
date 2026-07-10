@@ -4,7 +4,7 @@ import DivisionsService from '../services/divisionService.js'
 import capitalizeEachWord from '../utils/capitalize.js'
 
 const Dashboard = (props) => {
-    const { division, exercises, divisions, setDivision, setDivisions, setExercises, setPage } = props
+    const { division, divisions, setDivision, setDivisions, setPage } = props
 
     var today = []
     var nottoday = []
@@ -17,6 +17,10 @@ const Dashboard = (props) => {
 
         if (response?.success) {
             setDivisions(response.data || [])
+        }
+
+        if (response?.message === 'Expired token.' || response?.message === 'Invalid token.') {
+            setPage(2)
         }
     }
 
@@ -54,6 +58,7 @@ const Dashboard = (props) => {
         }
     })
 
+
     return (
         <div className="min-h-screen bg-slate-50 pb-24 font-sans text-slate-900">
 
@@ -86,7 +91,16 @@ const Dashboard = (props) => {
                                 <p className="text-slate-400 font-medium mb-8">
                                     • {today[0].exercises.length} Exercises
                                 </p>
-                                <button className="w-full sm:w-auto bg-indigo-600 text-white px-8 py-4 rounded-xl text-lg font-bold hover:bg-indigo-500 transition shadow-lg shadow-indigo-500/30 flex items-center justify-center space-x-2">
+                                <button
+                                    onClick={() => {
+                                        setDivision({
+                                            name: today[0].name,
+                                            day: today[0].day,
+                                            exercises: today[0].exercises,
+                                        })
+                                        setPage(5)
+                                    }}
+                                    className="w-full sm:w-auto bg-indigo-600 text-white px-8 py-4 rounded-xl text-lg font-bold hover:bg-indigo-500 transition shadow-lg shadow-indigo-500/30 flex items-center justify-center space-x-2 cursor-pointer text-indigo-600">
                                     <span>Check Workout</span>
                                     <span className="text-xl">→</span>
                                 </button>

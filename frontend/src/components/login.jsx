@@ -24,7 +24,10 @@ const LoginPage = (props) => {
             setEmail('')
             setPassword('')
             const token = response.data['data']['accessToken'].split(' ')[1]
+            const refreshToken = response.data['data']['refreshToken']
             localStorage.setItem('token', token)
+            localStorage.setItem('refreshToken', refreshToken)
+            setPage(3)
             alert('User successfully logged in.')
         } else {
             alert(response.message)
