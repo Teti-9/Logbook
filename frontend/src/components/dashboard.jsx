@@ -20,7 +20,9 @@ const Dashboard = (props) => {
         }
 
         if (response?.message === 'Expired token.' || response?.message === 'Invalid token.') {
-            setPage(2)
+            localStorage.removeItem('token')
+            localStorage.removeItem('refreshToken')
+            setPage(0)
         }
     }
 
@@ -35,6 +37,7 @@ const Dashboard = (props) => {
     }
 
     const dayDivisions = divisions.map(item => ({
+        id: item.id,
         name: item.name,
         day: item.day,
         exercises: item.exercises
@@ -43,6 +46,7 @@ const Dashboard = (props) => {
     dayDivisions.forEach(item => {
         if (capitalizeEachWord(item.day) === dayName) {
             today.push({
+                id: item.id,
                 name: item.name,
                 day: item.day,
                 exercises: item.exercises,
@@ -51,6 +55,7 @@ const Dashboard = (props) => {
 
         if (capitalizeEachWord(item.day) !== dayName) {
             nottoday.push({
+                id: item.id,
                 name: item.name,
                 day: item.day,
                 exercises: item.exercises,
@@ -108,6 +113,27 @@ const Dashboard = (props) => {
                                     <span>Check Workout</span>
                                     <span className="text-xl">→</span>
                                 </button>
+                            </div>
+                        </div>
+                    </section>
+                )}
+
+                {today.length === 0 && (
+                    <section>
+                        <div className="flex items-center space-x-2 mb-4">
+                            <span className="h-3 w-3 bg-green-500 rounded-full animate-pulse"></span>
+                            <h2 className="text-sm font-bold uppercase tracking-wider text-slate-500">Up Next Today</h2>
+                        </div>
+
+                        <div className="bg-slate-900 rounded-3xl p-6 shadow-xl relative overflow-hidden">
+                            <div className="absolute top-0 right-0 -mt-4 -mr-4 h-32 w-32 bg-indigo-500/20 rounded-full blur-2xl pointer-events-none"></div>
+
+                            <div className="relative z-10">
+                                <div className="text-indigo-400 font-bold text-sm mb-2 uppercase tracking-wide">{dayName}</div>
+                                <h3 className="text-3xl font-black text-white mb-2">{'Rest Day'}</h3>
+                                <p className="text-slate-400 font-medium mb-8">
+                                    • {'0'} Exercises
+                                </p>
                             </div>
                         </div>
                     </section>

@@ -1,9 +1,48 @@
 import React from 'react'
 import capitalizeEachWord from '../utils/capitalize.js'
+import logbookService from '../services/logbookService.js'
 
 const ActiveWorkout = (props) => {
-    const { division, setDivision, setPage } = props
+    const { logbook, division, setLogbook, setDivision, setPage } = props
     const exercises = division?.exercises ?? []
+
+    const handleLogChange = (exerciseId, field, value) => {
+        setLogbook((current) => ({
+            ...current,
+            [exerciseId]: {
+                ...current[exerciseId],
+                [field]: value
+            }
+        }))
+    }
+
+    async function createLogbook(e, id) {
+
+        e.preventDefault()
+
+        try {
+            const data = {
+                exerciseId: Number(id),
+                topset_weight: Number(logbook[id].topset_weight),
+                topset_reps: Number(logbook[id].topset_reps),
+                backoff_weight: Number(logbook[id].backoff_weight),
+                backoff_reps: Number(logbook[id].backoff_reps)
+            }
+
+            const response = await logbookService('POST', data)
+
+            if (response?.success) {
+                alert('Logbook successfully created.')
+            } else {
+                alert(response?.message)
+            }
+
+        } catch (error) {
+            if (error.message.startsWith('Cannot read properties of undefined')) {
+                alert('Not all fields are filled, try again.')
+            }
+        }
+    }
 
     return (
         <div className="min-h-screen bg-slate-50 pb-24 font-sans">
@@ -38,7 +77,6 @@ const ActiveWorkout = (props) => {
                             </div>
 
                             <div className="space-y-4">
-
                                 <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
                                     <div className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Top Set</div>
                                     <div className="grid grid-cols-2 gap-4">
@@ -46,8 +84,9 @@ const ActiveWorkout = (props) => {
                                             <label className="block text-xs font-bold text-slate-700 mb-1">Weight</label>
                                             <input
                                                 type="number"
-                                                placeholder='0'
-                                                // value={exercise.topset_weight}
+                                                placeholder={exercise.topset_weight}
+                                                value={logbook[exercise.id]?.topset_weight ?? ''}
+                                                onChange={(e) => handleLogChange(exercise.id, 'topset_weight', e.target.value)}
                                                 className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-lg font-bold text-slate-900 focus:ring-2 focus:ring-indigo-500 outline-none transition"
                                             />
                                         </div>
@@ -55,8 +94,9 @@ const ActiveWorkout = (props) => {
                                             <label className="block text-xs font-bold text-slate-700 mb-1">Reps</label>
                                             <input
                                                 type="number"
-                                                placeholder='0'
-                                                // value={exercise.topset_reps}
+                                                placeholder={exercise.topset_reps}
+                                                value={logbook[exercise.id]?.topset_reps ?? ''}
+                                                onChange={(e) => handleLogChange(exercise.id, 'topset_reps', e.target.value)}
                                                 className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-lg font-bold text-slate-900 focus:ring-2 focus:ring-indigo-500 outline-none transition"
                                             />
                                         </div>
@@ -70,8 +110,9 @@ const ActiveWorkout = (props) => {
                                             <label className="block text-xs font-bold text-slate-700 mb-1">Weight</label>
                                             <input
                                                 type="number"
-                                                placeholder='0'
-                                                // value={exercise.backoff_weight}
+                                                placeholder={exercise.backoff_weight ?? '0'}
+                                                value={logbook[exercise.id]?.backoff_weight ?? ''}
+                                                onChange={(e) => handleLogChange(exercise.id, 'backoff_weight', e.target.value)}
                                                 className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-lg font-bold text-slate-900 focus:ring-2 focus:ring-indigo-500 outline-none transition"
                                             />
                                         </div>
@@ -79,8 +120,9 @@ const ActiveWorkout = (props) => {
                                             <label className="block text-xs font-bold text-slate-700 mb-1">Reps</label>
                                             <input
                                                 type="number"
-                                                placeholder='0'
-                                                // value={exercise.backoff_reps}
+                                                placeholder={exercise.backoff_reps ?? '0'}
+                                                value={logbook[exercise.id]?.backoff_reps ?? ''}
+                                                onChange={(e) => handleLogChange(exercise.id, 'backoff_reps', e.target.value)}
                                                 className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-lg font-bold text-slate-900 focus:ring-2 focus:ring-indigo-500 outline-none transition"
                                             />
                                         </div>
@@ -88,6 +130,13 @@ const ActiveWorkout = (props) => {
                                 </div>
 
                             </div>
+
+                            <button
+                                onClick={(e) => { createLogbook(e, exercise.id) }}
+                                className="mt-6 w-full bg-indigo-50 text-indigo-700 font-extrabold py-4 px-6 rounded-xl hover:bg-indigo-100 transition active:scale-95 border border-indigo-100 cursor-pointer text-indigo-600"
+                            >
+                                Save {capitalizeEachWord(exercise.name)} Log
+                            </button>
 
                         </div>
                     ))
@@ -97,14 +146,6 @@ const ActiveWorkout = (props) => {
                     </div>
                 )}
             </main>
-
-            <div className="fixed bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-slate-50 via-slate-50 to-transparent pt-12">
-                <button
-                    className="w-full max-w-2xl mx-auto flex justify-center items-center py-4 px-6 rounded-2xl shadow-xl shadow-indigo-200 text-lg font-bold text-white bg-indigo-600 hover:bg-indigo-700 active:scale-95 transition transform"
-                >
-                    Finish & Sync Workout
-                </button>
-            </div>
         </div>
     )
 }

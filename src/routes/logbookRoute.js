@@ -44,6 +44,14 @@ const LogbookRouter = (logbookService) => {
             backoff_reps: "number",
         }
 
+        if (!req.body.backoff_weight) {
+            req.body.backoff_weight = 0
+        }
+
+        if (!req.body.backoff_reps) {
+            req.body.backoff_reps = 0
+        }
+
         const result = validateFields(req.body, fieldConfig)
 
         if (!result.success) {

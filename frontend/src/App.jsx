@@ -15,6 +15,7 @@ function App() {
   const [password, setPassword] = useState('')
   const [divisions, setDivisions] = useState([])
   const [division, setDivision] = useState({ name: '', day: '', exercises: [] })
+  const [logbook, setLogbook] = useState({ exerciseId: '', topset_weight: '', topset_reps: '', backoff_weight: '', backoff_reps: '' })
   const [exercises, setExercises] = useState({ name: '', series: '', topset_weight: '', topset_reps: '', divisionId: '' })
 
   const pages = {
@@ -28,7 +29,7 @@ function App() {
 
     4: <DivisionBuilder division={division} divisions={divisions} setDivisions={setDivisions} setDivision={setDivision} exercises={exercises} setExercises={setExercises} setPage={setPage} />,
 
-    5: <ActiveWorkout division={division} divisions={divisions} setDivisions={setDivisions} setDivision={setDivision} setPage={setPage} />,
+    5: <ActiveWorkout logbook={logbook} division={division} divisions={divisions} setLogbook={setLogbook} setDivisions={setDivisions} setDivision={setDivision} setPage={setPage} />,
   }
 
   return (
