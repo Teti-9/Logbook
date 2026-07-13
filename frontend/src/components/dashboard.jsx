@@ -147,6 +147,11 @@ const Dashboard = (props) => {
                             className="text-indigo-600 font-bold text-sm hover:text-indigo-500 transition cursor-pointer text-indigo-600">
                             + Add Data
                         </button>
+                        <button
+                            onClick={() => setPage(6)}
+                            className="text-indigo-600 font-bold text-sm hover:text-indigo-500 transition cursor-pointer text-indigo-600">
+                            + Sync Logbooks
+                        </button>
                     </div>
 
                     <div className="grid sm:grid-cols-2 gap-5">

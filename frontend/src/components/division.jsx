@@ -35,6 +35,10 @@ const DivisionBuilder = (props) => {
             day: division.day
         }
 
+        if (!division.day) {
+            data.day = 'Monday'
+        }
+
         const response = await DivisionsService('POST', data)
 
         if (response?.success) {
@@ -49,11 +53,6 @@ const DivisionBuilder = (props) => {
     async function createExercise(e) {
 
         e.preventDefault()
-
-        if (!exercises.divisionId) {
-            alert('Please select a division first.')
-            return
-        }
 
         const data = {
             name: exercises.name,
@@ -104,7 +103,7 @@ const DivisionBuilder = (props) => {
                         <div>
                             <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Target Day</label>
                             <select
-                                value={division.day || 'Monday'}
+                                value={division.day || ''}
                                 onChange={(e) => setDivision((current) => ({ ...current, day: e.target.value }))}
                                 className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-lg font-bold text-slate-900 focus:ring-2 focus:ring-indigo-500 outline-none transition appearance-none cursor-pointer"
                             >
@@ -150,7 +149,7 @@ const DivisionBuilder = (props) => {
                             <label className="block text-xs font-bold text-slate-500 mb-1">Top Set Weight</label>
                             <input
                                 type="number"
-                                placeholder="50"
+                                placeholder="kg"
                                 value={exercises.topset_weight}
                                 onChange={(e) => setExercises((current) => ({ ...current, topset_weight: e.target.value }))}
                                 className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-3 text-center text-lg font-bold text-slate-900 focus:ring-2 focus:ring-indigo-500 outline-none transition"

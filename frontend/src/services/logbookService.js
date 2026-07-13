@@ -6,7 +6,7 @@ export default async function logbookService(method, body) {
 
     if (method === 'GET') {
         try {
-            const response = await fetch(DIVISION_API, {
+            const response = await fetch(LOGBOOK_API, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -14,8 +14,8 @@ export default async function logbookService(method, body) {
                 },
             })
             if (response.ok) {
-                const payload = await response.json()
-                return { success: true, data: payload.data }
+                const data = await response.json()
+                return { success: true, data: data }
             } else {
                 const errorData = await response.json()
                 let errorMessage = errorData.data

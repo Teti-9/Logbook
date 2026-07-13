@@ -5,7 +5,15 @@ export default class LogbookRepo {
 
     async findAll(where) {
         return this.prisma.logbook.findMany({
-            where
+            where,
+            include: {
+                exercise: {
+                    select: {
+                        id: true,
+                        name: true,
+                    }
+                }
+            },
         })
     }
 
