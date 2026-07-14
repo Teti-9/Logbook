@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react'
 import logbookService from '../services/logbookService.js'
+import syncLogbookService from '../services/syncLogbookService.js'
 import exercisesService from '../services/exercisesService.js'
 import capitalizeEachWord from '../utils/capitalize.js'
 import Day from '../utils/day.js'
 
 const SyncCenter = (props) => {
-    const { pendingLogs, setPendingLogs, syncState, setSyncState, setPage } = props
+    const { logs, setLogs, pendingLogs, setPendingLogs, syncState, setSyncState, setPage } = props
 
     async function loadLogbooks() {
         const response = await logbookService('GET', '')
@@ -25,21 +26,44 @@ const SyncCenter = (props) => {
         await loadLogbooks()
     }
 
-    // const handleSyncAll = () => {
-    //     if (pendingLogs.length === 0) return
+    async function syncLogbook(e) {
 
-    //     setSyncState('syncing')
+        e.preventDefault()
 
-    //     // Simulate an API call taking 2 seconds
-    //     setTimeout(() => {
-    //         console.log('Sending to endpoint:', pendingLogs.map(log => log.id))
-    //         setPendingLogs([])
-    //         setSyncState('success')
+        setSyncState('syncing')
 
-    //         // Reset back to idle after showing the success message
-    //         setTimeout(() => setSyncState('idle'), 3000)
-    //     }, 2000)
-    // }
+        setTimeout(async () => {
+
+            const data = {
+                logbooks: pendingLogs.map(log => log.id)
+            }
+
+            const response = await syncLogbookService(data)
+
+            if (response?.success) {
+                setPendingLogs([])
+                setSyncState('success')
+            } else {
+                alert(response?.message)
+            }
+
+            setTimeout(() => setSyncState('idle'), 3000)
+        }, 2000)
+    }
+
+    async function deleteLogbook(e, id) {
+
+        e.preventDefault()
+
+        const response = await logbookService('DELETE', id)
+
+        if (response?.success) {
+            setPendingLogs(prev => prev.filter(log => log.id !== id))
+            alert('Logbook successfully deleted.')
+        } else {
+            alert(response?.message)
+        }
+    }
 
     return (
         <div className="min-h-screen bg-slate-50 pb-32 font-sans text-slate-900">
@@ -87,13 +111,13 @@ const SyncCenter = (props) => {
                         {pendingLogs.map((log) => (
                             <div key={log.id} className="bg-white p-5 rounded-3xl shadow-sm border border-slate-200 relative group">
 
-                                {/* <button
-                                    onClick={() => console.log()}
-                                    className="absolute top-4 right-4 text-slate-300 hover:text-red-500 transition"
+                                <button
+                                    onClick={(e) => deleteLogbook(e, log.id)}
+                                    className="absolute top-4 right-4 text-slate-300 hover:text-red-500 transition cursor-pointer text-indigo-600"
                                     title="Discard Log"
                                 >
                                     ✕
-                                </button> */}
+                                </button>
 
                                 <div className="mb-3 pr-8">
                                     <div className="flex items-center space-x-2 mb-1">
@@ -123,9 +147,9 @@ const SyncCenter = (props) => {
             {pendingLogs.length > 0 && syncState !== 'success' && (
                 <div className="fixed bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-slate-50 via-slate-50 to-transparent pt-12 z-20">
                     <button
-                        // onClick={handleSyncAll}
+                        onClick={syncLogbook}
                         disabled={syncState === 'syncing'}
-                        className={`w-full max-w-2xl mx-auto flex justify-center items-center py-4 px-6 rounded-2xl shadow-xl text-lg font-bold text-white transition transform ${syncState === 'syncing'
+                        className={`w-full max-w-2xl mx-auto flex justify-center items-center py-4 px-6 rounded-2xl shadow-xl text-lg font-bold text-white transition transform cursor-pointer text-indigo-600 ${syncState === 'syncing'
                             ? 'bg-indigo-400 cursor-not-allowed shadow-indigo-200'
                             : 'bg-indigo-600 hover:bg-indigo-700 active:scale-95 shadow-indigo-200'
                             }`}
@@ -139,7 +163,7 @@ const SyncCenter = (props) => {
                                 <span>Syncing Data...</span>
                             </span>
                         ) : (
-                            <span>Sync {pendingLogs.length} Workouts →</span>
+                            <span>Sync {pendingLogs.length} Workout(s) →</span>
                         )}
                     </button>
                 </div>

@@ -19,6 +19,7 @@ function App() {
   const [division, setDivision] = useState({ name: '', day: '', exercises: [] })
   const [logbook, setLogbook] = useState({ exerciseId: '', topset_weight: '', topset_reps: '', backoff_weight: '', backoff_reps: '' })
   const [pendingLogs, setPendingLogs] = useState([])
+  const [logs, setLogs] = useState([])
   const [exercises, setExercises] = useState({ name: '', series: '', topset_weight: '', topset_reps: '', divisionId: '' })
 
   const pages = {
@@ -34,7 +35,7 @@ function App() {
 
     5: <ActiveWorkout logbook={logbook} division={division} divisions={divisions} setLogbook={setLogbook} setDivisions={setDivisions} setDivision={setDivision} setPage={setPage} />,
 
-    6: <SyncCenter pendingLogs={pendingLogs} syncState={syncState} setPendingLogs={setPendingLogs} setSyncState={setSyncState} setPage={setPage} />
+    6: <SyncCenter logs={logs} setLogs={setLogs} pendingLogs={pendingLogs} syncState={syncState} setPendingLogs={setPendingLogs} setSyncState={setSyncState} setPage={setPage} />
   }
 
   return (

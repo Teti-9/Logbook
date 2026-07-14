@@ -9,10 +9,18 @@ async function sincLogbooks(userId, exerciseId, prisma) {
         throw new Error(zodError(id.error))
     }
 
+    const exerciseAssociated = await prisma.logbook.findFirst({
+        where: {
+            id: exerciseId
+        }
+    })
+
+    const associatedId = exerciseAssociated.exerciseId
+
     const exerciseExists = await prisma.exercises.findFirst({
         where: {
             userId: userId,
-            id: exerciseId,
+            id: associatedId,
             isDeleted: false
         }
     })
@@ -24,7 +32,7 @@ async function sincLogbooks(userId, exerciseId, prisma) {
     const logbookExists = await prisma.logbook.findFirst({
         where: {
             userId: userId,
-            exerciseId,
+            id: exerciseId,
             sinc: false,
             isDeleted: false
         }
@@ -43,7 +51,7 @@ async function sincLogbooks(userId, exerciseId, prisma) {
 
     const historical_data = {
         userId: userId,
-        exerciseId: exerciseId,
+        exerciseId: associatedId,
         name: exerciseExists.name,
         series: exerciseExists.series,
         previous_topset_weight: exerciseExists.topset_weight,
@@ -54,7 +62,7 @@ async function sincLogbooks(userId, exerciseId, prisma) {
 
     await prisma.$transaction([
         prisma.historical.create({ data: historical_data }),
-        prisma.exercises.update({ where: { userId: userId, id: exerciseId }, data }),
+        prisma.exercises.update({ where: { userId: userId, id: associatedId }, data }),
         prisma.logbook.update({ where: { userId: userId, id: logbookExists.id }, data: { sinc: true } })
     ])
 

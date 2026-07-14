@@ -40,8 +40,8 @@ const LogbookRouter = (logbookService) => {
             exerciseId: "number",
             topset_weight: "number",
             topset_reps: "number",
-            backoff_weight: "number",
-            backoff_reps: "number",
+            backoff_weight: "number0",
+            backoff_reps: "number0",
         }
 
         if (!req.body.backoff_weight) {
