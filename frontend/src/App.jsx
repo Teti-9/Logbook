@@ -7,6 +7,7 @@ import ActiveWorkout from './components/activeworkout.jsx'
 import DivisionBuilder from './components/division.jsx'
 import Dashboard from './components/dashboard.jsx'
 import SyncCenter from './components/sync.jsx'
+import HistoryPage from './components/history.jsx'
 import './App.css'
 
 function App() {
@@ -21,6 +22,7 @@ function App() {
   const [pendingLogs, setPendingLogs] = useState([])
   const [logs, setLogs] = useState([])
   const [exercises, setExercises] = useState({ name: '', series: '', topset_weight: '', topset_reps: '', divisionId: '' })
+  const [historical, setHistorical] = useState([])
 
   const pages = {
     0: <LogbookLanding setPage={setPage} />,
@@ -35,7 +37,9 @@ function App() {
 
     5: <ActiveWorkout logbook={logbook} division={division} divisions={divisions} setLogbook={setLogbook} setDivisions={setDivisions} setDivision={setDivision} setPage={setPage} />,
 
-    6: <SyncCenter logs={logs} setLogs={setLogs} pendingLogs={pendingLogs} syncState={syncState} setPendingLogs={setPendingLogs} setSyncState={setSyncState} setPage={setPage} />
+    6: <SyncCenter logs={logs} setLogs={setLogs} pendingLogs={pendingLogs} syncState={syncState} setPendingLogs={setPendingLogs} setSyncState={setSyncState} setPage={setPage} />,
+
+    7: <HistoryPage historical={historical} setHistorical={setHistorical} setPage={setPage} />
   }
 
   return (

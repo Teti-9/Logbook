@@ -5,7 +5,19 @@ export default class HistoricalRepo {
 
     async findAll(where) {
         return this.prisma.historical.findMany({
-            where
+            where,
+            include: {
+                exercise: {
+                    select: {
+                        name: true,
+                        topset_weight: true,
+                        topset_reps: true,
+                        backoff_weight: true,
+                        backoff_reps: true,
+                        updatedAt: true
+                    }
+                }
+            },
         })
     }
 

@@ -5,6 +5,29 @@ export default async function ExercisesService(method, body) {
 
     const token = localStorage.getItem('token')
 
+    if (method === 'GET') {
+        try {
+            const response = await fetch(EXERCISES_API, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+            })
+            if (response.ok) {
+                const payload = await response.json()
+                return { success: true, data: payload.data }
+            } else {
+                const errorData = await response.json()
+                let errorMessage = errorData.data
+
+                return { success: false, message: errorMessage }
+            }
+        } catch (error) {
+            console.error('Error:', error)
+        }
+    }
+
     if (method === 'GETid') {
         try {
             const response = await fetch(EXERCISES_API_ID, {
