@@ -32,8 +32,18 @@ const ActiveWorkout = (props) => {
             const response = await logbookService('POST', data)
 
             if (response?.success) {
+                setLogbook((current) => {
+                    const updated = { ...current }
+                    delete updated[id]
+                    return updated
+                })
                 alert('Logbook successfully created.')
             } else {
+                setLogbook((current) => {
+                    const updated = { ...current }
+                    delete updated[id]
+                    return updated
+                })
                 alert(response?.message)
             }
 

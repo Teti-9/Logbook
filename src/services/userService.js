@@ -17,7 +17,7 @@ export default class UserService {
             password: hashedPassword
         }
 
-        await this.userRepo.create(user)
+        const createdUser = await this.userRepo.create(user)
 
         return { message: 'User successfully created.' }
     }

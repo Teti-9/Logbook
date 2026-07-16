@@ -41,6 +41,8 @@ const ExercisesRouter = (exercisesService) => {
             series: "number",
             topset_weight: "number",
             topset_reps: "number",
+            backoff_weight: "number0",
+            backoff_reps: "number0",
             divisionId: "number",
         }
 

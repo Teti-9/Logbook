@@ -46,7 +46,7 @@ const HistoryPage = (props) => {
                     <div className="space-y-4">
                         {historical.length > 0 ? (
                             historical.map((ex, index) => (
-                                <div key={ex.id} className="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 hover:shadow-md transition cursor-pointer flex items-center justify-between group">
+                                <div key={ex.id} className="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 hover:shadow-md transition flex items-center justify-between group">
 
                                     <div className="flex items-center space-x-10">
                                         <div className="h-12 w-12 bg-slate-50 rounded-2xl flex flex-col items-center justify-center border border-slate-100 group-hover:border-indigo-100 group-hover:bg-indigo-50 transition">
@@ -58,12 +58,12 @@ const HistoryPage = (props) => {
                                                 {capitalizeEachWord(ex.name)}
                                             </h3>
                                             <div className="flex items-center text-xs font-medium text-slate-500 space-x-3">
-                                                <span>Previous Top Set : {ex.previous_topset_weight} x {ex.previous_topset_reps}</span>
                                                 <span>Updated Top Set : {ex.exercise.topset_weight} x {ex.exercise.topset_reps}</span>
+                                                <span>Previous Top Set : {ex.previous_topset_weight} x {ex.previous_topset_reps}</span>
                                             </div>
                                             <div className="flex items-center text-xs font-medium text-slate-500 space-x-3">
-                                                <span>Previous Back-off Set : {ex.previous_backoff_weight || 0} x {ex.previous_backoff_reps || 0}</span>
                                                 <span>Updated Back-off Set : {ex.exercise.backoff_weight || 0} x {ex.exercise.backoff_reps || 0}</span>
+                                                <span>Previous Back-off Set : {ex.previous_backoff_weight || 0} x {ex.previous_backoff_reps || 0}</span>
                                             </div>
                                         </div>
                                     </div>

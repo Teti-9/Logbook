@@ -59,13 +59,15 @@ const DivisionBuilder = (props) => {
             series: Number(exercises.series),
             topset_weight: Number(exercises.topset_weight),
             topset_reps: Number(exercises.topset_reps),
+            backoff_weight: Number(exercises.backoff_weight),
+            backoff_reps: Number(exercises.backoff_reps),
             divisionId: Number(exercises.divisionId)
         }
 
         const response = await ExercisesService('POST', data)
 
         if (response?.success) {
-            setExercises({ name: '', series: '', topset_weight: '', topset_reps: '', divisionId: '' })
+            setExercises({ name: '', series: '', topset_weight: '', topset_reps: '', backoff_weight: '', backoff_reps: '', divisionId: '' })
             alert('Exercise successfully created.')
         } else {
             alert(response?.message)
@@ -162,6 +164,28 @@ const DivisionBuilder = (props) => {
                                 placeholder="kg"
                                 value={exercises.topset_reps}
                                 onChange={(e) => setExercises((current) => ({ ...current, topset_reps: e.target.value }))}
+                                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-3 text-center text-lg font-bold text-slate-900 focus:ring-2 focus:ring-indigo-500 outline-none transition"
+                            />
+                        </div>
+                        <div>
+                        </div>
+                        <div>
+                            <label className="block text-xs font-bold text-slate-500 mb-1">Back-off Weight</label>
+                            <input
+                                type="number"
+                                placeholder="kg"
+                                value={exercises.backoff_weight}
+                                onChange={(e) => setExercises((current) => ({ ...current, backoff_weight: e.target.value }))}
+                                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-3 text-center text-lg font-bold text-slate-900 focus:ring-2 focus:ring-indigo-500 outline-none transition"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs font-bold text-slate-500 mb-1">Back-off Reps</label>
+                            <input
+                                type="number"
+                                placeholder="kg"
+                                value={exercises.backoff_reps}
+                                onChange={(e) => setExercises((current) => ({ ...current, backoff_reps: e.target.value }))}
                                 className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-3 text-center text-lg font-bold text-slate-900 focus:ring-2 focus:ring-indigo-500 outline-none transition"
                             />
                         </div>

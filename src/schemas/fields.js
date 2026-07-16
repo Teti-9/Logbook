@@ -7,6 +7,7 @@ const FIELD_TYPES = {
     boolean: z.boolean(),
     email: z.string().email(),
     date: z.string().date(),
+    password: z.string().min(4)
 }
 
 function buildSchema(fields) {

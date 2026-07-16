@@ -22,13 +22,14 @@ const Dashboard = (props) => {
         if (response?.message === 'Expired token.' || response?.message === 'Invalid token.') {
             localStorage.removeItem('token')
             localStorage.removeItem('refreshToken')
+            setDivisions([])
             setPage(0)
         }
     }
 
     useEffect(() => {
         loadDivisions()
-    }, [])
+    }, [localStorage.getItem('token')])
 
     async function getDivisions(e) {
         e.preventDefault()
@@ -143,6 +144,11 @@ const Dashboard = (props) => {
                     <div className="flex justify-between items-end mb-6">
                         <h2 className="text-xl font-extrabold text-slate-900">Your Split</h2>
                         <button
+                            onClick={() => setPage(7)}
+                            className="text-indigo-600 font-bold text-sm hover:text-indigo-500 transition cursor-pointer text-indigo-600">
+                            + History
+                        </button>
+                        <button
                             onClick={() => setPage(4)}
                             className="text-indigo-600 font-bold text-sm hover:text-indigo-500 transition cursor-pointer text-indigo-600">
                             + Add Data
@@ -150,7 +156,7 @@ const Dashboard = (props) => {
                         <button
                             onClick={() => setPage(6)}
                             className="text-indigo-600 font-bold text-sm hover:text-indigo-500 transition cursor-pointer text-indigo-600">
-                            + Sync Logbooks
+                            + Synchronize Logbooks
                         </button>
                     </div>
 

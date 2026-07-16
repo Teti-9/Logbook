@@ -25,7 +25,7 @@ const UserRouter = (userService, refreshTokenService) => {
 
     router.post('/registers', async (req, res) => {
 
-        const fieldConfig = { email: "string", password: "string" }
+        const fieldConfig = { email: "email", password: "password" }
 
         const result = validateFields(req.body, fieldConfig)
 

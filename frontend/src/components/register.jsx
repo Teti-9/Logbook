@@ -23,6 +23,7 @@ const RegisterPage = (props) => {
         if (response.success) {
             setEmail('')
             setPassword('')
+            setPage(2)
             alert('User successfully created.')
         } else {
             alert(response.message)

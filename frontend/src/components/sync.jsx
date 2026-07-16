@@ -6,7 +6,7 @@ import capitalizeEachWord from '../utils/capitalize.js'
 import Day from '../utils/day.js'
 
 const SyncCenter = (props) => {
-    const { logs, setLogs, pendingLogs, setPendingLogs, syncState, setSyncState, setPage } = props
+    const { pendingLogs, setPendingLogs, syncState, setSyncState, setPage } = props
 
     async function loadLogbooks() {
         const response = await logbookService('GET', '')

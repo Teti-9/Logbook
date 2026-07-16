@@ -15,9 +15,15 @@ export default async function registerUser(body) {
             return { success: true, data: data }
         } else {
             const errorData = await response.json()
-            let errorMessage = errorData.data
 
-            return { success: false, message: errorMessage }
+            if (errorData.code === 'P2002') {
+                return { success: false, message: 'Email already in use, try again.' }
+
+            } else {
+                let errorMessage = errorData.data
+                return { success: false, message: errorMessage }
+            }
+
         }
     } catch (error) {
         console.error('Error:', error)
