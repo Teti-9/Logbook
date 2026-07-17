@@ -5,13 +5,12 @@ const LogbookLanding = (props) => {
 
     async function userLogged() {
         const token = localStorage.getItem('token')
+        const refreshToken = localStorage.getItem('refreshToken')
 
-        if (!token) {
+        if (!token && !refreshToken) {
             setPage(2)
         } else {
-            if (token) {
-                setPage(3)
-            }
+            setPage(3)
         }
     }
 

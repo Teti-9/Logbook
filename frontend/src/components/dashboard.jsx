@@ -1,10 +1,10 @@
 import React, { useEffect } from 'react'
-import ExercisesService from '../services/exercisesService.js'
 import DivisionsService from '../services/divisionService.js'
 import capitalizeEachWord from '../utils/capitalize.js'
+import { clearSessionTokens, logoutSession } from '../services/auth.js'
 
 const Dashboard = (props) => {
-    const { division, divisions, setDivision, setDivisions, setPage } = props
+    const { divisions, setDivision, setDivisions, setPage } = props
 
     var today = []
     var nottoday = []
@@ -12,30 +12,29 @@ const Dashboard = (props) => {
     const now = new Date()
     const dayName = days[now.getDay()]
 
-    async function loadDivisions() {
-        const response = await DivisionsService('GET', '')
-
-        if (response?.success) {
-            setDivisions(response.data || [])
-        }
-
-        if (response?.message === 'Expired token.' || response?.message === 'Invalid token.') {
-            localStorage.removeItem('token')
-            localStorage.removeItem('refreshToken')
-            setDivisions([])
-            setPage(0)
-        }
-    }
-
     useEffect(() => {
+        async function loadDivisions() {
+            const response = await DivisionsService('GET', '')
+            console.log(response)
+            console.log(response.message)
+
+            if (response?.success) {
+                setDivisions(response.data || [])
+            }
+
+            if (
+                response?.message === 'Expired token.' ||
+                response?.message === 'Invalid token.' ||
+                response?.message === 'Token not included.'
+            ) {
+                clearSessionTokens()
+                setDivisions([])
+                setPage(0)
+            }
+        }
+
         loadDivisions()
-    }, [localStorage.getItem('token')])
-
-    async function getDivisions(e) {
-        e.preventDefault()
-
-        await loadDivisions()
-    }
+    }, [setDivisions, setPage])
 
     const dayDivisions = divisions.map(item => ({
         id: item.id,
@@ -64,6 +63,16 @@ const Dashboard = (props) => {
         }
     })
 
+    async function logoutUser() {
+        const confirmed = window.confirm("Are you sure you want to logout?")
+
+        if (confirmed) {
+            logoutSession()
+            setPage(0)
+            alert('User logged out.')
+        }
+    }
+
 
     return (
         <div className="min-h-screen bg-slate-50 pb-24 font-sans text-slate-900">
@@ -72,7 +81,7 @@ const Dashboard = (props) => {
                 <div className="text-xl font-black uppercase tracking-widest text-slate-900">Logbook</div>
                 <div
                     onClick={() => {
-                        setPage(0)
+                        logoutUser()
                     }}
                     className="h-10 w-10 bg-indigo-100 text-indigo-700 rounded-full flex items-center justify-center font-bold border border-indigo-200 cursor-pointer text-indigo-600">
                     RC
@@ -161,7 +170,7 @@ const Dashboard = (props) => {
                     </div>
 
                     <div className="grid sm:grid-cols-2 gap-5">
-                        {nottoday.map((division, index) => (
+                        {nottoday.map((division) => (
                             <div key={division.id} className="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 hover:shadow-md transition group">
                                 <div className="flex justify-between items-start mb-4">
                                     <div>

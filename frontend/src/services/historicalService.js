@@ -1,17 +1,13 @@
-export default async function HistoricalService(method, body) {
+import { authFetch } from './auth.js'
+
+export default async function HistoricalService(method) {
 
     const HISTORICAL_API = 'http://localhost:8000/api/historicals'
 
-    const token = localStorage.getItem('token')
-
     if (method === 'GET') {
         try {
-            const response = await fetch(HISTORICAL_API, {
+            const response = await authFetch(HISTORICAL_API, {
                 method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
             })
             if (response.ok) {
                 const payload = await response.json()

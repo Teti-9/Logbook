@@ -1,16 +1,12 @@
+import { authFetch } from './auth.js'
+
 export default async function syncLogbookService(body) {
 
     const LOGBOOK_API = 'http://localhost:8000/api/sinclogbooks'
 
-    const token = localStorage.getItem('token')
-
     try {
-        const response = await fetch(LOGBOOK_API, {
+        const response = await authFetch(LOGBOOK_API, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
             body: JSON.stringify(body),
         })
         if (response.ok) {

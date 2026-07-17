@@ -1,18 +1,14 @@
+import { authFetch } from './auth.js'
+
 export default async function ExercisesService(method, body) {
 
     const EXERCISES_API = 'http://localhost:8000/api/exercises'
     const EXERCISES_API_ID = `http://localhost:8000/api/exercises/${body}`
 
-    const token = localStorage.getItem('token')
-
     if (method === 'GET') {
         try {
-            const response = await fetch(EXERCISES_API, {
+            const response = await authFetch(EXERCISES_API, {
                 method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
             })
             if (response.ok) {
                 const payload = await response.json()
@@ -30,12 +26,8 @@ export default async function ExercisesService(method, body) {
 
     if (method === 'GETid') {
         try {
-            const response = await fetch(EXERCISES_API_ID, {
+            const response = await authFetch(EXERCISES_API_ID, {
                 method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
             })
             if (response.ok) {
                 const data = await response.json()
@@ -53,12 +45,8 @@ export default async function ExercisesService(method, body) {
 
     if (method === 'POST') {
         try {
-            const response = await fetch(EXERCISES_API, {
+            const response = await authFetch(EXERCISES_API, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
                 body: JSON.stringify(body),
             })
             if (response.ok) {
