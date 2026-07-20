@@ -15,8 +15,6 @@ const Dashboard = (props) => {
     useEffect(() => {
         async function loadDivisions() {
             const response = await DivisionsService('GET', '')
-            console.log(response)
-            console.log(response.message)
 
             if (response?.success) {
                 setDivisions(response.data || [])
