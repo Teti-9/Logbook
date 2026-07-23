@@ -3,9 +3,18 @@ export default class HistoricalRepo {
         this.prisma = prisma
     }
 
-    async findAll(where) {
+    async findAll(userId, isDeleted, search) {
         return this.prisma.historical.findMany({
-            where,
+            where: {
+                userId,
+                isDeleted,
+                ...(search && {
+                    name: {
+                        contains: search,
+                        mode: 'insensitive'
+                    }
+                })
+            },
             include: {
                 exercise: {
                     select: {
@@ -17,6 +26,9 @@ export default class HistoricalRepo {
                         updatedAt: true
                     }
                 }
+            },
+            orderBy: {
+                updatedAt: 'desc'
             },
         })
     }

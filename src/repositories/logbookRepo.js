@@ -14,6 +14,9 @@ export default class LogbookRepo {
                     }
                 }
             },
+            orderBy: {
+                createdAt: 'desc'
+            },
         })
     }
 

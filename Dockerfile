@@ -11,6 +11,6 @@ COPY . .
 
 RUN npx prisma generate
 
-EXPOSE 8000
+RUN npm install -g nodemon
 
-CMD ["sh", "-c", "npx prisma migrate deploy && node ./src/server.js"]
+EXPOSE 8000

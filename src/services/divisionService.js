@@ -3,20 +3,32 @@ export default class DivisionService {
         this.divisionRepo = divisionRepo
     }
 
-    async getDivisions(userId) {
+    async getDivisions(userId, { page = 1, limit = 10 } = {}) {
 
-        const divisions = await this.divisionRepo.findAll({
+        const { divisions, total } = await this.divisionRepo.findAll({
             userId: userId,
             isDeleted: false
-        })
+        }, {
+            page,
+            limit
+        }
+        )
 
         if (!divisions || divisions.length === 0) {
-            const error = new Error('No division found.')
+            const error = new Error('No divisions found.')
             error.statusCode = 404
             throw error
         }
 
-        return divisions
+        return {
+            divisions,
+            pagination: {
+                total,
+                page: Number(page || 1),
+                limit: Number(limit || 10),
+                totalPages: Math.ceil(total / (Number(limit) || 10))
+            }
+        }
     }
 
     async getDivisionById(userId, id) {

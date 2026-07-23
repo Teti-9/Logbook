@@ -8,7 +8,9 @@ const DivisionRouter = (divisionService) => {
 
     router.get('/divisions', async (req, res) => {
 
-        const result = await divisionService.getDivisions(req.user.id)
+        const { page, limit } = req.query
+
+        const result = await divisionService.getDivisions(req.user.id, { page, limit })
 
         return res.status(200).json({
             success: true,

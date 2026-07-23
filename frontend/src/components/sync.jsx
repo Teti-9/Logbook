@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import logbookService from '../services/logbookService.js'
 import syncLogbookService from '../services/syncLogbookService.js'
-import exercisesService from '../services/exercisesService.js'
 import capitalizeEachWord from '../utils/capitalize.js'
 import Day from '../utils/day.js'
 

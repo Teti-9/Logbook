@@ -22,7 +22,6 @@ services:
   app:
     build: .
     container_name: app
-    command: sh -c "npx prisma migrate deploy && npm run dev"
     restart: always
     environment:
       DATABASE_URL: ${DATABASE_URL}
@@ -35,6 +34,7 @@ services:
     volumes:
       - .:/app
       - /app/node_modules
+    command: sh -c "npx prisma migrate deploy && npm run dev"
 
   frontend:
     build:

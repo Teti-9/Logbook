@@ -3,10 +3,25 @@ export default class ExercisesRepo {
         this.prisma = prisma
     }
 
-    async findAll(where) {
-        return this.prisma.exercises.findMany({
-            where
-        })
+    async findAll({ userId, isDeleted }, { page = 1, limit = 10 } = {}) {
+        const skip = (page - 1) * limit
+
+        const [exercises, total] = await Promise.all([
+            this.prisma.exercises.findMany({
+                where: {
+                    userId,
+                    isDeleted
+                },
+                orderBy: {
+                    id: 'asc'
+                },
+                skip,
+                take: Number(limit)
+            }),
+            this.prisma.exercises.count({ where: { userId, isDeleted } })
+        ])
+
+        return { exercises, total }
     }
 
     async findById(where) {

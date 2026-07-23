@@ -26,40 +26,32 @@ Fluxo principal:
 - Node.js (ES Modules)
 - Vite + React.js
 - Express 5
-- Prisma + SQLITE
+- Prisma
 
 ## Requisitos
 
 - Node.js 20+ (recomendado)
 - NPM 10+
+- Docker
 
-## Instalação (local)
+## Instalação (Docker)
 
 1. Crie o arquivo `.env` na raiz:
 
 ```env
-DATABASE_URL="file:./dev.db"
+DATABASE_URL='postgresql://user:password@database:5432/logbook'
+POSTGRES_USER="user"
+POSTGRES_PASS="password"
+POSTGRES_DB="logbook"
 JWT_SECRET="sua_chave_jwt"
 ```
 
-2. Instale as dependências:
+2. Suba os containers:
 
 ```bash
-npm install
-cd frontend
-npm install
-cd ..
-```
-
-3. Inicie a API e o front-end na pasta raiz:
-
-```bash
-Terminal 1:
-npm run dev
-
-Terminal 2:
-cd frontend
-npm run dev
+docker-compose up database --build
+docker-compose up app --build
+docker-compose up frontend --build
 ```
 
 4. Acesse:
@@ -71,6 +63,8 @@ npm run dev
 
 ```text
 logbook/
+|- .github/workflows
+|  |- ci.yml
 |- src/
 |  |- config/
 |  |  |- database.js
@@ -103,6 +97,8 @@ logbook/
 |  |  |- token.js
 |  |  |- zoderror.js
 |  |- server.js
+|- docker-compose.yml
+|- Dockerfile
 |- prisma.config.ts
 |- frontend/
 |  |- src/
@@ -129,7 +125,8 @@ logbook/
 |  |  |- utils/
 |  |  |  |- capitalize.js
 |  |  |  |- day.js
-|  |- App.jsx
+|  |  |- App.jsx
+|  |- Dockerfile
 ```
 
 ## Padrão de resposta

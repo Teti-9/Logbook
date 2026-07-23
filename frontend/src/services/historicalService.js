@@ -1,8 +1,8 @@
 import { authFetch } from './auth.js'
 
-export default async function HistoricalService(method) {
+export default async function HistoricalService(method, search) {
 
-    const HISTORICAL_API = 'http://localhost:8000/api/historicals'
+    const HISTORICAL_API = `http://localhost:8000/api/historicals?search=${encodeURIComponent(search)}`
 
     if (method === 'GET') {
         try {

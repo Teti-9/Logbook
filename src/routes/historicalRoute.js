@@ -8,7 +8,9 @@ const HistoricalRouter = (historicalService) => {
 
     router.get('/historicals', async (req, res) => {
 
-        const result = await historicalService.getHistorical(req.user.id)
+        const { search } = req.query
+
+        const result = await historicalService.getHistorical(req.user.id, search)
 
         return res.status(200).json({
             success: true,

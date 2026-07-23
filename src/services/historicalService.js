@@ -3,12 +3,11 @@ export default class HistoricalService {
         this.historicalRepo = historicalRepo
     }
 
-    async getHistorical(userId) {
+    async getHistorical(userId, search) {
 
-        const historical = await this.historicalRepo.findAll({
-            userId: userId,
-            isDeleted: false
-        })
+        const isDeleted = false
+
+        const historical = await this.historicalRepo.findAll(userId, isDeleted, search)
 
         if (!historical || historical.length === 0) {
             const error = new Error('No historical archives found.')

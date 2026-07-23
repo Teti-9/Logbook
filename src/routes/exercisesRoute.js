@@ -8,7 +8,9 @@ const ExercisesRouter = (exercisesService) => {
 
     router.get('/exercises', async (req, res) => {
 
-        const result = await exercisesService.getExercises(req.user.id)
+        const { page, limit } = req.query
+
+        const result = await exercisesService.getExercises(req.user.id, { page, limit })
 
         return res.status(200).json({
             success: true,

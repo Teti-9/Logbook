@@ -14,6 +14,7 @@ function App() {
 
   const [page, setPage] = useState(0)
   const [syncState, setSyncState] = useState('idle')
+  const [search, setSearch] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [divisions, setDivisions] = useState([])
@@ -38,7 +39,7 @@ function App() {
 
     6: <SyncCenter pendingLogs={pendingLogs} syncState={syncState} setPendingLogs={setPendingLogs} setSyncState={setSyncState} setPage={setPage} />,
 
-    7: <HistoryPage historical={historical} setHistorical={setHistorical} setPage={setPage} />
+    7: <HistoryPage search={search} historical={historical} setSearch={setSearch} setHistorical={setHistorical} setPage={setPage} />
   }
 
   return (
