@@ -1,10 +1,11 @@
 export default async function refreshTokenService(body) {
 
-    const REFRESH_API = 'http://localhost:8000/api/refreshs'
+    const REFRESH_API = 'http://localhost:8000/api/auth/refreshs'
 
     try {
         const response = await fetch(REFRESH_API, {
             method: 'POST',
+            credentials: 'include',
             headers: {
                 'Content-Type': 'application/json',
             },

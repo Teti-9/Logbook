@@ -1,5 +1,6 @@
 import express from "express"
 import cors from "cors"
+import cookieParser from "cookie-parser"
 import errorMiddleware from "./middleware/error.js"
 import authMiddleware from "./middleware/auth.js"
 import { prisma, connectDB } from "./config/database.js"
@@ -53,11 +54,16 @@ const refreshTokenService = new RefreshTokenService(userRepo, refreshTokenRepo)
 const userService = new UserService(userRepo, refreshTokenService)
 const userRouter = UserRouter(userService, refreshTokenService)
 
-app.use(cors())
+app.use(cors({
+    origin: 'http://localhost:5173',
+    credentials: true,
+}));
+
+app.use(cookieParser())
 
 app.use(express.json())
 
-app.use("/api", userRouter)
+app.use("/api/auth", userRouter)
 app.use("/api", authMiddleware, divisionRouter)
 app.use("/api", authMiddleware, exercisesRouter)
 app.use("/api", authMiddleware, logbookRouter)

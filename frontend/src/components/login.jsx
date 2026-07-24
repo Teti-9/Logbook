@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react'
 import loginUser from '../services/loginService.js'
-import { setSessionTokens } from '../services/auth.js'
+import { setSessionToken } from '../services/auth.js'
 
 const LoginPage = (props) => {
     const { email, password, setEmail, setPassword, setPage } = props
@@ -24,10 +24,7 @@ const LoginPage = (props) => {
         if (response.success) {
             setEmail('')
             setPassword('')
-            setSessionTokens({
-                accessToken: response.data['data']['accessToken'],
-                refreshToken: response.data['data']['refreshToken']
-            })
+            setSessionToken(response.data['data']['accessToken'])
             setPage(3)
             alert('User successfully logged in.')
         } else {

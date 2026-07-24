@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react'
 import DivisionsService from '../services/divisionService.js'
 import capitalizeEachWord from '../utils/capitalize.js'
-import { clearSessionTokens, logoutSession } from '../services/auth.js'
+import { clearSessionToken, logoutSession } from '../services/auth.js'
 
 const Dashboard = (props) => {
     const { divisions, setDivision, setDivisions, setPage } = props
@@ -25,7 +25,7 @@ const Dashboard = (props) => {
                 response?.message === 'Invalid token.' ||
                 response?.message === 'Token not included.'
             ) {
-                clearSessionTokens()
+                clearSessionToken()
                 setDivisions([])
                 setPage(0)
             }
@@ -65,7 +65,7 @@ const Dashboard = (props) => {
         const confirmed = window.confirm("Are you sure you want to logout?")
 
         if (confirmed) {
-            logoutSession()
+            await logoutSession()
             setPage(0)
             alert('User logged out.')
         }

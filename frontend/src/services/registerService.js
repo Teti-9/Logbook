@@ -1,6 +1,6 @@
 export default async function registerUser(body) {
 
-    const REGISTER_API = 'http://localhost:8000/api/registers'
+    const REGISTER_API = 'http://localhost:8000/api/auth/registers'
 
     try {
         const response = await fetch(REGISTER_API, {

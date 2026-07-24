@@ -1,10 +1,11 @@
 export default async function loginUser(body) {
 
-    const LOGIN_API = 'http://localhost:8000/api/logins'
+    const LOGIN_API = 'http://localhost:8000/api/auth/logins'
 
     try {
         const response = await fetch(LOGIN_API, {
             method: 'POST',
+            credentials: 'include',
             headers: {
                 'Content-Type': 'application/json',
             },

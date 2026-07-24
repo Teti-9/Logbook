@@ -52,11 +52,15 @@ const UserRouter = (userService, refreshTokenService) => {
             throw new Error(zodError(result.error))
         }
 
-        const logedUser = await userService.loginUser(req.body)
+        const loggedUser = await userService.loginUser(req.body)
+
+        if (loggedUser) {
+            res.cookie('refreshToken', loggedUser.refreshToken, refreshTokenService._cookieOptions())
+        }
 
         return res.status(200).json({
             success: true,
-            data: logedUser
+            data: loggedUser
         })
 
     })
@@ -65,19 +69,23 @@ const UserRouter = (userService, refreshTokenService) => {
 
         const fieldConfig = { refreshToken: "string" }
 
-        const result = validateFields(req.body, fieldConfig)
-
-        if (!result.success) {
-            throw new Error(zodError(result.error))
-        }
-
-        if (!req.body.refreshToken)
+        if (!req.cookies.refreshToken)
             return res.status(401).json({
                 success: false,
                 data: 'Refresh token not supplied.'
             })
 
-        const token = await refreshTokenService.refreshToken(req.body.refreshToken)
+        const result = validateFields({ refreshToken: req.cookies.refreshToken }, fieldConfig)
+
+        if (!result.success) {
+            throw new Error(zodError(result.error))
+        }
+
+        const token = await refreshTokenService.refreshToken(req.cookies.refreshToken)
+
+        if (token) {
+            res.cookie('refreshToken', token.refreshToken, refreshTokenService._cookieOptions())
+        }
 
         return res.status(200).json({
             success: true,
@@ -90,19 +98,23 @@ const UserRouter = (userService, refreshTokenService) => {
 
         const fieldConfig = { refreshToken: "string" }
 
-        const result = validateFields(req.body, fieldConfig)
-
-        if (!result.success) {
-            throw new Error(zodError(result.error))
-        }
-
-        if (!req.body.refreshToken)
+        if (!req.cookies.refreshToken)
             return res.status(401).json({
                 success: false,
                 data: 'Refresh token not supplied.'
             })
 
-        const logoutUser = await refreshTokenService.logoutUser(req.body.refreshToken)
+        const result = validateFields({ refreshToken: req.cookies.refreshToken }, fieldConfig)
+
+        if (!result.success) {
+            throw new Error(zodError(result.error))
+        }
+
+        const logoutUser = await refreshTokenService.logoutUser(req.cookies.refreshToken)
+
+        if (logoutUser) {
+            res.clearCookie('refreshToken', refreshTokenService._cookieOptions({ clear: true }))
+        }
 
         return res.status(200).json({
             success: true,

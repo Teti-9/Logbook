@@ -1,9 +1,10 @@
+import 'dotenv/config'
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcryptjs'
 import { generateRefreshToken, hashRefreshToken } from '../utils/token.js'
 
 const ACCESS_TOKEN_TTL = '12h'
-const REFRESH_TOKEN_DAYS = 30
+const REFRESH_TOKEN_DAYS = 7
 
 export default class RefreshTokenService {
     constructor(userRepo, refreshRepo) {
@@ -81,5 +82,22 @@ export default class RefreshTokenService {
         }
 
         return returnHash ? { tokens, newHash } : tokens
+    }
+
+    _cookieOptions({ clear = false } = {}) {
+        const isProduction = process.env.NODE_ENV === 'production'
+
+        const options = {
+            httpOnly: true,
+            secure: isProduction,
+            sameSite: isProduction ? 'none' : 'lax',
+            path: '/api/auth',
+        }
+
+        if (!clear) {
+            options.maxAge = 7 * 24 * 60 * 60 * 1000
+        }
+
+        return options
     }
 }

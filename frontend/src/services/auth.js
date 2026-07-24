@@ -1,4 +1,6 @@
-const API_BASE = 'http://localhost:8000/api'
+import { currentAccessToken, setAccessToken } from '../utils/token.js'
+
+const API_BASE = 'http://localhost:8000/api/auth'
 let refreshInFlight = null
 
 function normalizeAccessToken(token) {
@@ -10,28 +12,19 @@ function normalizeAccessToken(token) {
 }
 
 export function getAccessToken() {
-    return localStorage.getItem('token')
+    return currentAccessToken()
 }
 
-export function getRefreshToken() {
-    return localStorage.getItem('refreshToken')
-}
-
-export function setSessionTokens({ accessToken, refreshToken }) {
+export function setSessionToken(accessToken) {
     const normalizedAccessToken = normalizeAccessToken(accessToken)
 
     if (normalizedAccessToken) {
-        localStorage.setItem('token', normalizedAccessToken)
-    }
-
-    if (refreshToken) {
-        localStorage.setItem('refreshToken', refreshToken)
+        setAccessToken(normalizedAccessToken)
     }
 }
 
-export function clearSessionTokens() {
-    localStorage.removeItem('token')
-    localStorage.removeItem('refreshToken')
+export function clearSessionToken() {
+    setAccessToken('')
 }
 
 async function refreshSession() {
@@ -40,35 +33,28 @@ async function refreshSession() {
     }
 
     refreshInFlight = (async () => {
-        const refreshToken = getRefreshToken()
-
-        if (!refreshToken) {
-            return null
-        }
-
         const response = await fetch(`${API_BASE}/refreshs`, {
             method: 'POST',
+            credentials: 'include',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ refreshToken }),
         })
 
         if (!response.ok) {
-            clearSessionTokens()
+            clearSessionToken()
             return null
         }
 
         const payload = await response.json()
         const accessToken = payload?.data?.accessToken
-        const newRefreshToken = payload?.data?.refreshToken
 
-        if (!accessToken || !newRefreshToken) {
-            clearSessionTokens()
+        if (!accessToken) {
+            clearSessionToken()
             return null
         }
 
-        setSessionTokens({ accessToken, refreshToken: newRefreshToken })
+        setAccessToken(accessToken)
 
         return getAccessToken()
     })()
@@ -114,23 +100,17 @@ export async function authFetch(url, options = {}) {
 }
 
 export async function logoutSession() {
-    const refreshToken = getRefreshToken()
-
-    if (!refreshToken) {
-        clearSessionTokens()
-        return { success: true }
-    }
 
     try {
         await fetch(`${API_BASE}/logouts`, {
             method: 'POST',
+            credentials: 'include',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ refreshToken }),
         })
     } finally {
-        clearSessionTokens()
+        clearSessionToken()
     }
 
     return { success: true }
