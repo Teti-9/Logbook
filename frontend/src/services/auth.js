@@ -27,7 +27,7 @@ export function clearSessionToken() {
     setAccessToken('')
 }
 
-async function refreshSession() {
+export async function refreshSession() {
     if (refreshInFlight) {
         return refreshInFlight
     }
@@ -54,7 +54,7 @@ async function refreshSession() {
             return null
         }
 
-        setAccessToken(accessToken)
+        setSessionToken(accessToken)
 
         return getAccessToken()
     })()

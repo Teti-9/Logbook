@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react'
+import { AuthProvider } from './services/authContext.jsx'
+import { useAuth } from './services/authContext.jsx'
 import Layout from './components/layout.jsx'
 import LogbookLanding from './components/landingPage.jsx'
 import RegisterPage from './components/register.jsx'
@@ -13,6 +15,15 @@ import './App.css'
 function App() {
 
   const [page, setPage] = useState(0)
+
+  return (
+    <AuthProvider>
+      <AppShell page={page} setPage={setPage} />
+    </AuthProvider>
+  )
+}
+
+function AppShell({ page, setPage, ...rest }) {
   const [syncState, setSyncState] = useState('idle')
   const [search, setSearch] = useState('')
   const [email, setEmail] = useState('')
@@ -23,6 +34,15 @@ function App() {
   const [pendingLogs, setPendingLogs] = useState([])
   const [exercises, setExercises] = useState({ name: '', series: '', topset_weight: '', topset_reps: '', backoff_weight: '', backoff_reps: '', divisionId: '' })
   const [historical, setHistorical] = useState([])
+  const { isAuthenticated, loading } = useAuth()
+
+  useEffect(() => {
+    if (!loading && isAuthenticated && page === 0) {
+      setPage(3)
+    }
+  }, [loading, isAuthenticated, page, setPage])
+
+  if (loading) return null
 
   const pages = {
     0: <LogbookLanding setPage={setPage} />,
@@ -39,16 +59,14 @@ function App() {
 
     6: <SyncCenter pendingLogs={pendingLogs} syncState={syncState} setPendingLogs={setPendingLogs} setSyncState={setSyncState} setPage={setPage} />,
 
-    7: <HistoryPage search={search} historical={historical} setSearch={setSearch} setHistorical={setHistorical} setPage={setPage} />
+    7: <HistoryPage search={search} historical={historical} setSearch={setSearch} setHistorical={setHistorical} setPage={setPage} />,
   }
 
   return (
-
     <Layout>
       {pages[page]}
     </Layout>
   )
-
 }
 
 export default App

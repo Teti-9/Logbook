@@ -1,10 +1,11 @@
 import React, { useEffect } from 'react'
+import { useAuth } from '../services/authContext.jsx'
 import DivisionsService from '../services/divisionService.js'
 import capitalizeEachWord from '../utils/capitalize.js'
-import { clearSessionToken, logoutSession } from '../services/auth.js'
 
 const Dashboard = (props) => {
     const { divisions, setDivision, setDivisions, setPage } = props
+    const { clearAuth, logout } = useAuth()
 
     var today = []
     var nottoday = []
@@ -13,8 +14,12 @@ const Dashboard = (props) => {
     const dayName = days[now.getDay()]
 
     useEffect(() => {
+        let ignore = false
+
         async function loadDivisions() {
             const response = await DivisionsService('GET', '')
+
+            if (ignore) return
 
             if (response?.success) {
                 setDivisions(response.data.divisions || [])
@@ -25,14 +30,16 @@ const Dashboard = (props) => {
                 response?.message === 'Invalid token.' ||
                 response?.message === 'Token not included.'
             ) {
-                clearSessionToken()
+                clearAuth()
                 setDivisions([])
                 setPage(0)
             }
         }
 
         loadDivisions()
-    }, [setDivisions, setPage])
+
+        return () => { ignore = true }
+    }, [setDivisions, setPage, clearAuth])
 
     const dayDivisions = divisions.map(item => ({
         id: item.id,
@@ -65,7 +72,7 @@ const Dashboard = (props) => {
         const confirmed = window.confirm("Are you sure you want to logout?")
 
         if (confirmed) {
-            await logoutSession()
+            await logout()
             setPage(0)
             alert('User logged out.')
         }

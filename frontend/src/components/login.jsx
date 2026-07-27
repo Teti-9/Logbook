@@ -1,16 +1,17 @@
 import React, { useEffect } from 'react'
 import loginUser from '../services/loginService.js'
-import { setSessionToken } from '../services/auth.js'
+import { useAuth } from '../services/authContext.jsx'
 
 const LoginPage = (props) => {
     const { email, password, setEmail, setPassword, setPage } = props
+    const { login } = useAuth()
 
     useEffect(() => {
         setEmail('')
         setPassword('')
     }, [setEmail, setPassword])
 
-    async function login(e) {
+    async function loginForm(e) {
 
         e.preventDefault()
 
@@ -24,7 +25,7 @@ const LoginPage = (props) => {
         if (response.success) {
             setEmail('')
             setPassword('')
-            setSessionToken(response.data['data']['accessToken'])
+            login(response.data['data']['accessToken'])
             setPage(3)
             alert('User successfully logged in.')
         } else {
@@ -46,7 +47,7 @@ const LoginPage = (props) => {
 
             <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
                 <div className="bg-white py-8 px-4 shadow-xl shadow-slate-200/50 sm:rounded-3xl sm:px-10 border border-slate-100">
-                    <form className="space-y-6" onSubmit={login}>
+                    <form className="space-y-6" onSubmit={loginForm}>
                         <div>
                             <label htmlFor="email" className="block text-sm font-bold text-slate-700">
                                 Email address

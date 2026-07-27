@@ -3,17 +3,6 @@ import React from 'react'
 const LogbookLanding = (props) => {
     const { setPage } = props
 
-    async function userLogged() {
-        const token = localStorage.getItem('token')
-        const refreshToken = localStorage.getItem('refreshToken')
-
-        if (!token && !refreshToken) {
-            setPage(2)
-        } else {
-            setPage(3)
-        }
-    }
-
     return (
         <div className="font-sans text-slate-900 bg-slate-50 min-h-screen">
             <nav className="flex justify-between items-center p-6 bg-white shadow-sm border-b border-slate-100">
@@ -24,7 +13,7 @@ const LogbookLanding = (props) => {
                     <li><a href="#pricing" className="hover:text-indigo-600 transition">Placeholder</a></li>
                 </ul>
                 <button
-                    onClick={() => userLogged()}
+                    onClick={() => setPage(2)}
                     className="bg-indigo-600 text-white px-6 py-2.5 rounded-lg hover:bg-indigo-700 transition font-bold shadow-md shadow-indigo-200 cursor-pointer text-indigo-600">
                     Start Tracking
                 </button>
