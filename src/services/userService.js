@@ -7,6 +7,25 @@ export default class UserService {
         this.refreshTokenService = refreshTokenService
     }
 
+    async getUserById(id) {
+        const userId = Number(id)
+
+        const user = await this.userRepo.findUser({
+            id: userId,
+            isDeleted: false
+        })
+
+        if (!user) {
+            const error = new Error('User not found.')
+            error.statusCode = 404
+            throw error
+        }
+
+        const { password, ...safeUser } = user
+
+        return safeUser
+    }
+
     async createUser(body) {
 
         const lowercaseEmail = body.email.toLowerCase()

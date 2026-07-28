@@ -1,6 +1,8 @@
 import express from "express"
 import cors from "cors"
 import cookieParser from "cookie-parser"
+import swaggerUI from "swagger-ui-express"
+import swaggerJsdoc from "swagger-jsdoc"
 import errorMiddleware from "./middleware/error.js"
 import authMiddleware from "./middleware/auth.js"
 import { prisma, connectDB } from "./config/database.js"
@@ -63,11 +65,34 @@ app.use(cookieParser())
 
 app.use(express.json())
 
+const options = {
+    definition: {
+        openapi: "3.0.0",
+        info: {
+            title: "Logbook API",
+            version: "1.0.0"
+        },
+        components: {
+            securitySchemes: {
+                bearerAuth: {
+                    type: "http",
+                    scheme: "bearer",
+                    bearerFormat: "JWT",
+                },
+            },
+        },
+    },
+    apis: ["./src/routes/*.js"],
+}
+
+const specs = swaggerJsdoc(options)
+
 app.use("/api/auth", userRouter)
 app.use("/api", authMiddleware, divisionRouter)
 app.use("/api", authMiddleware, exercisesRouter)
 app.use("/api", authMiddleware, logbookRouter)
 app.use("/api", authMiddleware, historicalRouter)
+app.use("/docs", swaggerUI.serve, swaggerUI.setup(specs))
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}.`)

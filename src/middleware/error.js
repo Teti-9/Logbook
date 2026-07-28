@@ -4,7 +4,7 @@ const errorMiddleware = (err, req, res, next) => {
 
     const statusCode = err.statusCode || 500
     const errorCode = err.code
-    const message = err.message || "There was a internal server error."
+    const message = err.message || "There was an internal server error."
 
     if (err instanceof Prisma.PrismaClientValidationError) {
         res.status(409).json({
