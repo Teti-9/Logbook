@@ -30,7 +30,7 @@ Fluxo principal:
 
 ## Requisitos
 
-- Node.js 20+ (recomendado)
+- Node.js 22+ (recomendado)
 - NPM 10+
 - Docker
 

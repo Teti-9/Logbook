@@ -5,6 +5,14 @@ import { afterEach, afterAll } from 'vitest'
 
 const { PrismaClient } = pkg
 
+if (!process.env.DATABASE_URL) {
+    throw new Error('DATABASE_URL must be set before loading the Vitest setup file.')
+}
+
+if (!process.env.JWT_SECRET) {
+    process.env.JWT_SECRET = 'test-secret'
+}
+
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL })
 export const prisma = new PrismaClient({ adapter })
 
