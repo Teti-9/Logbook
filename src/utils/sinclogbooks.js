@@ -66,7 +66,7 @@ async function sincLogbooks(userId, exerciseId, prisma) {
         prisma.logbook.update({ where: { userId: userId, id: logbookExists.id }, data: { sinc: true } })
     ])
 
-    return { message: 'Logbook successfully synchronized.' }
+    return { message: 'Logbook(s) successfully synchronized(s).' }
 }
 
 export default sincLogbooks

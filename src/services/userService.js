@@ -27,8 +27,19 @@ export default class UserService {
     }
 
     async createUser(body) {
-
         const lowercaseEmail = body.email.toLowerCase()
+
+        const userExists = await this.userRepo.findUser({
+            email: lowercaseEmail,
+            isDeleted: false
+        })
+
+        if (userExists) {
+            const error = new Error('Email already in use.')
+            error.statusCode = 409
+            throw error
+        }
+
         const hashedPassword = await bcrypt.hash(body.password, 8)
 
         const user = {
@@ -42,9 +53,10 @@ export default class UserService {
     }
 
     async loginUser(body) {
-        body.email = body.email.toLowerCase()
+        const lowercaseEmail = body.email.toLowerCase()
+
         const user = await this.userRepo.findUser({
-            email: body.email
+            email: lowercaseEmail
         })
 
         if (!user) {

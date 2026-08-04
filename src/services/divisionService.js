@@ -5,6 +5,12 @@ export default class DivisionService {
 
     async getDivisions(userId, { page = 1, limit = 10 } = {}) {
 
+        if (page <= 0) {
+            const error = new Error("Page cannot be zero or a negative number.")
+            error.statusCode = 400
+            throw error
+        }
+
         const { divisions, total } = await this.divisionRepo.findAll({
             userId: userId,
             isDeleted: false
@@ -53,6 +59,13 @@ export default class DivisionService {
 
         const lowercaseName = body.name.toLowerCase()
         const lowercaseDay = body.day.toLowerCase()
+        const DAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
+
+        if (!DAYS.includes(lowercaseDay)) {
+            const error = new Error(`'${body.day}' is not a day of the week.`)
+            error.statusCode = 400
+            throw error
+        }
 
         const dayUsed = await this.divisionRepo.findOne({
             userId: userId,
@@ -85,6 +98,12 @@ export default class DivisionService {
             id: divisionId,
             isDeleted: false
         })
+
+        if (divisionExists.exercises.length > 0) {
+            const error = new Error('Division contain exercises, please delete them before hand.')
+            error.statusCode = 409
+            throw error
+        }
 
         if (!divisionExists) {
             const error = new Error('Division not found.')

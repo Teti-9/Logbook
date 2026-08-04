@@ -6,6 +6,12 @@ export default class ExercisesService {
 
     async getExercises(userId, { page = 1, limit = 10 } = {}) {
 
+        if (page <= 0) {
+            const error = new Error("Page cannot be zero or a negative number.")
+            error.statusCode = 400
+            throw error
+        }
+
         const { exercises, total } = await this.exercisesRepo.findAll({
             userId: userId,
             isDeleted: false
@@ -86,6 +92,12 @@ export default class ExercisesService {
             id: exerciseId,
             isDeleted: false
         })
+
+        if (exercise.logbook.length > 0) {
+            const error = new Error('Exercise contains unsynced logbooks, please delete or sync them before hand.')
+            error.statusCode = 409
+            throw error
+        }
 
         if (!exercise) {
             const error = new Error('Exercise not found.')

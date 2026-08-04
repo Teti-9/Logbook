@@ -22,7 +22,15 @@ export default class LogbookRepo {
 
     async findById(where) {
         return this.prisma.logbook.findFirst({
-            where
+            where,
+            include: {
+                exercise: {
+                    select: {
+                        id: true,
+                        name: true,
+                    }
+                }
+            }
         })
     }
 

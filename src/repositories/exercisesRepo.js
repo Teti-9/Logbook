@@ -12,6 +12,17 @@ export default class ExercisesRepo {
                     userId,
                     isDeleted
                 },
+                include: {
+                    logbook: {
+                        where: {
+                            sinc: false,
+                            isDeleted: false,
+                        },
+                        select: {
+                            id: true
+                        }
+                    }
+                },
                 orderBy: {
                     id: 'asc'
                 },
@@ -26,7 +37,18 @@ export default class ExercisesRepo {
 
     async findById(where) {
         return this.prisma.exercises.findFirst({
-            where
+            where,
+            include: {
+                logbook: {
+                    where: {
+                        sinc: false,
+                        isDeleted: false,
+                    },
+                    select: {
+                        id: true
+                    }
+                }
+            },
         })
     }
 

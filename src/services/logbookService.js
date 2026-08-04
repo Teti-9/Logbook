@@ -67,7 +67,7 @@ export default class LogbookService {
 
         if (logbookExists) {
             const error = new Error('A logbook for this exercise already exists and it is not yet synced.')
-            error.statusCode = 404
+            error.statusCode = 400
             throw error
         }
 

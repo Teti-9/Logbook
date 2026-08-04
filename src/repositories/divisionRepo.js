@@ -14,6 +14,9 @@ export default class DivisionRepo {
                 },
                 include: {
                     exercises: {
+                        where: {
+                            isDeleted: false,
+                        },
                         select: {
                             id: true,
                             name: true,
@@ -39,13 +42,33 @@ export default class DivisionRepo {
 
     async findById(where) {
         return this.prisma.division.findFirst({
-            where
+            where,
+            include: {
+                exercises: {
+                    where: {
+                        isDeleted: false,
+                    },
+                    select: {
+                        id: true,
+                    }
+                }
+            }
         })
     }
 
     async findOne(where) {
         return this.prisma.division.findFirst({
-            where
+            where,
+            include: {
+                exercises: {
+                    where: {
+                        isDeleted: false,
+                    },
+                    select: {
+                        id: true,
+                    }
+                }
+            }
         })
     }
 
