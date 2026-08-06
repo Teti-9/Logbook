@@ -93,15 +93,15 @@ export default class ExercisesService {
             isDeleted: false
         })
 
-        if (exercise.logbook.length > 0) {
-            const error = new Error('Exercise contains unsynced logbooks, please delete or sync them before hand.')
-            error.statusCode = 409
-            throw error
-        }
-
         if (!exercise) {
             const error = new Error('Exercise not found.')
             error.statusCode = 404
+            throw error
+        }
+
+        if (exercise.logbook.length > 0) {
+            const error = new Error('Exercise contains unsynced logbooks, please delete or sync them before hand.')
+            error.statusCode = 409
             throw error
         }
 

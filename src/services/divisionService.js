@@ -99,15 +99,15 @@ export default class DivisionService {
             isDeleted: false
         })
 
-        if (divisionExists.exercises.length > 0) {
-            const error = new Error('Division contain exercises, please delete them before hand.')
-            error.statusCode = 409
-            throw error
-        }
-
         if (!divisionExists) {
             const error = new Error('Division not found.')
             error.statusCode = 404
+            throw error
+        }
+
+        if (divisionExists.exercises.length > 0) {
+            const error = new Error('Division contain exercises, please delete them before hand.')
+            error.statusCode = 409
             throw error
         }
 

@@ -46,9 +46,9 @@ describe('GET /api/divisions (integration)', () => {
             .set('Authorization', `Bearer ${token}`)
             .send({ name: 'Push', day: 'notvalid' })
 
-        expect(res.status).toBe(409)
+        expect(res.status).toBe(400)
         expect(res.body.success).toBe(false)
-        expect(res.body.data).toMatch(/invalid/i)
+        expect(res.body.data).toMatch(/is not a day/i)
     })
 
     it('a training split for this day already exists.', async () => {
