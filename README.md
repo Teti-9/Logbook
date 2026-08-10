@@ -1,40 +1,48 @@
 # Logbook
 
-Projeto full stack para gerenciamento de treinos por divisão, exercícios e logbooks de progressão.
+Projeto full stack para organizar treinos por divisao, cadastrar exercicios e acompanhar a progressao no logbook.
 
-## Visão geral
+## O que ele faz
 
-Tanto a API quanto o Frontend seguem a regra de arquitetura em camadas:
+- cria divisoes de treino por dia
+- cadastra exercicios ligados a cada divisao
+- registra cargas e repeticoes no logbook
+- sincroniza o logbook para atualizar os dados do exercicio
+- guarda historico das evolucoes
+- usa autenticacao com access token e refresh token em cookie
 
-- `routes`: Entrada HTTP.
-- `middleware/schemas`: Validação com Zod + Autenticação JWT.
-- `services`: Regras de negócio.
-- `repositories`: Acesso ao SQL.
-- `components`: Componentes React.
-- `utils`: Funções utilitárias.
+## Stack
 
-Fluxo principal:
-
-1. Cadastro de divisão de treino por dia.
-2. Cadastro de exercícios vinculados a uma divisão.
-3. Registro de performance no logbook.
-4. Sincronização do logbook para atualizar os dados do exercício.
-5. Histórico dos exercícios que foram sincronizados.
-
-## Stack técnica
-
-- Node.js (ES Modules)
-- Vite + React.js
+- Node.js com ES Modules
 - Express 5
-- Prisma
-
-## Requisitos
-
-- Node.js 22+ (recomendado)
-- NPM 10+
+- Prisma + PostgreSQL
+- React 19 + Vite
+- Tailwind CSS
+- Swagger/OpenAPI
+- Vitest + Supertest
 - Docker
 
-## Instalação (Docker)
+## Visao geral
+
+O projeto segue uma estrutura em camadas, tanto na API quanto no frontend:
+
+- `routes`: entrada HTTP
+- `middleware`: auth e tratamento de erros
+- `schemas`: validacao de dados
+- `services`: regras de negocio
+- `repositories`: acesso ao banco
+- `components`: telas e componentes React
+- `utils`: funcoes auxiliares
+
+## Como o fluxo funciona
+
+1. O usuario cria uma divisao de treino por dia.
+2. Depois cadastra os exercicios dessa divisao.
+3. Durante o treino, registra a performance no logbook.
+4. O logbook pode ser sincronizado para atualizar o exercicio.
+5. O historico guarda o antes e depois dessas mudancas.
+
+## Como rodar com Docker
 
 1. Crie o arquivo `.env` na raiz:
 
@@ -46,92 +54,31 @@ POSTGRES_DB="logbook"
 JWT_SECRET="sua_chave_jwt"
 ```
 
-2. Suba os containers:
+2. Suba tudo com:
 
 ```bash
-docker-compose up database --build
-docker-compose up app --build
-docker-compose up frontend --build
+docker compose up --build
 ```
 
-4. Acesse:
+3. Acesse:
 
-- API base: `http://localhost:8000/api/`
+- API: `http://localhost:8000/api`
+- Docs: `http://localhost:8000/docs`
 - Frontend: `http://localhost:5173`
 
-## Estrutura do projeto
+## Autenticacao
 
-```text
-logbook/
-|- .github/workflows
-|  |- ci.yml
-|- src/
-|  |- config/
-|  |  |- database.js
-|  |- middleware/
-|  |  |- auth.js
-|  |  |- error.js
-|  |- repositories/
-|  |  |- divisionRepo.js
-|  |  |- exercisesRepo.js
-|  |  |- historicalRepo.js
-|  |  |- logbookRepo.js
-|  |  |- userRepo.js
-|  |- routes/
-|  |  |- divisionRoute.js
-|  |  |- exercisesRoute.js
-|  |  |- historicalRoute.js
-|  |  |- logbookRoute.js
-|  |  |- userRoute.js
-|  |- schemas/
-|  |  |- fiels.js
-|  |  |- ids.js
-|  |- services/
-|  |  |- divisionService.js
-|  |  |- exercisesService.js
-|  |  |- historicalService.js
-|  |  |- refreshTokenService.js
-|  |  |- userService.js
-|  |- utils/
-|  |  |- sinclogbooks.js
-|  |  |- token.js
-|  |  |- zoderror.js
-|  |- server.js
-|- docker-compose.yml
-|- Dockerfile
-|- prisma.config.ts
-|- frontend/
-|  |- src/
-|  |  |- components.js
-|  |  |  |- activeworkout.jsx
-|  |  |  |- dashboard.jsx
-|  |  |  |- division.jsx
-|  |  |  |- history.jsx
-|  |  |  |- landingPage.jsx
-|  |  |  |- layout.jsx
-|  |  |  |- login.jsx
-|  |  |  |- register.jsx
-|  |  |  |- sync.jsx
-|  |  |- services/
-|  |  |  |- auth.js
-|  |  |  |- divisionService.js
-|  |  |  |- exercisesService.js
-|  |  |  |- historicalService.js
-|  |  |  |- logbookService.js
-|  |  |  |- loginService.js
-|  |  |  |- refreshTokenService.js
-|  |  |  |- registerService.js
-|  |  |  |- syncLogbookService.js
-|  |  |- utils/
-|  |  |  |- capitalize.js
-|  |  |  |- day.js
-|  |  |- App.jsx
-|  |- Dockerfile
+- O login retorna um access token valido por 12h.
+- O refresh token fica em cookie HTTP-only.
+- Para rotas protegidas, envie:
+
+```http
+Authorization: Bearer <seu_token>
 ```
 
-## Padrão de resposta
+## Padrao de resposta
 
-A API segue o formato:
+A API segue este formato:
 
 ```json
 {
@@ -140,14 +87,31 @@ A API segue o formato:
 }
 ```
 
-Em erro de validação `data` retorna mensagens do Zod.
+Em erros de validacao, `data` traz as mensagens do Zod.
 
-## Autenticação (JWT)
+## Testes e qualidade
 
-- Registre um usuário e faça login para obter o token.
-- O token expira em **12h**.
-- Para rotas protegidas, envie o header:
+- A suite usa Vitest + Supertest.
+- O CI roda em GitHub Actions com PostgreSQL.
+- A documentacao da API fica em `/docs`.
 
-```http
-Authorization: Bearer <seu_token>
+## Estrutura resumida
+
+```text
+src/
+  config/
+  middleware/
+  repositories/
+  routes/
+  schemas/
+  services/
+  utils/
+frontend/
+  src/
+    components/
+    services/
+    utils/
+prisma/
+.github/workflows/
+docker-compose.yml
 ```
