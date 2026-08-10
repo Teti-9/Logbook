@@ -63,4 +63,23 @@ export default async function ExercisesService(method, body) {
         }
     }
 
+    if (method === 'DELETE') {
+        try {
+            const response = await authFetch(EXERCISES_API_ID, {
+                method: 'DELETE',
+            })
+            if (response.ok) {
+                const data = await response.json()
+                return { success: true, data: data }
+            } else {
+                const errorData = await response.json()
+                let errorMessage = errorData.data
+
+                return { success: false, message: errorMessage }
+            }
+        } catch (error) {
+            console.error('Error:', error)
+        }
+    }
+
 }

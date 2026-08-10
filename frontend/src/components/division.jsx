@@ -12,7 +12,7 @@ const DivisionBuilder = (props) => {
         const response = await DivisionsService('GET', '')
 
         if (response?.success) {
-            setDivisions(response.data || [])
+            setDivisions(response.data.divisions || [])
         }
     }
 

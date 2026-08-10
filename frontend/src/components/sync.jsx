@@ -54,13 +54,17 @@ const SyncCenter = (props) => {
 
         e.preventDefault()
 
-        const response = await logbookService('DELETE', id)
+        const confirmed = window.confirm("Are you sure you want to delete this logbook?")
 
-        if (response?.success) {
-            setPendingLogs(prev => prev.filter(log => log.id !== id))
-            alert('Logbook successfully deleted.')
-        } else {
-            alert(response?.message)
+        if (confirmed) {
+            const response = await logbookService('DELETE', id)
+
+            if (response?.success) {
+                setPendingLogs(prev => prev.filter(log => log.id !== id))
+                alert('Logbook successfully deleted.')
+            } else {
+                alert(response?.message)
+            }
         }
     }
 

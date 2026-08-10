@@ -156,7 +156,7 @@ const Dashboard = (props) => {
 
                 <section>
                     <div className="flex justify-between items-end mb-6">
-                        <h2 className="text-xl font-extrabold text-slate-900">Your Split</h2>
+                        <h2 className="text-xl font-extrabold text-slate-900">Your Splits</h2>
                         <button
                             onClick={() => setPage(7)}
                             className="text-indigo-600 font-bold text-sm hover:text-indigo-500 transition cursor-pointer text-indigo-600">

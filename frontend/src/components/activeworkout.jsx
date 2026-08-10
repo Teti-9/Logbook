@@ -1,6 +1,7 @@
 import React from 'react'
 import capitalizeEachWord from '../utils/capitalize.js'
 import logbookService from '../services/logbookService.js'
+import ExercisesService from '../services/exercisesService.js'
 
 const ActiveWorkout = (props) => {
     const { logbook, division, setLogbook, setDivision, setPage } = props
@@ -54,6 +55,27 @@ const ActiveWorkout = (props) => {
         }
     }
 
+    async function deleteExercise(e, id) {
+
+        e.preventDefault()
+
+        const confirmed = window.confirm("Are you sure you want to delete this exercise?")
+
+        if (confirmed) {
+            const response = await ExercisesService('DELETE', Number(id))
+
+            if (response?.success) {
+                setDivision((current) => ({
+                    ...current,
+                    exercises: current.exercises.filter((ex) => ex.id !== id)
+                }))
+                alert('Exercise successfully deleted.')
+            } else {
+                alert(response?.message)
+            }
+        }
+    }
+
     return (
         <div className="min-h-screen bg-slate-50 pb-24 font-sans">
             <header className="bg-slate-900 text-white pt-12 pb-6 px-6 sticky top-0 z-10 shadow-md">
@@ -73,7 +95,7 @@ const ActiveWorkout = (props) => {
             <main className="p-4 space-y-6 max-w-2xl mx-auto mt-4">
                 {exercises.length > 0 ? (
                     exercises.map((exercise, index) => (
-                        <div key={exercise.id} className="bg-white rounded-3xl p-5 shadow-sm border border-slate-100">
+                        <div key={exercise.id} className="relative bg-white rounded-3xl p-5 shadow-sm border border-slate-100">
 
                             <div className="flex justify-between items-start mb-6">
                                 <div>
@@ -85,6 +107,14 @@ const ActiveWorkout = (props) => {
                                     </p>
                                 </div>
                             </div>
+
+                            <button
+                                onClick={(e) => deleteExercise(e, exercise.id)}
+                                className="absolute top-4 right-4 text-slate-300 hover:text-red-500 transition cursor-pointer"
+                                title="Discard Exercise"
+                            >
+                                ✕
+                            </button>
 
                             <div className="space-y-4">
                                 <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
