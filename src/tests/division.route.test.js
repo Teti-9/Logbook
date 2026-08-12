@@ -7,7 +7,7 @@ import app from '../server.js'
 const signToken = (userId) =>
     jwt.sign({ id: userId }, process.env.JWT_SECRET, { expiresIn: '15m' })
 
-describe('GET /api/divisions (integration)', () => {
+describe('api/divisions (integration)', () => {
     let user, token
 
     beforeEach(async () => {
@@ -139,6 +139,18 @@ describe('GET /api/divisions (integration)', () => {
         expect(res.body.success).toBe(false)
         expect(res.status).toBe(404)
         expect(res.body.data).toBe('Division not found.')
+    })
+
+    it('delete populated division.', async () => {
+        await prisma.exercises.create({ data: { name: 'tbar', series: 2, topset_weight: 50, topset_reps: 8, divisionId: 2, userId: user.id } })
+
+        const res = await request(app)
+            .delete(`/api/divisions/${2}`)
+            .set('Authorization', `Bearer ${token}`)
+
+        expect(res.body.success).toBe(false)
+        expect(res.status).toBe(409)
+        expect(res.body.data).toBe('Division contain exercises, please delete them before hand.')
     })
 
     it('successfully delete a division.', async () => {
