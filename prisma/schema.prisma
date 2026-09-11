@@ -4,7 +4,7 @@
 // Get a free hosted Postgres database in seconds: `npx create-db`
 
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
   binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
 }
 
@@ -13,16 +13,16 @@ datasource db {
 }
 
 model Division {
-  id  Int @id @default(autoincrement())
-  name  String
-  day  Day
-  userId  Int
-  user  User  @relation(fields: [userId], references: [id])
+  id        Int         @id @default(autoincrement())
+  name      String
+  day       Day
+  userId    Int
+  user      User        @relation(fields: [userId], references: [id])
   exercises Exercises[]
-  isDeleted Boolean @default(false)
+  isDeleted Boolean     @default(false)
   deletedAt DateTime?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
 
   @@index([userId, day, isDeleted])
 }
@@ -38,88 +38,142 @@ enum Day {
 }
 
 model Exercises {
-  id  Int     @id @default(autoincrement())
-  name  String
-  series  Int
+  id             Int          @id @default(autoincrement())
+  name           String
+  series         Int
   topset_weight  Float
-  topset_reps  Int
-  backoff_weight  Float?
-  backoff_reps  Int?
-  divisionId  Int
-  userId  Int
-  logbook Logbook[]
-  historical  Historical[]
-  user  User  @relation(fields: [userId], references: [id])
-  division  Division  @relation(fields: [divisionId], references: [id])
-  isDeleted Boolean    @default(false)
-  deletedAt DateTime?
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  topset_reps    Int
+  backoff_weight Float?
+  backoff_reps   Int?
+  divisionId     Int
+  userId         Int
+  logbook        Logbook[]
+  historical     Historical[]
+  user           User         @relation(fields: [userId], references: [id])
+  division       Division     @relation(fields: [divisionId], references: [id])
+  isDeleted      Boolean      @default(false)
+  deletedAt      DateTime?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
 
   @@index([userId, divisionId, isDeleted])
 }
 
 model Logbook {
-  id  Int     @id @default(autoincrement())
-  exerciseId Int
+  id             Int       @id @default(autoincrement())
+  exerciseId     Int
   topset_weight  Float
-  topset_reps  Int
-  backoff_weight  Float?
-  backoff_reps  Int?
-  sinc  Boolean  @default(false)
-  userId  Int
-  user  User  @relation(fields: [userId], references: [id])
-  exercise  Exercises @relation(fields: [exerciseId], references: [id])
-  isDeleted Boolean    @default(false)
-  deletedAt DateTime?
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  topset_reps    Int
+  backoff_weight Float?
+  backoff_reps   Int?
+  sinc           Boolean   @default(false)
+  userId         Int
+  user           User      @relation(fields: [userId], references: [id])
+  exercise       Exercises @relation(fields: [exerciseId], references: [id])
+  isDeleted      Boolean   @default(false)
+  deletedAt      DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 
   @@index([userId, exerciseId, isDeleted])
 }
 
 model Historical {
-  id  Int     @id @default(autoincrement())
-  exerciseId  Int
-  name  String
-  series  Int
-  previous_topset_weight Float
-  previous_topset_reps Int
-  previous_backoff_weight  Float?
-  previous_backoff_reps  Int?
-  userId  Int
-  user  User  @relation(fields: [userId], references: [id])
-  exercise Exercises  @relation(fields: [exerciseId], references: [id])
-  isDeleted Boolean    @default(false)
-  deletedAt DateTime?
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  id                      Int       @id @default(autoincrement())
+  exerciseId              Int
+  name                    String
+  series                  Int
+  previous_topset_weight  Float
+  previous_topset_reps    Int
+  previous_backoff_weight Float?
+  previous_backoff_reps   Int?
+  userId                  Int
+  user                    User      @relation(fields: [userId], references: [id])
+  exercise                Exercises @relation(fields: [exerciseId], references: [id])
+  isDeleted               Boolean   @default(false)
+  deletedAt               DateTime?
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @updatedAt
 
   @@index([userId, exerciseId, isDeleted])
 }
 
 model RefreshToken {
-  id  Int     @id @default(autoincrement())
-  userId  Int
+  id         Int      @id @default(autoincrement())
+  userId     Int
   tokenHash  String
-  expiresAt DateTime
-  revoked Boolean @default(false)
+  expiresAt  DateTime
+  revoked    Boolean  @default(false)
   replacedBy String?
-  user  User  @relation(fields: [userId], references: [id])
+  user       User     @relation(fields: [userId], references: [id])
+}
+
+model Session {
+  id        Int      @id @default(autoincrement())
+  expiresAt DateTime
+  token     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([token])
+  @@index([userId])
+  @@map("session")
+}
+
+model Account {
+  id                    Int       @id @default(autoincrement())
+  accountId             String
+  providerId            String
+  userId                Int
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([userId])
+  @@map("account")
+}
+
+model Verification {
+  id         Int      @id @default(autoincrement())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+  @@map("verification")
 }
 
 model User {
-  id  Int     @id @default(autoincrement())
-  email  String @unique
-  password  String
-  isDeleted Boolean    @default(false)
-  deletedAt DateTime?
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  id       Int     @id @default(autoincrement())
+  name     String  @default("Member")
+  email    String  @unique
+  password String?
+  image    String?
 
-  divisions Division[]
-  exercises Exercises[]
-  logbooks Logbook[]
+  emailVerified Boolean   @default(false)
+  isDeleted     Boolean   @default(false)
+  deletedAt     DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  sessions    Session[]
+  accounts    Account[]
+  divisions   Division[]
+  exercises   Exercises[]
+  logbooks    Logbook[]
   historicals Historical[]
-  tokens RefreshToken[]
+  tokens      RefreshToken[]
 }
