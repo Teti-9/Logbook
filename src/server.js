@@ -7,7 +7,7 @@ import swaggerJsdoc from "swagger-jsdoc";
 import errorMiddleware from "./middleware/error.js";
 // import authMiddleware from "./middleware/auth.js";
 import sessionsMiddleware from "./middleware/sessions.js";
-import { prisma, connectDB } from "./config/database.js";
+import { prisma, connectDB } from "./config/infra/database.js";
 import { toNodeHandler } from "better-auth/node";
 
 import HistoricalRepo from "./repositories/historicalRepo.js";
@@ -81,7 +81,7 @@ app.use(
 
 await connectDB();
 
-const { auth } = await import("./config/auth.js");
+const { auth } = await import("./config/infra/auth.js");
 
 app.all("/api/auth/*splat", toNodeHandler(auth));
 

@@ -1,5 +1,5 @@
 import { fromNodeHeaders } from "better-auth/node";
-import { auth } from "../config/auth.js";
+import { auth } from "../config/infra/auth.js";
 
 export default async function sessionsMiddleware(req, res, next) {
   try {

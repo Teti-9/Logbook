@@ -1,5 +1,5 @@
 import validateFields from "../schemas/zodFields.js";
-import zodError from "../utils/zoderror.js";
+import parseError from "../schemas/zodError.js";
 
 export default class WorkoutService {
   constructor(workoutRepo) {
@@ -50,7 +50,7 @@ export default class WorkoutService {
     const result = validateFields({ id: workoutId }, fieldConfig);
 
     if (!result.success) {
-      throw new Error(zodError(result.error));
+      throw new Error(parseError(result.error));
     }
 
     const workoutExists = await this.workoutRepo.findById({
@@ -74,7 +74,7 @@ export default class WorkoutService {
     const result = validateFields(body, fieldConfig);
 
     if (!result.success) {
-      throw new Error(zodError(result.error));
+      throw new Error(parseError(result.error));
     }
 
     const lowercaseName = body.name.toLowerCase();
@@ -96,7 +96,7 @@ export default class WorkoutService {
     const result = validateFields({ id: workoutId }, fieldConfig);
 
     if (!result.success) {
-      throw new Error(zodError(result.error));
+      throw new Error(parseError(result.error));
     }
 
     const workoutExists = await this.workoutRepo.findById({
