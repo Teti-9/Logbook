@@ -12,12 +12,26 @@ datasource db {
   provider = "postgresql"
 }
 
+model Workout {
+  id        Int        @id @default(autoincrement())
+  name      String
+  userId    Int
+  user      User       @relation(fields: [userId], references: [id])
+  divisions Division[]
+  isDeleted Boolean    @default(false)
+  deletedAt DateTime?
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
 model Division {
   id        Int         @id @default(autoincrement())
   name      String
   day       Day
   userId    Int
   user      User        @relation(fields: [userId], references: [id])
+  workoutId Int
+  workout   Workout     @relation(fields: [workoutId], references: [id])
   exercises Exercises[]
   isDeleted Boolean     @default(false)
   deletedAt DateTime?
@@ -176,4 +190,5 @@ model User {
   logbooks    Logbook[]
   historicals Historical[]
   tokens      RefreshToken[]
+  workouts    Workout[]
 }

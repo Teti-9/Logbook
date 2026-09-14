@@ -1,118 +1,128 @@
 export default class DivisionService {
-    constructor(divisionRepo) {
-        this.divisionRepo = divisionRepo
+  constructor(divisionRepo) {
+    this.divisionRepo = divisionRepo;
+  }
+
+  async getDivisions(userId, { page = 1, limit = 10 } = {}) {
+    if (page <= 0) {
+      const error = new Error("Page cannot be zero or a negative number.");
+      error.statusCode = 400;
+      throw error;
     }
 
-    async getDivisions(userId, { page = 1, limit = 10 } = {}) {
+    const { divisions, total } = await this.divisionRepo.findAll(
+      {
+        userId: userId,
+        isDeleted: false,
+      },
+      {
+        page,
+        limit,
+      },
+    );
 
-        if (page <= 0) {
-            const error = new Error("Page cannot be zero or a negative number.")
-            error.statusCode = 400
-            throw error
-        }
-
-        const { divisions, total } = await this.divisionRepo.findAll({
-            userId: userId,
-            isDeleted: false
-        }, {
-            page,
-            limit
-        }
-        )
-
-        if (!divisions || divisions.length === 0) {
-            const error = new Error('No divisions found.')
-            error.statusCode = 404
-            throw error
-        }
-
-        return {
-            divisions,
-            pagination: {
-                total,
-                page: Number(page || 1),
-                limit: Number(limit || 10),
-                totalPages: Math.ceil(total / (Number(limit) || 10))
-            }
-        }
+    if (!divisions || divisions.length === 0) {
+      const error = new Error("No divisions found.");
+      error.statusCode = 404;
+      throw error;
     }
 
-    async getDivisionById(userId, id) {
-        const divisionId = Number(id)
+    return {
+      divisions,
+      pagination: {
+        total,
+        page: Number(page || 1),
+        limit: Number(limit || 10),
+        totalPages: Math.ceil(total / (Number(limit) || 10)),
+      },
+    };
+  }
 
-        const division = await this.divisionRepo.findById({
-            userId: userId,
-            id: divisionId,
-            isDeleted: false
-        })
+  async getDivisionById(userId, id) {
+    const divisionId = Number(id);
 
-        if (!division) {
-            const error = new Error('Division not found.')
-            error.statusCode = 404
-            throw error
-        }
+    const division = await this.divisionRepo.findById({
+      userId: userId,
+      id: divisionId,
+      isDeleted: false,
+    });
 
-        return division
+    if (!division) {
+      const error = new Error("Division not found.");
+      error.statusCode = 404;
+      throw error;
     }
 
-    async createDivision(userId, body) {
+    return division;
+  }
 
-        const lowercaseName = body.name.toLowerCase()
-        const lowercaseDay = body.day.toLowerCase()
-        const DAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
+  async createDivision(userId, body) {
+    const lowercaseName = body.name.toLowerCase();
+    const lowercaseDay = body.day.toLowerCase();
+    const DAYS = [
+      "monday",
+      "tuesday",
+      "wednesday",
+      "thursday",
+      "friday",
+      "saturday",
+      "sunday",
+    ];
 
-        if (!DAYS.includes(lowercaseDay)) {
-            const error = new Error(`'${body.day}' is not a day of the week.`)
-            error.statusCode = 400
-            throw error
-        }
-
-        const dayUsed = await this.divisionRepo.findOne({
-            userId: userId,
-            day: lowercaseDay,
-            isDeleted: false
-        })
-
-        if (dayUsed) {
-            const error = new Error('A training split for this day already exists.')
-            error.statusCode = 400
-            throw error
-        }
-
-        const newData = {
-            name: lowercaseName,
-            day: lowercaseDay,
-            userId: userId
-        }
-
-        await this.divisionRepo.create(newData)
-
-        return { message: 'Training split successfully created.' }
+    if (!DAYS.includes(lowercaseDay)) {
+      const error = new Error(`'${body.day}' is not a day of the week.`);
+      error.statusCode = 400;
+      throw error;
     }
 
-    async deleteDivision(userId, id) {
-        const divisionId = Number(id)
+    const dayUsed = await this.divisionRepo.findOne({
+      userId: userId,
+      day: lowercaseDay,
+      isDeleted: false,
+    });
 
-        const divisionExists = await this.divisionRepo.findById({
-            userId: userId,
-            id: divisionId,
-            isDeleted: false
-        })
-
-        if (!divisionExists) {
-            const error = new Error('Division not found.')
-            error.statusCode = 404
-            throw error
-        }
-
-        if (divisionExists.exercises.length > 0) {
-            const error = new Error('Division contain exercises, please delete them before hand.')
-            error.statusCode = 409
-            throw error
-        }
-
-        await this.divisionRepo.findByIdAndDelete(divisionId)
-
-        return { message: 'Division successfully deleted.' }
+    if (dayUsed) {
+      const error = new Error("A training split for this day already exists.");
+      error.statusCode = 400;
+      throw error;
     }
+
+    const newData = {
+      name: lowercaseName,
+      day: lowercaseDay,
+      userId: userId,
+    };
+
+    await this.divisionRepo.create(newData);
+
+    return { message: "Training split successfully created." };
+  }
+
+  async deleteDivision(userId, id) {
+    const divisionId = Number(id);
+
+    const divisionExists = await this.divisionRepo.findById({
+      userId: userId,
+      id: divisionId,
+      isDeleted: false,
+    });
+
+    if (!divisionExists) {
+      const error = new Error("Division not found.");
+      error.statusCode = 404;
+      throw error;
+    }
+
+    if (divisionExists.exercises.length > 0) {
+      const error = new Error(
+        "Division contain exercises, please delete them before hand.",
+      );
+      error.statusCode = 409;
+      throw error;
+    }
+
+    await this.divisionRepo.findByIdAndDelete(divisionId);
+
+    return { message: "Division successfully deleted." };
+  }
 }

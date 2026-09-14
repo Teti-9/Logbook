@@ -10,12 +10,13 @@ import sessionsMiddleware from "./middleware/sessions.js";
 import { prisma, connectDB } from "./config/database.js";
 import { toNodeHandler } from "better-auth/node";
 
-// import RefreshTokenRepo from "./repositories/refreshTokenRepo.js";
-// import RefreshTokenService from "./services/refreshTokenService.js";
-
 import HistoricalRepo from "./repositories/historicalRepo.js";
 import HistoricalService from "./services/historicalService.js";
 import HistoricalRouter from "./routes/historicalRoute.js";
+
+import WorkoutRepo from "./repositories/workoutRepo.js";
+import WorkoutService from "./services/workoutService.js";
+import WorkoutRouter from "./routes/workoutRoute.js";
 
 import DivisionRepo from "./repositories/divisionRepo.js";
 import DivisionService from "./services/divisionService.js";
@@ -29,17 +30,22 @@ import LogbookRepo from "./repositories/logbookRepo.js";
 import LogbookService from "./services/logbookService.js";
 import LogbookRouter from "./routes/logbookRoute.js";
 
+// import RefreshTokenRepo from "./repositories/refreshTokenRepo.js";
+// import RefreshTokenService from "./services/refreshTokenService.js";
+
 // import UserRepo from "./repositories/userRepo.js";
 // import UserService from "./services/userService.js";
 // import UserRouter from "./routes/userRoute.js";
 
 dotenv.config();
 
-// const refreshTokenRepo = new RefreshTokenRepo(prisma);
-
 const historicalRepo = new HistoricalRepo(prisma);
 const historicalService = new HistoricalService(historicalRepo);
 const historicalRouter = HistoricalRouter(historicalService);
+
+const workoutRepo = new WorkoutRepo(prisma);
+const workoutService = new WorkoutService(workoutRepo);
+const workoutRouter = WorkoutRouter(workoutService);
 
 const divisionRepo = new DivisionRepo(prisma);
 const divisionService = new DivisionService(divisionRepo);
@@ -53,8 +59,10 @@ const logbookRepo = new LogbookRepo(prisma);
 const logbookService = new LogbookService(logbookRepo, exercisesRepo, prisma);
 const logbookRouter = LogbookRouter(logbookService);
 
-// const userRepo = new UserRepo(prisma);
+// const refreshTokenRepo = new RefreshTokenRepo(prisma);
 // const refreshTokenService = new RefreshTokenService(userRepo, refreshTokenRepo);
+
+// const userRepo = new UserRepo(prisma);
 // const userService = new UserService(userRepo, refreshTokenService);
 // const userRouter = UserRouter(userService, refreshTokenService);
 
@@ -95,6 +103,7 @@ const options = {
 const specs = swaggerJsdoc(options);
 
 // app.use("/api/auth", userRouter);
+app.use("/api", sessionsMiddleware, workoutRouter);
 app.use("/api", sessionsMiddleware, divisionRouter);
 app.use("/api", sessionsMiddleware, exercisesRouter);
 app.use("/api", sessionsMiddleware, logbookRouter);
