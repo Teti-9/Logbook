@@ -1,60 +1,60 @@
 export default class LogbookRepo {
-    constructor(prisma) {
-        this.prisma = prisma
-    }
+  constructor(prisma) {
+    this.prisma = prisma;
+  }
 
-    async findAll(where) {
-        return this.prisma.logbook.findMany({
-            where,
-            include: {
-                exercise: {
-                    select: {
-                        id: true,
-                        name: true,
-                    }
-                }
-            },
-            orderBy: {
-                createdAt: 'desc'
-            },
-        })
-    }
+  async findAll(where) {
+    return this.prisma.logbook.findMany({
+      where,
+      include: {
+        exercise: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+  }
 
-    async findById(where) {
-        return this.prisma.logbook.findFirst({
-            where,
-            include: {
-                exercise: {
-                    select: {
-                        id: true,
-                        name: true,
-                    }
-                }
-            }
-        })
-    }
+  async findById(where) {
+    return this.prisma.logbook.findFirst({
+      where,
+      include: {
+        exercise: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+    });
+  }
 
-    async findOne(where) {
-        return this.prisma.logbook.findFirst({
-            where
-        })
-    }
+  async findOne(where) {
+    return this.prisma.logbook.findFirst({
+      where,
+    });
+  }
 
-    async create(data) {
-        return this.prisma.logbook.create({ data })
-    }
+  async create(data) {
+    return this.prisma.logbook.create({ data });
+  }
 
-    async findByIdAndUpdate(id, data) {
-        return this.prisma.logbook.update({ where: { id }, data })
-    }
+  async findByIdAndUpdate(id, data) {
+    return this.prisma.logbook.update({ where: { id }, data });
+  }
 
-    async findByIdAndDelete(id) {
-        return this.prisma.logbook.update({
-            where: { id },
-            data: {
-                isDeleted: true,
-                deletedAt: new Date()
-            }
-        })
-    }
+  async findByIdAndDelete(id) {
+    return this.prisma.logbook.update({
+      where: { id },
+      data: {
+        isDeleted: true,
+        deletedAt: new Date(),
+      },
+    });
+  }
 }

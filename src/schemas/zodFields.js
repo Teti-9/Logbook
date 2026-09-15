@@ -3,10 +3,9 @@ import * as z from "zod";
 const FIELD_TYPES = {
   string: z.string().min(1),
   number: z.number().min(1),
-  number0: z.number().optional(),
   boolean: z.boolean(),
-  email: z.string().email(),
-  date: z.string().date(),
+  email: z.email(),
+  date: z.iso.date(),
   password: z.string().min(4),
 };
 

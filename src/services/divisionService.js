@@ -1,13 +1,18 @@
+import validateFields from "../schemas/zodFields.js";
+import parseError from "../schemas/zodError.js";
+
 export default class DivisionService {
   constructor(divisionRepo) {
     this.divisionRepo = divisionRepo;
   }
 
   async getDivisions(userId, { page = 1, limit = 10 } = {}) {
-    if (page <= 0) {
-      const error = new Error("Page cannot be zero or a negative number.");
-      error.statusCode = 400;
-      throw error;
+    const fieldConfig = { page: "number" };
+
+    const result = validateFields({ page: Number(page) }, fieldConfig);
+
+    if (!result.success) {
+      throw new Error("Page cannot be zero or a negative number.");
     }
 
     const { divisions, total } = await this.divisionRepo.findAll(
@@ -40,6 +45,13 @@ export default class DivisionService {
 
   async getDivisionById(userId, id) {
     const divisionId = Number(id);
+    const fieldConfig = { id: "number" };
+
+    const result = validateFields({ id: divisionId }, fieldConfig);
+
+    if (!result.success) {
+      throw new Error(parseError(result.error));
+    }
 
     const division = await this.divisionRepo.findById({
       userId: userId,
@@ -57,6 +69,13 @@ export default class DivisionService {
   }
 
   async createDivision(userId, body) {
+    const fieldConfig = { name: "string", day: "string" };
+
+    const result = validateFields(body, fieldConfig);
+
+    if (!result.success) {
+      throw new Error(parseError(result.error));
+    }
     const lowercaseName = body.name.toLowerCase();
     const lowercaseDay = body.day.toLowerCase();
     const DAYS = [
@@ -82,7 +101,7 @@ export default class DivisionService {
     });
 
     if (dayUsed) {
-      const error = new Error("A training split for this day already exists.");
+      const error = new Error("A division for this day already exists.");
       error.statusCode = 400;
       throw error;
     }
@@ -95,11 +114,18 @@ export default class DivisionService {
 
     await this.divisionRepo.create(newData);
 
-    return { message: "Training split successfully created." };
+    return { message: "Division successfully created." };
   }
 
   async deleteDivision(userId, id) {
     const divisionId = Number(id);
+    const fieldConfig = { id: "number" };
+
+    const result = validateFields({ id: divisionId }, fieldConfig);
+
+    if (!result.success) {
+      throw new Error(parseError(result.error));
+    }
 
     const divisionExists = await this.divisionRepo.findById({
       userId: userId,

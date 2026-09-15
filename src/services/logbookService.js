@@ -1,127 +1,153 @@
-import sincLogbooks from "../utils/sinclogbooks.js"
+import validateFields from "../schemas/zodFields.js";
+import parseError from "../schemas/zodError.js";
+import syncLogbooks from "../utils/syncBook.js";
 
 export default class LogbookService {
-    constructor(logbookRepo, exercisesRepo, prisma) {
-        this.logbookRepo = logbookRepo
-        this.exercisesRepo = exercisesRepo
-        this.prisma = prisma
+  constructor(logbookRepo, exercisesRepo, prisma) {
+    this.logbookRepo = logbookRepo;
+    this.exercisesRepo = exercisesRepo;
+    this.prisma = prisma;
+  }
+
+  async getLogbooks(userId) {
+    const logbooks = await this.logbookRepo.findAll({
+      userId: userId,
+      sync: false,
+      isDeleted: false,
+    });
+
+    if (!logbooks || logbooks.length === 0) {
+      const error = new Error("No logbooks found.");
+      error.statusCode = 404;
+      throw error;
     }
 
-    async getLogbooks(userId) {
+    return logbooks;
+  }
 
-        const logbooks = await this.logbookRepo.findAll({
-            userId: userId,
-            sinc: false,
-            isDeleted: false
-        })
+  async getLogbookById(userId, id) {
+    const logbookId = Number(id);
+    const fieldConfig = { id: "number" };
 
-        if (!logbooks || logbooks.length === 0) {
-            const error = new Error('No logbooks found.')
-            error.statusCode = 404
-            throw error
-        }
+    const result = validateFields({ id: logbookId }, fieldConfig);
 
-        return logbooks
+    if (!result.success) {
+      throw new Error(parseError(result.error));
     }
 
-    async getLogbookById(userId, id) {
-        const logbookId = Number(id)
+    const logbook = await this.logbookRepo.findById({
+      userId: userId,
+      id: logbookId,
+      sync: false,
+      isDeleted: false,
+    });
 
-        const logbook = await this.logbookRepo.findById({
-            userId: userId,
-            id: logbookId,
-            sinc: false,
-            isDeleted: false
-        })
-
-        if (!logbook) {
-            const error = new Error('Logbook not found.')
-            error.statusCode = 404
-            throw error
-        }
-
-        return logbook
+    if (!logbook) {
+      const error = new Error("Logbook not found.");
+      error.statusCode = 404;
+      throw error;
     }
 
-    async createLogbook(userId, body) {
-        const exerciseId = Number(body.exerciseId)
+    return logbook;
+  }
 
-        const exerciseExists = await this.exercisesRepo.findById({
-            userId: userId,
-            id: exerciseId,
-            isDeleted: false
-        })
+  async createLogbook(userId, body) {
+    const exerciseId = Number(body.exerciseId);
+    const fieldConfig = {
+      exerciseId: "number",
+      name: "string",
+      series: "number",
+      rest: "number",
+      divisionId: "number",
+      userId: "number",
+    };
 
-        if (!exerciseExists) {
-            const error = new Error('Exercise not found.')
-            error.statusCode = 404
-            throw error
-        }
+    const newData = {
+      ...body,
+      exerciseId: exerciseId,
+      userId: userId,
+    };
 
-        const logbookExists = await this.logbookRepo.findById({
-            userId: userId,
-            exerciseId,
-            sinc: false,
-            isDeleted: false,
-        })
+    const result = validateFields(newData, fieldConfig);
 
-        if (logbookExists) {
-            const error = new Error('A logbook for this exercise already exists and it is not yet synced.')
-            error.statusCode = 400
-            throw error
-        }
-
-        const newData = {
-            ...body,
-            userId: userId
-        }
-
-        await this.logbookRepo.create(newData)
-
-        return { message: 'Logbook successfully created.' }
+    if (!result.success) {
+      throw new Error(zodError(result.error));
     }
 
-    async sincLogbook(userId, body) {
+    const exerciseExists = await this.exercisesRepo.findById({
+      userId: userId,
+      id: exerciseId,
+      isDeleted: false,
+    });
 
-        const { logbooks } = body
-        const sincronizados = []
-
-        for (const exerciseId of logbooks) {
-
-            try {
-
-                const sincResult = await sincLogbooks(userId, exerciseId, this.prisma)
-                sincronizados.push(sincResult)
-
-            } catch (error) {
-
-                throw new Error(error)
-
-            }
-        }
-
-        return {
-            message: sincronizados
-        }
+    if (!exerciseExists) {
+      const error = new Error("Exercise not found.");
+      error.statusCode = 404;
+      throw error;
     }
 
-    async deleteLogbook(userId, id) {
-        const logbookId = Number(id)
+    const logbookExists = await this.logbookRepo.findById({
+      userId: userId,
+      exerciseId,
+      sync: false,
+      isDeleted: false,
+    });
 
-        const logbook = await this.logbookRepo.findById({
-            userId: userId,
-            id: logbookId,
-            isDeleted: false
-        })
-
-        if (!logbook) {
-            const error = new Error('Logbook not found.')
-            error.statusCode = 404
-            throw error
-        }
-
-        await this.logbookRepo.findByIdAndDelete(logbookId)
-
-        return { message: 'Logbook successfully deleted.' }
+    if (logbookExists) {
+      const error = new Error(
+        "A logbook for this exercise already exists and it is not yet synced.",
+      );
+      error.statusCode = 400;
+      throw error;
     }
+
+    await this.logbookRepo.create(newData);
+
+    return { message: "Logbook successfully created." };
+  }
+
+  async syncLogbook(userId, body) {
+    const { logbooks } = body;
+    const synchronizations = [];
+
+    for (const exerciseId of logbooks) {
+      try {
+        const syncResult = await syncLogbooks(userId, exerciseId, this.prisma);
+        synchronizations.push(syncResult);
+      } catch (error) {
+        throw new Error(error);
+      }
+    }
+
+    return {
+      message: synchronizations,
+    };
+  }
+
+  async deleteLogbook(userId, id) {
+    const logbookId = Number(id);
+    const fieldConfig = { id: "number" };
+
+    const result = validateFields({ id: logbookId }, fieldConfig);
+
+    if (!result.success) {
+      throw new Error(parseError(result.error));
+    }
+
+    const logbook = await this.logbookRepo.findById({
+      userId: userId,
+      id: logbookId,
+      isDeleted: false,
+    });
+
+    if (!logbook) {
+      const error = new Error("Logbook not found.");
+      error.statusCode = 404;
+      throw error;
+    }
+
+    await this.logbookRepo.findByIdAndDelete(logbookId);
+
+    return { message: "Logbook successfully deleted." };
+  }
 }
