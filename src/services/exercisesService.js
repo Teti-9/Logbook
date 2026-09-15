@@ -70,22 +70,31 @@ export default class ExercisesService {
   }
 
   async createExercise(userId, body) {
+    const lowercaseName = body.name.toLowerCase();
+    const divisionId = Number(body.divisionId);
     const fieldConfig = {
       name: "string",
-      series: "number",
+      target_muscle_group: "string",
+      series_reps: "string",
       rest: "number",
+      advanced_technique: "optional",
+      observation: "optional",
       divisionId: "number",
       userId: "number",
     };
 
-    const result = validateFields(req.body, fieldConfig);
+    const newData = {
+      ...body,
+      name: lowercaseName,
+      divisionId: divisionId,
+      userId: userId,
+    };
+
+    const result = validateFields(newData, fieldConfig);
 
     if (!result.success) {
       throw new Error(zodError(result.error));
     }
-
-    const lowercaseName = body.name.toLowerCase();
-    const divisionId = Number(body.divisionId);
 
     const divisionExists = await this.divisionRepo.findById({
       userId: userId,
@@ -98,12 +107,6 @@ export default class ExercisesService {
       error.statusCode = 404;
       throw error;
     }
-
-    const newData = {
-      ...body,
-      name: lowercaseName,
-      userId: userId,
-    };
 
     await this.exercisesRepo.create(newData);
 

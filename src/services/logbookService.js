@@ -58,6 +58,7 @@ export default class LogbookService {
       name: "string",
       series: "number",
       rest: "number",
+      extra: "optional",
       divisionId: "number",
       userId: "number",
     };
