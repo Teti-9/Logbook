@@ -23,7 +23,8 @@ export default class HistoricalRepo {
           select: {
             id: true,
             name: true,
-            series: true,
+            target_muscle_group: true,
+            series_reps: true,
             rest: true,
             advanced_technique: true,
             observation: true,
