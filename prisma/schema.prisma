@@ -16,6 +16,7 @@ model Workout {
   id        Int        @id @default(autoincrement())
   name      String
   userId    Int
+  observation         String?
   user      User       @relation(fields: [userId], references: [id])
   divisions Division[]
   isDeleted Boolean    @default(false)

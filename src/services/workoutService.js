@@ -69,7 +69,8 @@ export default class WorkoutService {
   }
 
   async createWorkout(userId, body) {
-    const fieldConfig = { name: "string" };
+    const lowercaseName = body.name.toLowerCase();
+    const fieldConfig = { name: "string", observation: "optional" };
 
     const result = validateFields(body, fieldConfig);
 
@@ -77,9 +78,8 @@ export default class WorkoutService {
       throw new Error(parseError(result.error));
     }
 
-    const lowercaseName = body.name.toLowerCase();
-
     const newData = {
+      ...body,
       name: lowercaseName,
       userId: userId,
     };
