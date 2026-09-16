@@ -2,9 +2,10 @@ import validateFields from "../schemas/zodFields.js";
 import parseError from "../schemas/zodError.js";
 
 export default class ExercisesService {
-  constructor(exercisesRepo, divisionRepo) {
+  constructor(exercisesRepo, divisionRepo, prisma) {
     this.exercisesRepo = exercisesRepo;
     this.divisionRepo = divisionRepo;
+    this.prisma = prisma;
   }
 
   async getExercises(userId, { page = 1, limit = 10 } = {}) {
@@ -93,7 +94,7 @@ export default class ExercisesService {
     const result = validateFields(newData, fieldConfig);
 
     if (!result.success) {
-      throw new Error(zodError(result.error));
+      throw new Error(parseError(result.error));
     }
 
     const divisionExists = await this.divisionRepo.findById({
@@ -109,6 +110,12 @@ export default class ExercisesService {
     }
 
     await this.exercisesRepo.create(newData);
+    await this.prisma.exercises__.create({
+      data: {
+        name: lowercaseName,
+        target_muscle_group: body.target_muscle_group,
+      },
+    });
 
     return { message: "Exercise successfully created." };
   }

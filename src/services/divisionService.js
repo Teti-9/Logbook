@@ -2,8 +2,9 @@ import validateFields from "../schemas/zodFields.js";
 import parseError from "../schemas/zodError.js";
 
 export default class DivisionService {
-  constructor(divisionRepo) {
+  constructor(divisionRepo, workoutRepo) {
     this.divisionRepo = divisionRepo;
+    this.workoutRepo = workoutRepo;
   }
 
   async getDivisions(userId, { page = 1, limit = 10 } = {}) {
@@ -69,7 +70,7 @@ export default class DivisionService {
   }
 
   async createDivision(userId, body) {
-    const fieldConfig = { name: "string", day: "string" };
+    const fieldConfig = { name: "string", day: "string", workoutId: "number" };
 
     const result = validateFields(body, fieldConfig);
 
@@ -78,6 +79,7 @@ export default class DivisionService {
     }
     const lowercaseName = body.name.toLowerCase();
     const lowercaseDay = body.day.toLowerCase();
+    const workoutId = body.workoutId;
     const DAYS = [
       "monday",
       "tuesday",
@@ -87,6 +89,20 @@ export default class DivisionService {
       "saturday",
       "sunday",
     ];
+
+    const workout = await this.workoutRepo.findOne({
+      userId: userId,
+      id: workoutId,
+      isDeleted: false,
+    });
+
+    if (!workout) {
+      const error = new Error(
+        "Workout not found. Please create a workout first.",
+      );
+      error.statusCode = 404;
+      throw error;
+    }
 
     if (!DAYS.includes(lowercaseDay)) {
       const error = new Error(`'${body.day}' is not a day of the week.`);
@@ -109,6 +125,7 @@ export default class DivisionService {
     const newData = {
       name: lowercaseName,
       day: lowercaseDay,
+      workoutId: workoutId,
       userId: userId,
     };
 

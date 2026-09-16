@@ -55,24 +55,21 @@ export default class LogbookService {
     const exerciseId = Number(body.exerciseId);
     const fieldConfig = {
       exerciseId: "number",
-      name: "string",
-      series: "number",
-      rest: "number",
+      topset_weight: "number",
+      topset_reps: "number",
       extra: "optional",
-      divisionId: "number",
       userId: "number",
     };
 
     const newData = {
       ...body,
-      exerciseId: exerciseId,
       userId: userId,
     };
 
     const result = validateFields(newData, fieldConfig);
 
     if (!result.success) {
-      throw new Error(zodError(result.error));
+      throw new Error(parseError(result.error));
     }
 
     const exerciseExists = await this.exercisesRepo.findById({
@@ -108,10 +105,10 @@ export default class LogbookService {
   }
 
   async syncLogbook(userId, body) {
-    const { logbooks } = body;
+    const { exercises } = body;
     const synchronizations = [];
 
-    for (const exerciseId of logbooks) {
+    for (const exerciseId of exercises) {
       try {
         const syncResult = await syncLogbooks(userId, exerciseId, this.prisma);
         synchronizations.push(syncResult);
@@ -138,6 +135,7 @@ export default class LogbookService {
     const logbook = await this.logbookRepo.findById({
       userId: userId,
       id: logbookId,
+      sync: false,
       isDeleted: false,
     });
 

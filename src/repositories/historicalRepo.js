@@ -9,17 +9,16 @@ export default class HistoricalRepo {
         userId,
         isDeleted,
         ...(search && {
-          name: {
-            contains: search,
-            mode: "insensitive",
+          exercise: {
+            name: {
+              contains: search,
+              mode: "insensitive",
+            },
           },
         }),
       },
       include: {
-        exercises: {
-          where: {
-            isDeleted: false,
-          },
+        exercise: {
           select: {
             id: true,
             name: true,

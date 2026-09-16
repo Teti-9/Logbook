@@ -39,25 +39,29 @@ import LogbookRouter from "./routes/logbookRoute.js";
 
 dotenv.config();
 
-const historicalRepo = new HistoricalRepo(prisma);
-const historicalService = new HistoricalService(historicalRepo);
-const historicalRouter = HistoricalRouter(historicalService);
-
 const workoutRepo = new WorkoutRepo(prisma);
 const workoutService = new WorkoutService(workoutRepo);
 const workoutRouter = WorkoutRouter(workoutService);
 
 const divisionRepo = new DivisionRepo(prisma);
-const divisionService = new DivisionService(divisionRepo);
+const divisionService = new DivisionService(divisionRepo, workoutRepo);
 const divisionRouter = DivisionRouter(divisionService);
 
 const exercisesRepo = new ExercisesRepo(prisma);
-const exercisesService = new ExercisesService(exercisesRepo, divisionRepo);
+const exercisesService = new ExercisesService(
+  exercisesRepo,
+  divisionRepo,
+  prisma,
+);
 const exercisesRouter = ExercisesRouter(exercisesService);
 
 const logbookRepo = new LogbookRepo(prisma);
 const logbookService = new LogbookService(logbookRepo, exercisesRepo, prisma);
 const logbookRouter = LogbookRouter(logbookService);
+
+const historicalRepo = new HistoricalRepo(prisma);
+const historicalService = new HistoricalService(historicalRepo);
+const historicalRouter = HistoricalRouter(historicalService);
 
 // const refreshTokenRepo = new RefreshTokenRepo(prisma);
 // const refreshTokenService = new RefreshTokenService(userRepo, refreshTokenRepo);

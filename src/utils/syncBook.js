@@ -11,63 +11,31 @@ async function syncLogbooks(userId, exerciseId, prisma) {
     throw new Error(parseError(result.error));
   }
 
-  const exerciseAssociated = await prisma.logbook.findFirst({
+  const logbookAssociated = await prisma.logbook.findFirst({
     where: {
-      id: id,
+      exerciseId: id,
       userId: userId,
-      isDeleted: false,
-    },
-  });
-
-  const associatedId = exerciseAssociated.exerciseId;
-
-  const exerciseExists = await prisma.exercises.findFirst({
-    where: {
-      userId: userId,
-      id: associatedId,
-      isDeleted: false,
-    },
-  });
-
-  if (!exerciseExists) {
-    throw new Error("Exercise associated with this logbook does not exist.");
-  }
-
-  const logbookExists = await prisma.logbook.findFirst({
-    where: {
-      userId: userId,
-      id: id,
       sync: false,
       isDeleted: false,
     },
   });
 
-  if (!logbookExists) {
+  if (!logbookAssociated) {
     throw new Error("Logbook not found for this exercise.");
   }
 
-  const data = {
-    topset_weight: logbookExists.topset_weight,
-    topset_reps: logbookExists.topset_reps,
-    extra: logbookExists.extra,
-  };
-
   const historical_data = {
+    exerciseId: id,
+    previous_topset_weight: logbookAssociated.topset_weight,
+    previous_topset_reps: logbookAssociated.topset_reps,
+    extra: logbookAssociated.extra,
     userId: userId,
-    exerciseId: associatedId,
-    previous_topset_weight: exerciseExists.topset_weight,
-    previous_topset_reps: exerciseExists.topset_reps,
-    extra: exerciseExists.extra,
   };
 
   await prisma.$transaction([
     prisma.historical.create({ data: historical_data }),
-    prisma.exercises.update({
-      where: { userId: userId, id: associatedId },
-      data,
-    }),
     prisma.logbook.update({
-      where: { userId: userId, id: logbookExists.id },
+      where: { userId: userId, id: logbookAssociated.id },
       data: { sync: true },
     }),
   ]);

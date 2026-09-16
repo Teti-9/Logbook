@@ -13,16 +13,16 @@ datasource db {
 }
 
 model Workout {
-  id        Int        @id @default(autoincrement())
-  name      String
-  userId    Int
-  observation         String?
-  user      User       @relation(fields: [userId], references: [id])
-  divisions Division[]
-  isDeleted Boolean    @default(false)
-  deletedAt DateTime?
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  id          Int        @id @default(autoincrement())
+  name        String
+  userId      Int
+  observation String?
+  user        User       @relation(fields: [userId], references: [id])
+  divisions   Division[]
+  isDeleted   Boolean    @default(false)
+  deletedAt   DateTime?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
 }
 
 model Division {
@@ -76,6 +76,18 @@ model Exercises {
 
 enum AdvancedTechnique {
   backoff
+}
+
+model Exercises__ {
+  id                  Int       @id @default(autoincrement())
+  name                String
+  target_muscle_group String
+  isDeleted           Boolean   @default(false)
+  deletedAt           DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  @@index([name])
 }
 
 model Logbook {
