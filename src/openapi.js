@@ -249,6 +249,7 @@ const openapi = {
             ),
           ),
           401: errorResponse("Missing or invalid session."),
+          400: errorResponse("Page cannot be zero or a negative number."),
           404: errorResponse("No workouts found."),
         },
       }),
@@ -285,6 +286,7 @@ const openapi = {
         parameters: [{ in: "path", name: "id", required: true, schema: id }],
         responses: {
           200: messageResponse("Workout successfully deleted."),
+          404: errorResponse("Workout not found."),
           409: errorResponse("The workout still contains divisions."),
         },
       }),
@@ -304,6 +306,7 @@ const openapi = {
               ["divisions", "pagination"],
             ),
           ),
+          400: errorResponse("Page cannot be zero or a negative number."),
           404: errorResponse("No divisions found."),
         },
       }),
@@ -342,6 +345,7 @@ const openapi = {
         parameters: [{ in: "path", name: "id", required: true, schema: id }],
         responses: {
           200: messageResponse("Division successfully deleted."),
+          404: errorResponse("Division not found."),
           409: errorResponse("The division still contains exercises."),
         },
       }),
@@ -361,6 +365,7 @@ const openapi = {
               ["exercises", "pagination"],
             ),
           ),
+          400: errorResponse("Page cannot be zero or a negative number."),
           404: errorResponse("No exercises found."),
         },
       }),
@@ -397,6 +402,7 @@ const openapi = {
         parameters: [{ in: "path", name: "id", required: true, schema: id }],
         responses: {
           200: messageResponse("Exercise successfully deleted."),
+          404: errorResponse("Exercise not found."),
           409: errorResponse("The exercise has unsynced logbooks."),
         },
       }),
@@ -442,7 +448,10 @@ const openapi = {
         tags: ["Logbooks"],
         summary: "Soft-delete a logbook entry",
         parameters: [{ in: "path", name: "id", required: true, schema: id }],
-        responses: { 200: messageResponse("Logbook successfully deleted.") },
+        responses: {
+          200: messageResponse("Logbook successfully deleted."),
+          404: errorResponse("Logbook not found."),
+        },
       }),
     },
     "/api/synclogbooks": {
@@ -501,6 +510,7 @@ const openapi = {
         parameters: [{ in: "path", name: "id", required: true, schema: id }],
         responses: {
           200: messageResponse("Historical archive successfully deleted."),
+          404: errorResponse("Historical archive not found."),
         },
       }),
     },

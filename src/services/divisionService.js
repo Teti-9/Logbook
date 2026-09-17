@@ -14,6 +14,8 @@ export default class DivisionService {
 
     if (!result.success) {
       throw new Error("Page cannot be zero or a negative number.");
+      error.statusCode = 400;
+      throw error;
     }
 
     const { divisions, total } = await this.divisionRepo.findAll(

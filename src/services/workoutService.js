@@ -13,6 +13,8 @@ export default class WorkoutService {
 
     if (!result.success) {
       throw new Error("Page cannot be zero or a negative number.");
+      error.statusCode = 400;
+      throw error;
     }
 
     const { workouts, total } = await this.workoutRepo.findAll(

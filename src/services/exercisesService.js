@@ -15,6 +15,8 @@ export default class ExercisesService {
 
     if (!result.success) {
       throw new Error("Page cannot be zero or a negative number.");
+      error.statusCode = 400;
+      throw error;
     }
 
     const { exercises, total } = await this.exercisesRepo.findAll(

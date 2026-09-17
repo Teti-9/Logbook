@@ -71,13 +71,13 @@ The React client uses `better-auth/react` through `frontend/src/auth-client.js`;
 
 All application routes are under `/api` and require a Better Auth session cookie:
 
-| Resource | Routes |
-| --- | --- |
-| Workouts | `GET`, `POST /api/workouts`; `GET`, `DELETE /api/workouts/:id` |
-| Divisions | `GET`, `POST /api/divisions`; `GET`, `DELETE /api/divisions/:id` |
-| Exercises | `GET`, `POST /api/exercises`; `GET`, `DELETE /api/exercises/:id` |
-| Logbook | `GET`, `POST /api/logbooks`; `GET`, `DELETE /api/logbooks/:id`; `POST /api/synclogbooks` |
-| History | `GET /api/historicals`; `GET`, `DELETE /api/historicals/:id` |
+| Resource  | Routes                                                                                   |
+| --------- | ---------------------------------------------------------------------------------------- |
+| Workouts  | `GET`, `POST /api/workouts`; `GET`, `DELETE /api/workouts/:id`                           |
+| Divisions | `GET`, `POST /api/divisions`; `GET`, `DELETE /api/divisions/:id`                         |
+| Exercises | `GET`, `POST /api/exercises`; `GET`, `DELETE /api/exercises/:id`                         |
+| Logbook   | `GET`, `POST /api/logbooks`; `GET`, `DELETE /api/logbooks/:id`; `POST /api/synclogbooks` |
+| History   | `GET /api/historicals`; `GET`, `DELETE /api/historicals/:id`                             |
 
 The list endpoints for workouts, divisions, and exercises support `page` and `limit`. History supports an optional `search` parameter for an exercise name.
 
