@@ -10,8 +10,6 @@ const HistoricalRouter = (historicalService) => {
    *   get:
    *     summary: Return all historical archives.
    *     tags: [Historical]
-   *     security:
-   *       - bearerAuth: []
    *     parameters:
    *       - in: query
    *         name: search
@@ -23,9 +21,9 @@ const HistoricalRouter = (historicalService) => {
    *       200:
    *         description: Success.
    *       401:
-   *         description: Token not included.
+   *         description: Unauthorized.
    *       403:
-   *         description: Expired or invalid token.
+   *         description: Expired or invalid token (Only with manual JWT implementation.)
    *       404:
    *         description: No historical archives found.
    *       500:
@@ -35,8 +33,6 @@ const HistoricalRouter = (historicalService) => {
    *   get:
    *     summary: Return a single historical archive.
    *     tags: [Historical]
-   *     security:
-   *       - bearerAuth: []
    *     parameters:
    *       - in: path
    *         name: id
@@ -48,9 +44,9 @@ const HistoricalRouter = (historicalService) => {
    *       200:
    *         description: Success.
    *       401:
-   *         description: Token not included.
+   *         description: Unauthorized.
    *       403:
-   *         description: Expired or invalid token.
+   *         description: Expired or invalid token (Only with manual JWT implementation.)
    *       404:
    *         description: Historical archive not found.
    *       500:
@@ -59,8 +55,6 @@ const HistoricalRouter = (historicalService) => {
    *   delete:
    *     summary: Soft-delete a historical archive.
    *     tags: [Historical]
-   *     security:
-   *       - bearerAuth: []
    *     parameters:
    *       - in: path
    *         name: id
@@ -72,9 +66,9 @@ const HistoricalRouter = (historicalService) => {
    *       200:
    *         description: Historical archive successfully deleted.
    *       401:
-   *         description: Token not included.
+   *         description: Unauthorized.
    *       403:
-   *         description: Expired or invalid token.
+   *         description: Expired or invalid token (Only with manual JWT implementation.)
    *       404:
    *         description: Historical archive not found.
    *       500:

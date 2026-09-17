@@ -10,15 +10,13 @@ const LogbookRouter = (logbookService) => {
    *   get:
    *     summary: Return all logbooks.
    *     tags: [Logbook]
-   *     security:
-   *       - bearerAuth: []
    *     responses:
    *       200:
    *         description: Success.
    *       401:
-   *         description: Token not included.
+   *         description: Unauthorized.
    *       403:
-   *         description: Expired or invalid token.
+   *         description: Expired or invalid token (Only with manual JWT implementation.)
    *       404:
    *         description: No logbooks found.
    *       500:
@@ -27,8 +25,6 @@ const LogbookRouter = (logbookService) => {
    *   post:
    *     summary: Create a new logbook entry.
    *     tags: [Logbook]
-   *     security:
-   *       - bearerAuth: []
    *     requestBody:
    *       required: true
    *       content:
@@ -39,6 +35,7 @@ const LogbookRouter = (logbookService) => {
    *               - exerciseId
    *               - topset_weight
    *               - topset_reps
+   *               - extra
    *             properties:
    *               exerciseId:
    *                 type: integer
@@ -49,23 +46,20 @@ const LogbookRouter = (logbookService) => {
    *               topset_reps:
    *                 type: integer
    *                 example: 8
-   *               backoff_weight:
-   *                 type: number
-   *                 minimum: 0
-   *                 example: 90
-   *               backoff_reps:
-   *                 type: integer
-   *                 minimum: 0
-   *                 example: 10
+   *               extra:
+   *                 type: string
+   *                 example: back off progression 90x8
    *     responses:
    *       201:
    *         description: Logbook successfully created.
    *       401:
-   *         description: Token not included.
+   *         description: Unauthorized.
    *       403:
-   *         description: Expired or invalid token.
+   *         description: Expired or invalid token (Only with manual JWT implementation.)
    *       404:
    *         description: Exercise not found.
+   *       400:
+   *         description: A logbook for this exercise already exists and it is not yet synced.
    *       500:
    *         description: There was an internal server error.
    *
@@ -73,8 +67,6 @@ const LogbookRouter = (logbookService) => {
    *   post:
    *     summary: Synchronize one or more logbooks.
    *     tags: [Logbook]
-   *     security:
-   *       - bearerAuth: []
    *     requestBody:
    *       required: true
    *       content:
@@ -82,9 +74,9 @@ const LogbookRouter = (logbookService) => {
    *           schema:
    *             type: object
    *             required:
-   *               - logbooks
+   *               - exercises
    *             properties:
-   *               logbooks:
+   *               exercises:
    *                 type: array
    *                 items:
    *                   type: integer
@@ -93,9 +85,9 @@ const LogbookRouter = (logbookService) => {
    *       200:
    *         description: Logbooks successfully synchronized.
    *       401:
-   *         description: Token not included.
+   *         description: Unauthorized.
    *       403:
-   *         description: Expired or invalid token.
+   *         description: Expired or invalid token (Only with manual JWT implementation.)
    *       500:
    *         description: There was an internal server error.
    *
@@ -116,9 +108,9 @@ const LogbookRouter = (logbookService) => {
    *       200:
    *         description: Success.
    *       401:
-   *         description: Token not included.
+   *         description: Unauthorized.
    *       403:
-   *         description: Expired or invalid token.
+   *         description: Expired or invalid token (Only with manual JWT implementation.)
    *       404:
    *         description: Logbook not found.
    *       500:
@@ -127,8 +119,6 @@ const LogbookRouter = (logbookService) => {
    *   delete:
    *     summary: Soft-delete a logbook.
    *     tags: [Logbook]
-   *     security:
-   *       - bearerAuth: []
    *     parameters:
    *       - in: path
    *         name: id
@@ -140,9 +130,9 @@ const LogbookRouter = (logbookService) => {
    *       200:
    *         description: Logbook successfully deleted.
    *       401:
-   *         description: Token not included.
+   *         description: Unauthorized.
    *       403:
-   *         description: Expired or invalid token.
+   *         description: Expired or invalid token (Only with manual JWT implementation.)
    *       404:
    *         description: Logbook not found.
    *       500:

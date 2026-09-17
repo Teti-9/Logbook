@@ -118,7 +118,7 @@ export default class DivisionService {
 
     if (dayUsed) {
       const error = new Error("A division for this day already exists.");
-      error.statusCode = 400;
+      error.statusCode = 409;
       throw error;
     }
 

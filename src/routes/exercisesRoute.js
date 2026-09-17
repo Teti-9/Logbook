@@ -10,8 +10,6 @@ const ExercisesRouter = (exercisesService) => {
    *   get:
    *     summary: Return all exercises.
    *     tags: [Exercise]
-   *     security:
-   *       - bearerAuth: []
    *     parameters:
    *       - in: query
    *         name: page
@@ -30,12 +28,12 @@ const ExercisesRouter = (exercisesService) => {
    *           default: 10
    *         description: Number of items per page.
    *     responses:
+   *       401:
+   *         description: Unauthorized.
+   *       403:
+   *         description: Expired or invalid token (Only with manual JWT implementation.)
    *       200:
    *         description: Success.
-   *       401:
-   *         description: Token not included.
-   *       403:
-   *         description: Expired or invalid token.
    *       404:
    *         description: No exercises found.
    *       500:
@@ -44,8 +42,6 @@ const ExercisesRouter = (exercisesService) => {
    *   post:
    *     summary: Create a new exercise.
    *     tags: [Exercise]
-   *     security:
-   *       - bearerAuth: []
    *     requestBody:
    *       required: true
    *       content:
@@ -54,33 +50,31 @@ const ExercisesRouter = (exercisesService) => {
    *             type: object
    *             required:
    *               - name
-   *               - series
-   *               - topset_weight
-   *               - topset_reps
-   *               - backoff_weight
-   *               - backoff_reps
+   *               - target_muscle_group
+   *               - series_reps
+   *               - rest
+   *               - advanced_technique
+   *               - observation
    *               - divisionId
    *             properties:
    *               name:
    *                 type: string
    *                 example: Bench Press
-   *               series:
-   *                 type: integer
-   *                 example: 3
-   *               topset_weight:
+   *               target_muscle_group:
+   *                 type: string
+   *                 example: Chest
+   *               series_reps:
+   *                 type: string
+   *                 example: 4x8
+   *               rest:
    *                 type: number
-   *                 example: 100
-   *               topset_reps:
-   *                 type: integer
-   *                 example: 8
-   *               backoff_weight:
-   *                 type: number
-   *                 minimum: 0
    *                 example: 90
-   *               backoff_reps:
-   *                 type: integer
-   *                 minimum: 0
-   *                 example: 10
+   *               advanced_technique:
+   *                 type: string
+   *                 example: Backoff (Optional)
+   *               observation:
+   *                 type: string
+   *                 example: Focus on form and control. (Optional)
    *               divisionId:
    *                 type: integer
    *                 example: 1
@@ -88,9 +82,9 @@ const ExercisesRouter = (exercisesService) => {
    *       201:
    *         description: Exercise successfully created.
    *       401:
-   *         description: Token not included.
+   *         description: Unauthorized.
    *       403:
-   *         description: Expired or invalid token.
+   *         description: Expired or invalid token (Only with manual JWT implementation.)
    *       404:
    *         description: Division not found.
    *       500:
@@ -100,8 +94,6 @@ const ExercisesRouter = (exercisesService) => {
    *   get:
    *     summary: Return a single exercise.
    *     tags: [Exercise]
-   *     security:
-   *       - bearerAuth: []
    *     parameters:
    *       - in: path
    *         name: id
@@ -113,9 +105,9 @@ const ExercisesRouter = (exercisesService) => {
    *       200:
    *         description: Success.
    *       401:
-   *         description: Token not included.
+   *         description: Unauthorized.
    *       403:
-   *         description: Expired or invalid token.
+   *         description: Expired or invalid token (Only with manual JWT implementation.)
    *       404:
    *         description: Exercise not found.
    *       500:
@@ -124,8 +116,6 @@ const ExercisesRouter = (exercisesService) => {
    *   delete:
    *     summary: Soft-delete an exercise.
    *     tags: [Exercise]
-   *     security:
-   *       - bearerAuth: []
    *     parameters:
    *       - in: path
    *         name: id
@@ -137,11 +127,13 @@ const ExercisesRouter = (exercisesService) => {
    *       200:
    *         description: Exercise successfully deleted.
    *       401:
-   *         description: Token not included.
+   *         description: Unauthorized.
    *       403:
-   *         description: Expired or invalid token.
+   *         description: Expired or invalid token (Only with manual JWT implementation.)
    *       404:
    *         description: Exercise not found.
+   *       409:
+   *         description: Exercise contains unsynced logbooks, please delete or sync them before hand.
    *       500:
    *         description: There was an internal server error.
    */

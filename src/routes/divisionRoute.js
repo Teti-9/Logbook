@@ -10,8 +10,6 @@ const DivisionRouter = (divisionService) => {
    *   get:
    *     summary: Return all divisions.
    *     tags: [Division]
-   *     security:
-   *       - bearerAuth: []
    *     parameters:
    *       - in: query
    *         name: page
@@ -31,9 +29,9 @@ const DivisionRouter = (divisionService) => {
    *         description: Number of items per page.
    *     responses:
    *       401:
-   *         description: Token not included.
+   *         description: Unauthorized.
    *       403:
-   *         description: Expired or invalid token.
+   *         description: Expired or invalid token (Only with manual JWT implementation.)
    *       200:
    *         description: Success.
    *       404:
@@ -44,8 +42,6 @@ const DivisionRouter = (divisionService) => {
    *   post:
    *     summary: Create a new division.
    *     tags: [Division]
-   *     security:
-   *       - bearerAuth: []
    *     requestBody:
    *       required: true
    *       content:
@@ -59,11 +55,14 @@ const DivisionRouter = (divisionService) => {
    *               day:
    *                 type: string
    *                 example: "Monday, Tuesday..."
+   *               workoutId:
+   *                 type: integer
+   *                 example: 1
    *     responses:
    *       401:
-   *         description: Token not included.
+   *         description: Unauthorized.
    *       403:
-   *         description: Expired or invalid token.
+   *         description: Expired or invalid token (Only with manual JWT implementation.)
    *       201:
    *         description: Training split successfully created.
    *       400:
@@ -86,9 +85,9 @@ const DivisionRouter = (divisionService) => {
    *        description: Division ID.
    *     responses:
    *       401:
-   *         description: Token not included.
+   *         description: Unauthorized.
    *       403:
-   *         description: Expired or invalid token.
+   *         description: Expired or invalid token (Only with manual JWT implementation.)
    *       200:
    *         description: Success.
    *       404:
@@ -110,13 +109,15 @@ const DivisionRouter = (divisionService) => {
    *        description: Division ID to be deleted.
    *     responses:
    *       401:
-   *         description: Token not included.
+   *         description: Unauthorized.
    *       403:
-   *         description: Expired or invalid token.
+   *         description: Expired or invalid token (Only with manual JWT implementation.)
    *       200:
    *         description: Division successfully deleted.
    *       404:
    *         description: Division not found.
+   *       409:
+   *         description: Division contain exercises, please delete them before hand.
    *       500:
    *         description: There was an internal server error.
    */
