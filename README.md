@@ -1,84 +1,91 @@
 # Logbook
 
-Projeto full stack para organizar treinos por divisao, cadastrar exercicios e acompanhar a progressao no logbook.
+Full-stack training logbook for creating workout plans, organizing weekly divisions, recording top sets, and retaining a progression history.
 
-## O que ele faz
+## What it does
 
-- cria divisoes de treino por dia
-- cadastra exercicios ligados a cada divisao
-- registra cargas e repeticoes no logbook
-- sincroniza o logbook para atualizar os dados do exercicio
-- guarda historico das evolucoes
-- usa autenticacao com access token e refresh token em cookie
+- Organizes **workouts** into daily **divisions**.
+- Registers exercises with target muscle group, prescription, rest interval, optional `backoff` technique, and notes.
+- Records a top set (`topset_weight` and `topset_reps`) plus optional notes.
+- Syncs logbook entries into a permanent history record.
+- Keeps users' data isolated through Better Auth sessions.
 
 ## Stack
 
-- Node.js com ES Modules
-- Express 5
-- Prisma + PostgreSQL
-- React 19 + Vite
-- Tailwind CSS
-- Swagger/OpenAPI
-- Vitest + Supertest
-- Docker
+- Node.js (ES modules) and Express 5
+- Prisma 7 and PostgreSQL
+- Better Auth with the Prisma adapter
+- React 19, Vite, and Tailwind CSS
+- OpenAPI/Swagger UI, Vitest, Supertest, and Docker
 
-## Visao geral
+## Domain model
 
-O projeto segue uma estrutura em camadas, tanto na API quanto no frontend:
+```text
+User
+└─ Workout (name, observation?)
+   └─ Division (name, day, workoutId)
+      └─ Exercise (name, target_muscle_group, series_reps, rest,
+                   advanced_technique?, observation?)
+         ├─ Logbook (topset_weight, topset_reps, extra?, sync)
+         └─ Historical (previous_topset_weight, previous_topset_reps, extra?)
+```
 
-- `routes`: entrada HTTP
-- `middleware`: auth e tratamento de erros
-- `schemas`: validacao de dados
-- `services`: regras de negocio
-- `repositories`: acesso ao banco
-- `components`: telas e componentes React
-- `utils`: funcoes auxiliares
+`day` must be one of `monday` through `sunday`. Each user can have only one active division per day. Deletions of workouts, divisions, exercises, logbook entries, and history entries are soft deletions.
 
-## Como o fluxo funciona
+## Run with Docker
 
-1. O usuario cria uma divisao de treino por dia.
-2. Depois cadastra os exercicios dessa divisao.
-3. Durante o treino, registra a performance no logbook.
-4. O logbook pode ser sincronizado para atualizar o exercicio.
-5. O historico guarda o antes e depois dessas mudancas.
-
-## Como rodar com Docker
-
-1. Crie o arquivo `.env` na raiz:
+Create a `.env` file at the project root:
 
 ```env
-DATABASE_URL='postgresql://user:password@database:5432/logbook'
+DATABASE_URL="postgresql://user:password@database:5432/logbook"
 POSTGRES_USER="user"
 POSTGRES_PASS="password"
 POSTGRES_DB="logbook"
-JWT_SECRET="sua_chave_jwt"
+BETTER_AUTH_URL="http://localhost:8000"
+BETTER_AUTH_SECRET="replace-with-a-long-random-secret"
 ```
 
-2. Suba tudo com:
+Then start the stack:
 
 ```bash
 docker compose up --build
 ```
 
-3. Acesse:
-
 - API: `http://localhost:8000/api`
-- Docs: `http://localhost:8000/docs`
+- Interactive API documentation: `http://localhost:8000/docs`
 - Frontend: `http://localhost:5173`
 
-## Autenticacao
+## Authentication
 
-- O login retorna um access token valido por 12h.
-- O refresh token fica em cookie HTTP-only.
-- Para rotas protegidas, envie:
+Authentication is provided by **Better Auth**, not by the legacy JWT/refresh-token implementation.
 
-```http
-Authorization: Bearer <seu_token>
-```
+1. Register with `POST /api/auth/sign-up/email` using `name`, `email`, and `password`.
+2. Sign in with `POST /api/auth/sign-in/email` using `email` and `password`.
+3. Better Auth sets an HTTP-only session cookie. Browser clients must send requests with `credentials: "include"`.
+4. Protected API routes identify the user from that cookie. Do **not** send `Authorization: Bearer ...` headers.
+5. Use `GET /api/auth/get-session` to read the session and `POST /api/auth/sign-out` to end it.
 
-## Padrao de resposta
+The React client uses `better-auth/react` through `frontend/src/auth-client.js`; prefer it over calling the Better Auth routes by hand.
 
-A API segue este formato:
+## API overview
+
+All application routes are under `/api` and require a Better Auth session cookie:
+
+| Resource | Routes |
+| --- | --- |
+| Workouts | `GET`, `POST /api/workouts`; `GET`, `DELETE /api/workouts/:id` |
+| Divisions | `GET`, `POST /api/divisions`; `GET`, `DELETE /api/divisions/:id` |
+| Exercises | `GET`, `POST /api/exercises`; `GET`, `DELETE /api/exercises/:id` |
+| Logbook | `GET`, `POST /api/logbooks`; `GET`, `DELETE /api/logbooks/:id`; `POST /api/synclogbooks` |
+| History | `GET /api/historicals`; `GET`, `DELETE /api/historicals/:id` |
+
+The list endpoints for workouts, divisions, and exercises support `page` and `limit`. History supports an optional `search` parameter for an exercise name.
+
+Create a division only after its workout exists: the request body must include `workoutId`. Use the exact field names in the OpenAPI docs—especially `target_muscle_group`, `series_reps`, `topset_weight`, `topset_reps`, and `advanced_technique`.
+
+## Response envelope
+
+Application routes use this envelope:
 
 ```json
 {
@@ -87,31 +94,27 @@ A API segue este formato:
 }
 ```
 
-Em erros de validacao, `data` traz as mensagens do Zod.
+Errors use `success: false` and put the message in `data`. Better Auth routes return Better Auth's own response format.
 
-## Testes e qualidade
+## Tests
 
-- A suite usa Vitest + Supertest.
-- O CI roda em GitHub Actions com PostgreSQL.
-- A documentacao da API fica em `/docs`.
+```bash
+npm test
+```
 
-## Estrutura resumida
+## Project structure
 
 ```text
 src/
-  config/
-  middleware/
-  repositories/
-  routes/
-  schemas/
+  config/         # database and Better Auth setup
+  middleware/     # session and error handling
+  repositories/   # Prisma persistence
+  routes/         # HTTP handlers
+  services/       # domain logic
+  openapi.js      # source of truth for Swagger UI
+frontend/src/
+  auth-client.js  # Better Auth React client
+  components/
   services/
-  utils/
-frontend/
-  src/
-    components/
-    services/
-    utils/
 prisma/
-.github/workflows/
-docker-compose.yml
 ```

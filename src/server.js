@@ -3,8 +3,9 @@ import cors from "cors";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import swaggerUI from "swagger-ui-express";
-import swaggerJsdoc from "swagger-jsdoc";
+// import swaggerJsdoc from "swagger-jsdoc";
 import errorMiddleware from "./middleware/error.js";
+import openapi from "./openapi.js";
 // import authMiddleware from "./middleware/auth.js";
 import sessionsMiddleware from "./middleware/sessions.js";
 import { prisma, connectDB } from "./config/infra/database.js";
@@ -93,26 +94,13 @@ app.use(express.json());
 
 app.use(cookieParser());
 
-const options = {
-  definition: {
-    openapi: "3.0.0",
-    info: {
-      title: "Logbook API",
-      version: "1.0.0",
-    },
-  },
-  apis: ["./src/routes/*.js"],
-};
-
-const specs = swaggerJsdoc(options);
-
 // app.use("/api/auth", userRouter);
 app.use("/api", sessionsMiddleware, workoutRouter);
 app.use("/api", sessionsMiddleware, divisionRouter);
 app.use("/api", sessionsMiddleware, exercisesRouter);
 app.use("/api", sessionsMiddleware, logbookRouter);
 app.use("/api", sessionsMiddleware, historicalRouter);
-app.use("/docs", swaggerUI.serve, swaggerUI.setup(specs));
+app.use("/docs", swaggerUI.serve, swaggerUI.setup(openapi));
 
 app.use(errorMiddleware);
 
