@@ -9,8 +9,6 @@ RUN npm ci
 
 COPY . .
 
-RUN npx prisma generate
-
 RUN npm install -g nodemon
 
 EXPOSE 8000

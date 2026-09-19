@@ -8,6 +8,7 @@ const FIELD_TYPES = {
   date: z.iso.date(),
   password: z.string().min(4),
   optional: z.string().optional(),
+  array: z.array(z.number()).min(1),
 };
 
 function buildSchema(fields) {

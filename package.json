@@ -6,6 +6,8 @@
   "scripts": {
     "postinstall": "prisma generate",
     "prisma:generate": "prisma generate",
+    "worker": "nodemon -L ./src/lib/worker.js",
+    "clearQueue": "node ./src/utils/cleanQueue.js",
     "start": "node ./src/server.js",
     "dev": "nodemon -L ./src/server.js",
     "test": "vitest run"
@@ -20,9 +22,11 @@
     "@prisma/client": "^7.8.0",
     "bcryptjs": "^3.0.3",
     "better-auth": "^1.7.4",
+    "bullmq": "^6.3.7",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
     "express": "^5.2.1",
+    "ioredis": "^6.0.0",
     "joi": "^18.2.3",
     "jsonwebtoken": "^9.0.3",
     "moment": "^2.30.1",

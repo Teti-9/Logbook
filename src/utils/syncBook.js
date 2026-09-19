@@ -1,7 +1,8 @@
 import validateFields from "../schemas/zodFields.js";
 import parseError from "../schemas/zodError.js";
+import { prisma } from "../config/infra/database.js";
 
-async function syncLogbooks(userId, exerciseId, prisma) {
+async function syncLogbooks(userId, exerciseId) {
   const id = Number(exerciseId);
   const fieldConfig = { id: "number" };
 

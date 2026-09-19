@@ -1,6 +1,6 @@
 import validateFields from "../schemas/zodFields.js";
 import parseError from "../schemas/zodError.js";
-import syncLogbooks from "../utils/syncBook.js";
+import { addQueue } from "../queue.js";
 
 export default class LogbookService {
   constructor(logbookRepo, exercisesRepo, prisma) {
@@ -106,20 +106,63 @@ export default class LogbookService {
 
   async syncLogbook(userId, body) {
     const { exercises } = body;
-    const synchronizations = [];
+    const fieldConfig = { exercises: "array" };
 
-    for (const exerciseId of exercises) {
-      try {
-        const syncResult = await syncLogbooks(userId, exerciseId, this.prisma);
-        synchronizations.push(syncResult);
-      } catch (error) {
-        throw new Error(error);
-      }
+    const result = validateFields(body, fieldConfig);
+
+    if (!result.success) {
+      throw new Error(parseError(result.error));
     }
 
-    return {
-      message: synchronizations,
+    for (const exerciseId of exercises) {
+      await addQueue.add(
+        "taskSync",
+        { userId, exerciseId },
+        {
+          attempts: 2,
+          backoff: { type: "exponential", delay: 2000 },
+          removeOnComplete: { count: 1000 },
+          removeOnFail: { count: 5000 },
+        },
+      );
+    }
+    return { message: "Logbook(s) successfully added for synchronization." };
+  }
+
+  async logbookJob(userId, id) {
+    const jobId = Number(id);
+    const fieldConfig = { id: "number" };
+    const result = validateFields({ id: jobId }, fieldConfig);
+
+    if (!result.success) {
+      throw new Error(parseError(result.error));
+    }
+
+    const jobResult = await addQueue.getJob(jobId);
+
+    if (!jobResult) {
+      const error = new Error("Job not found.");
+      error.statusCode = 404;
+      throw error;
+    }
+
+    if (jobResult.data.userId !== userId) {
+      const error = new Error("Job not found.");
+      error.statusCode = 404;
+      throw error;
+    }
+
+    const state = await jobResult.getState();
+    const failed = jobResult.failedReason;
+    const returnValue = jobResult.returnvalue;
+
+    const data = {
+      state,
+      failed,
+      returnValue,
     };
+
+    return data;
   }
 
   async deleteLogbook(userId, id) {

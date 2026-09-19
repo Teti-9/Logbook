@@ -45,6 +45,18 @@ const LogbookRouter = (logbookService) => {
     });
   });
 
+  router.get("/logbooksjobs/:jobId", async (req, res) => {
+    const jobStatus = await logbookService.logbookJob(
+      req.user.id,
+      req.params.jobId,
+    );
+
+    return res.status(200).json({
+      success: true,
+      data: jobStatus,
+    });
+  });
+
   router.delete("/logbooks/:id", async (req, res) => {
     const logbookDeleted = await logbookService.deleteLogbook(
       req.user.id,
