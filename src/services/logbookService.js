@@ -52,10 +52,9 @@ export default class LogbookService {
   }
 
   async createLogbook(userId, body) {
-    const exerciseId = Number(body.exerciseId);
     const fieldConfig = {
       exerciseId: "number",
-      topset_weight: "number",
+      topset_weight: "float",
       topset_reps: "number",
       extra: "optional",
       userId: "number",
@@ -71,6 +70,8 @@ export default class LogbookService {
     if (!result.success) {
       throw new Error(parseError(result.error));
     }
+
+    const exerciseId = result.data.exerciseId;
 
     const exerciseExists = await this.exercisesRepo.findById({
       userId: userId,
@@ -99,7 +100,7 @@ export default class LogbookService {
       throw error;
     }
 
-    await this.logbookRepo.create(newData);
+    await this.logbookRepo.create(result.data);
 
     return { message: "Logbook successfully created." };
   }
@@ -178,7 +179,6 @@ export default class LogbookService {
     const logbook = await this.logbookRepo.findById({
       userId: userId,
       id: logbookId,
-      sync: false,
       isDeleted: false,
     });
 

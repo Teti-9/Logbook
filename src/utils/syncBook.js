@@ -41,7 +41,7 @@ async function syncLogbooks(userId, exerciseId) {
     }),
   ]);
 
-  return { message: "Logbook(s) successfully synchronized(s)." };
+  return { message: "Logbook successfully synchronized." };
 }
 
 export default syncLogbooks;

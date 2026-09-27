@@ -7,12 +7,19 @@ export default class WorkoutService {
   }
 
   async getWorkouts(userId, { page = 1, limit = 10 } = {}) {
-    const fieldConfig = { page: "number" };
+    const fieldConfig = { page: "page", limit: "limit" };
 
-    const result = validateFields({ page: Number(page) }, fieldConfig);
+    console.log(page, limit);
+
+    const params = {
+      page: Number(page ?? 1),
+      limit: Number(limit ?? 10),
+    };
+
+    const result = validateFields(params, fieldConfig);
 
     if (!result.success) {
-      throw new Error("Page cannot be zero or a negative number.");
+      const error = new Error(parseError(result.error));
       error.statusCode = 400;
       throw error;
     }
@@ -23,8 +30,8 @@ export default class WorkoutService {
         isDeleted: false,
       },
       {
-        page,
-        limit,
+        page: result.data.page ? result.data.page : 1,
+        limit: result.data.limit ? result.data.limit : 10,
       },
     );
 
@@ -71,22 +78,31 @@ export default class WorkoutService {
   }
 
   async createWorkout(userId, body) {
-    const lowercaseName = body.name.toLowerCase();
-    const fieldConfig = { name: "string", observation: "optional" };
+    const fieldConfig = {
+      name: "string",
+      observation: "optional",
+      userId: "number",
+    };
 
-    const result = validateFields(body, fieldConfig);
+    const newData = {
+      ...body,
+      userId: userId,
+    };
+
+    const result = validateFields(newData, fieldConfig);
 
     if (!result.success) {
       throw new Error(parseError(result.error));
     }
 
-    const newData = {
-      ...body,
-      name: lowercaseName,
-      userId: userId,
+    const name = result.data.name.toLowerCase();
+
+    const data = {
+      ...result.data,
+      name,
     };
 
-    await this.workoutRepo.create(newData);
+    await this.workoutRepo.create(data);
 
     return { message: "Training split successfully created." };
   }

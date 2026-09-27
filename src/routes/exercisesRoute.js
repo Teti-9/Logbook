@@ -4,11 +4,14 @@ const ExercisesRouter = (exercisesService) => {
   const router = express.Router();
 
   router.get("/exercises", async (req, res) => {
-    const { page, limit } = req.query;
+    const query = {
+      page: Number(req.query.page ?? 1),
+      limit: Number(req.query.limit ?? 10),
+    };
 
     const result = await exercisesService.getExercises(req.user.id, {
-      page,
-      limit,
+      page: query.page,
+      limit: query.limit,
     });
 
     return res.status(200).json({

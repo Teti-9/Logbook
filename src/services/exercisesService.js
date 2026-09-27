@@ -9,12 +9,17 @@ export default class ExercisesService {
   }
 
   async getExercises(userId, { page = 1, limit = 10 } = {}) {
-    const fieldConfig = { page: "number" };
+    const fieldConfig = { page: "number", limit: "limit" };
 
-    const result = validateFields({ page: Number(page) }, fieldConfig);
+    const params = {
+      page: Number(page),
+      limit: Number(limit),
+    };
+
+    const result = validateFields(params, fieldConfig);
 
     if (!result.success) {
-      throw new Error("Page cannot be zero or a negative number.");
+      const error = new Error(parseError(result.error));
       error.statusCode = 400;
       throw error;
     }
@@ -25,8 +30,8 @@ export default class ExercisesService {
         isDeleted: false,
       },
       {
-        page,
-        limit,
+        page: result.data.page,
+        limit: result.data.limit,
       },
     );
 
@@ -73,8 +78,6 @@ export default class ExercisesService {
   }
 
   async createExercise(userId, body) {
-    const lowercaseName = body.name.toLowerCase();
-    const divisionId = Number(body.divisionId);
     const fieldConfig = {
       name: "string",
       target_muscle_group: "string",
@@ -88,8 +91,7 @@ export default class ExercisesService {
 
     const newData = {
       ...body,
-      name: lowercaseName,
-      divisionId: divisionId,
+      divisionId: Number(body.divisionId),
       userId: userId,
     };
 
@@ -98,6 +100,8 @@ export default class ExercisesService {
     if (!result.success) {
       throw new Error(parseError(result.error));
     }
+
+    const divisionId = result.data.divisionId;
 
     const divisionExists = await this.divisionRepo.findById({
       userId: userId,
@@ -111,11 +115,18 @@ export default class ExercisesService {
       throw error;
     }
 
-    await this.exercisesRepo.create(newData);
+    const name = result.data.name.toLowerCase();
+
+    const data = {
+      ...result.data,
+      name,
+    };
+
+    await this.exercisesRepo.create(data);
     await this.prisma.exercises__.create({
       data: {
-        name: lowercaseName,
-        target_muscle_group: body.target_muscle_group,
+        name,
+        target_muscle_group: result.data.target_muscle_group.toLowerCase(),
       },
     });
 

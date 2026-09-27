@@ -2,13 +2,16 @@ import * as z from "zod";
 
 const FIELD_TYPES = {
   string: z.string().min(1),
-  number: z.number().min(1),
+  number: z.number().int().min(1),
+  float: z.number().min(1),
   boolean: z.boolean(),
   email: z.email(),
   date: z.iso.date(),
   password: z.string().min(4),
   optional: z.string().optional(),
   array: z.array(z.number()).min(1),
+  page: z.number().int().positive().optional(),
+  limit: z.number().int().positive().max(100).optional(),
 };
 
 function buildSchema(fields) {

@@ -2,7 +2,7 @@
 import requests
 BASE = "http://localhost:8000/api"
 
-COOKIE = "better-auth.session_token=PASTE COOKIE FROM SIGN-IN"
+COOKIE = "better-auth.session_token=PASTE_COOKIE_FROM_SIGN-IN"
 H = {"Cookie": COOKIE, "Origin": "http://localhost:8000"}
 
 WORKOUT_ID = 1

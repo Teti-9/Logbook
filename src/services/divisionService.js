@@ -8,12 +8,17 @@ export default class DivisionService {
   }
 
   async getDivisions(userId, { page = 1, limit = 10 } = {}) {
-    const fieldConfig = { page: "number" };
+    const fieldConfig = { page: "number", limit: "limit" };
 
-    const result = validateFields({ page: Number(page) }, fieldConfig);
+    const params = {
+      page: Number(page),
+      limit: Number(limit),
+    };
+
+    const result = validateFields(params, fieldConfig);
 
     if (!result.success) {
-      throw new Error("Page cannot be zero or a negative number.");
+      const error = new Error(parseError(result.error));
       error.statusCode = 400;
       throw error;
     }
@@ -24,8 +29,8 @@ export default class DivisionService {
         isDeleted: false,
       },
       {
-        page,
-        limit,
+        page: result.data.page,
+        limit: result.data.limit,
       },
     );
 
@@ -72,16 +77,6 @@ export default class DivisionService {
   }
 
   async createDivision(userId, body) {
-    const fieldConfig = { name: "string", day: "string", workoutId: "number" };
-
-    const result = validateFields(body, fieldConfig);
-
-    if (!result.success) {
-      throw new Error(parseError(result.error));
-    }
-    const lowercaseName = body.name.toLowerCase();
-    const lowercaseDay = body.day.toLowerCase();
-    const workoutId = body.workoutId;
     const DAYS = [
       "monday",
       "tuesday",
@@ -91,6 +86,26 @@ export default class DivisionService {
       "saturday",
       "sunday",
     ];
+    const fieldConfig = {
+      name: "string",
+      day: "string",
+      workoutId: "number",
+      userId: "number",
+    };
+
+    const newData = {
+      ...body,
+      workoutId: body.workoutId,
+      userId: userId,
+    };
+
+    const result = validateFields(newData, fieldConfig);
+
+    if (!result.success) {
+      throw new Error(parseError(result.error));
+    }
+
+    const workoutId = result.data.workoutId;
 
     const workout = await this.workoutRepo.findOne({
       userId: userId,
@@ -105,6 +120,8 @@ export default class DivisionService {
       error.statusCode = 404;
       throw error;
     }
+
+    const lowercaseDay = result.data.day.toLowerCase();
 
     if (!DAYS.includes(lowercaseDay)) {
       const error = new Error(`'${body.day}' is not a day of the week.`);
@@ -124,14 +141,7 @@ export default class DivisionService {
       throw error;
     }
 
-    const newData = {
-      name: lowercaseName,
-      day: lowercaseDay,
-      workoutId: workoutId,
-      userId: userId,
-    };
-
-    await this.divisionRepo.create(newData);
+    await this.divisionRepo.create(result.data);
 
     return { message: "Division successfully created." };
   }
