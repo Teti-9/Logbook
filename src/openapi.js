@@ -36,7 +36,7 @@ const paginatedParameters = [
   {
     in: "query",
     name: "limit",
-    schema: { type: "integer", minimum: 1, default: 10 },
+    schema: { type: "integer", minimum: 1, maximum: 100, default: 10 },
   },
 ];
 
@@ -111,8 +111,9 @@ const openapi = {
           advanced_technique: {
             type: "string",
             nullable: true,
-            enum: ["backoff"],
             example: "backoff",
+            description:
+              "Free-form technique label (e.g. 'backoff'); not restricted to a fixed set of values.",
           },
           observation: {
             type: "string",
@@ -457,7 +458,9 @@ const openapi = {
     "/api/synclogbooks": {
       post: protectedOperation({
         tags: ["Logbooks"],
-        summary: "Archive and mark selected logbook entries as synced",
+        summary: "Enqueue selected logbook entries for background sync",
+        description:
+          "Adds one BullMQ job per exercise id to archive its unsynced logbook into history and mark it synced. Returns immediately; poll GET /api/logbooksjobs/{jobId} with the returned job id(s) to check progress.",
         requestBody: {
           required: true,
           content: {
@@ -467,11 +470,35 @@ const openapi = {
           },
         },
         responses: {
+          200: messageResponse(
+            "Logbook(s) successfully added for synchronization.",
+          ),
+        },
+      }),
+    },
+    "/api/logbooksjobs/{jobId}": {
+      get: protectedOperation({
+        tags: ["Logbooks"],
+        summary: "Check the status of a logbook sync job",
+        parameters: [{ in: "path", name: "jobId", required: true, schema: id }],
+        responses: {
           200: successResponse(
             objectSchema(
-              { message: { type: "array", items: { type: "object" } } },
-              ["message"],
+              {
+                state: {
+                  type: "string",
+                  example: "completed",
+                  description:
+                    "BullMQ job state, e.g. 'waiting', 'active', 'completed', 'failed'.",
+                },
+                failed: { type: "string", nullable: true },
+                returnValue: { type: "object", nullable: true },
+              },
+              ["state"],
             ),
+          ),
+          404: errorResponse(
+            "Job not found (or it does not belong to the current user).",
           ),
         },
       }),

@@ -58,7 +58,9 @@ export default class DivisionService {
     const result = validateFields({ id: divisionId }, fieldConfig);
 
     if (!result.success) {
-      throw new Error(parseError(result.error));
+      const error = new Error(parseError(result.error));
+      error.statusCode = 400;
+      throw error;
     }
 
     const division = await this.divisionRepo.findById({
@@ -102,7 +104,9 @@ export default class DivisionService {
     const result = validateFields(newData, fieldConfig);
 
     if (!result.success) {
-      throw new Error(parseError(result.error));
+      const error = new Error(parseError(result.error));
+      error.statusCode = 400;
+      throw error;
     }
 
     const workoutId = result.data.workoutId;
@@ -153,7 +157,9 @@ export default class DivisionService {
     const result = validateFields({ id: divisionId }, fieldConfig);
 
     if (!result.success) {
-      throw new Error(parseError(result.error));
+      const error = new Error(parseError(result.error));
+      error.statusCode = 400;
+      throw error;
     }
 
     const divisionExists = await this.divisionRepo.findById({

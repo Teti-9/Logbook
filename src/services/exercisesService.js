@@ -59,7 +59,9 @@ export default class ExercisesService {
     const result = validateFields({ id: exerciseId }, fieldConfig);
 
     if (!result.success) {
-      throw new Error(parseError(result.error));
+      const error = new Error(parseError(result.error));
+      error.statusCode = 400;
+      throw error;
     }
 
     const exercise = await this.exercisesRepo.findById({
@@ -98,7 +100,9 @@ export default class ExercisesService {
     const result = validateFields(newData, fieldConfig);
 
     if (!result.success) {
-      throw new Error(parseError(result.error));
+      const error = new Error(parseError(result.error));
+      error.statusCode = 400;
+      throw error;
     }
 
     const divisionId = result.data.divisionId;
@@ -140,7 +144,9 @@ export default class ExercisesService {
     const result = validateFields({ id: exerciseId }, fieldConfig);
 
     if (!result.success) {
-      throw new Error(parseError(result.error));
+      const error = new Error(parseError(result.error));
+      error.statusCode = 400;
+      throw error;
     }
 
     const exercise = await this.exercisesRepo.findById({

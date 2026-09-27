@@ -32,7 +32,9 @@ export default class LogbookService {
     const result = validateFields({ id: logbookId }, fieldConfig);
 
     if (!result.success) {
-      throw new Error(parseError(result.error));
+      const error = new Error(parseError(result.error));
+      error.statusCode = 400;
+      throw error;
     }
 
     const logbook = await this.logbookRepo.findById({
@@ -68,7 +70,9 @@ export default class LogbookService {
     const result = validateFields(newData, fieldConfig);
 
     if (!result.success) {
-      throw new Error(parseError(result.error));
+      const error = new Error(parseError(result.error));
+      error.statusCode = 400;
+      throw error;
     }
 
     const exerciseId = result.data.exerciseId;
@@ -112,7 +116,9 @@ export default class LogbookService {
     const result = validateFields(body, fieldConfig);
 
     if (!result.success) {
-      throw new Error(parseError(result.error));
+      const error = new Error(parseError(result.error));
+      error.statusCode = 400;
+      throw error;
     }
 
     for (const exerciseId of exercises) {
@@ -136,7 +142,9 @@ export default class LogbookService {
     const result = validateFields({ id: jobId }, fieldConfig);
 
     if (!result.success) {
-      throw new Error(parseError(result.error));
+      const error = new Error(parseError(result.error));
+      error.statusCode = 400;
+      throw error;
     }
 
     const jobResult = await addQueue.getJob(jobId);
@@ -173,7 +181,9 @@ export default class LogbookService {
     const result = validateFields({ id: logbookId }, fieldConfig);
 
     if (!result.success) {
-      throw new Error(parseError(result.error));
+      const error = new Error(parseError(result.error));
+      error.statusCode = 400;
+      throw error;
     }
 
     const logbook = await this.logbookRepo.findById({

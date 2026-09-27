@@ -9,8 +9,6 @@ export default class WorkoutService {
   async getWorkouts(userId, { page = 1, limit = 10 } = {}) {
     const fieldConfig = { page: "page", limit: "limit" };
 
-    console.log(page, limit);
-
     const params = {
       page: Number(page ?? 1),
       limit: Number(limit ?? 10),
@@ -59,7 +57,9 @@ export default class WorkoutService {
     const result = validateFields({ id: workoutId }, fieldConfig);
 
     if (!result.success) {
-      throw new Error(parseError(result.error));
+      const error = new Error(parseError(result.error));
+      error.statusCode = 400;
+      throw error;
     }
 
     const workoutExists = await this.workoutRepo.findById({
@@ -92,7 +92,9 @@ export default class WorkoutService {
     const result = validateFields(newData, fieldConfig);
 
     if (!result.success) {
-      throw new Error(parseError(result.error));
+      const error = new Error(parseError(result.error));
+      error.statusCode = 400;
+      throw error;
     }
 
     const name = result.data.name.toLowerCase();
@@ -114,7 +116,9 @@ export default class WorkoutService {
     const result = validateFields({ id: workoutId }, fieldConfig);
 
     if (!result.success) {
-      throw new Error(parseError(result.error));
+      const error = new Error(parseError(result.error));
+      error.statusCode = 400;
+      throw error;
     }
 
     const workoutExists = await this.workoutRepo.findById({

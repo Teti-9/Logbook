@@ -29,7 +29,9 @@ export default class HistoricalService {
     const result = validateFields({ id: historicalId }, fieldConfig);
 
     if (!result.success) {
-      throw new Error(parseError(result.error));
+      const error = new Error(parseError(result.error));
+      error.statusCode = 400;
+      throw error;
     }
 
     const historical = await this.historicalRepo.findById({
@@ -54,7 +56,9 @@ export default class HistoricalService {
     const result = validateFields({ id: historicalId }, fieldConfig);
 
     if (!result.success) {
-      throw new Error(parseError(result.error));
+      const error = new Error(parseError(result.error));
+      error.statusCode = 400;
+      throw error;
     }
 
     const historical = await this.historicalRepo.findById({
