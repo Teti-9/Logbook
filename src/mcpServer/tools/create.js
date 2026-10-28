@@ -69,6 +69,9 @@ const createExercise = {
       rest: z.number().describe("Rest between exercises (e.g 120)"),
       advanced_technique: z.string().optional().describe("(e.g backoff)"),
       observation: z.string().optional().describe("Observation note"),
+      workoutId: z
+        .number()
+        .describe("Id of the workout that this exercise belongs to"),
       divisionId: z
         .number()
         .describe("Id of the division that this exercise belongs to"),
@@ -83,20 +86,24 @@ const createExercise = {
       rest,
       advanced_technique,
       observation,
+      workoutId,
       divisionId,
     }) => {
-      const exercise = await makeApiRequest("/exercises", {
-        method: "POST",
-        body: {
-          name,
-          target_muscle_group,
-          series_reps,
-          rest,
-          advanced_technique,
-          observation,
-          divisionId,
+      const exercise = await makeApiRequest(
+        `/exercises?workoutId=${workoutId}`,
+        {
+          method: "POST",
+          body: {
+            name,
+            target_muscle_group,
+            series_reps,
+            rest,
+            advanced_technique,
+            observation,
+            divisionId,
+          },
         },
-      });
+      );
       return {
         content: [
           {
@@ -122,14 +129,27 @@ const createLogbook = {
         .describe("Topset weight of the exercise (e.g) 50"),
       topset_reps: z.number().describe("Topset reps of the exercise (e.g) 8"),
       extra: z.string().optional().describe("Extra information"),
+      workoutId: z
+        .number()
+        .describe("Id of the workout that this logbook belongs to"),
+      divisionId: z
+        .number()
+        .describe("Id of the divisionn that this logbook belongs to"),
     }),
   },
   handler: errorHandling(
     "Create a new logbook",
-    async ({ exerciseId, topset_weight, topset_reps, extra }) => {
-      const logbook = await makeApiRequest("/logbooks", {
+    async ({
+      exerciseId,
+      topset_weight,
+      topset_reps,
+      extra,
+      workoutId,
+      divisionId,
+    }) => {
+      const logbook = await makeApiRequest(`/logbooks?workoutId=${workoutId}`, {
         method: "POST",
-        body: { exerciseId, topset_weight, topset_reps, extra },
+        body: { exerciseId, topset_weight, topset_reps, extra, divisionId },
       });
       return {
         content: [
@@ -150,22 +170,31 @@ const syncLogbook = {
         .describe(
           "Id of the exercise(s) with unsyced logbook(s) (e.g one or more comma separated numbers inside an array: [1, 2])",
         ),
+      workoutId: z
+        .number()
+        .describe("Id of the workout that this logbook belongs to"),
     }),
   },
-  handler: errorHandling("Sync one or more logbooks", async ({ exercises }) => {
-    const logbooks = await makeApiRequest("/synclogbooks", {
-      method: "POST",
-      body: { exercises },
-    });
-    return {
-      content: [
+  handler: errorHandling(
+    "Sync one or more logbooks",
+    async ({ exercises, workoutId }) => {
+      const logbooks = await makeApiRequest(
+        `/synclogbooks?workoutId=${workoutId}`,
         {
-          type: "text",
-          text: `Logbook(s) added for syncronization: ${JSON.stringify(logbooks)}`,
+          method: "POST",
+          body: { exercises },
         },
-      ],
-    };
-  }),
+      );
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Logbook(s) added for syncronization: ${JSON.stringify(logbooks)}`,
+          },
+        ],
+      };
+    },
+  ),
 };
 
 export const createTools = [

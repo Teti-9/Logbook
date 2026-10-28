@@ -35,7 +35,7 @@ export default class WorkoutService {
 
     if (!workouts || workouts.length === 0) {
       const error = new Error("No workouts found.");
-      error.statusCode = 404;
+      error.statusCode = 200;
       throw error;
     }
 
@@ -43,18 +43,21 @@ export default class WorkoutService {
       workouts,
       pagination: {
         total,
-        page: Number(page || 1),
-        limit: Number(limit || 10),
-        totalPages: Math.ceil(total / (Number(limit) || 10)),
+        page: Number(result.data.page || 1),
+        limit: Number(result.data.limit || 10),
+        totalPages: Math.ceil(total / (Number(result.data.limit) || 10)),
       },
     };
   }
 
-  async getWorkoutById(userId, id) {
-    const workoutId = Number(id);
-    const fieldConfig = { id: "number" };
+  async getWorkoutById(data) {
+    const fieldConfig = { workoutId: "number" };
 
-    const result = validateFields({ id: workoutId }, fieldConfig);
+    const params = {
+      workoutId: Number(data.workoutId),
+    };
+
+    const result = validateFields(params, fieldConfig);
 
     if (!result.success) {
       const error = new Error(parseError(result.error));
@@ -63,8 +66,8 @@ export default class WorkoutService {
     }
 
     const workoutExists = await this.workoutRepo.findById({
-      userId: userId,
-      id: workoutId,
+      userId: data.userId,
+      workoutId: result.data.workoutId,
       isDeleted: false,
     });
 
@@ -123,7 +126,7 @@ export default class WorkoutService {
 
     const workoutExists = await this.workoutRepo.findById({
       userId: userId,
-      id: workoutId,
+      workoutId: workoutId,
       isDeleted: false,
     });
 

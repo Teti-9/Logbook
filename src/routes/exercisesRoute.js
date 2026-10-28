@@ -4,15 +4,15 @@ const ExercisesRouter = (exercisesService) => {
   const router = express.Router();
 
   router.get("/exercises", async (req, res) => {
-    const query = {
+    const newData = {
+      userId: req.user.id,
+      divisionId: req.query.divisionId,
+      workoutId: req.query.workoutId,
       page: Number(req.query.page ?? 1),
       limit: Number(req.query.limit ?? 10),
     };
 
-    const result = await exercisesService.getExercises(req.user.id, {
-      page: query.page,
-      limit: query.limit,
-    });
+    const result = await exercisesService.getExercises(newData);
 
     return res.status(200).json({
       success: true,
@@ -21,10 +21,12 @@ const ExercisesRouter = (exercisesService) => {
   });
 
   router.get("/exercises/:id", async (req, res) => {
-    const result = await exercisesService.getExerciseById(
-      req.user.id,
-      req.params.id,
-    );
+    const result = await exercisesService.getExerciseById({
+      userId: req.user.id,
+      exerciseId: req.params.id,
+      divisionId: req.query.divisionId,
+      workoutId: req.query.workoutId,
+    });
 
     return res.status(200).json({
       success: true,
@@ -33,10 +35,11 @@ const ExercisesRouter = (exercisesService) => {
   });
 
   router.post("/exercises", async (req, res) => {
-    const exerciseCreated = await exercisesService.createExercise(
-      req.user.id,
-      req.body,
-    );
+    const exerciseCreated = await exercisesService.createExercise({
+      userId: req.user.id,
+      workoutId: req.query.workoutId,
+      body: req.body,
+    });
 
     return res.status(201).json({
       success: true,
@@ -45,10 +48,12 @@ const ExercisesRouter = (exercisesService) => {
   });
 
   router.delete("/exercises/:id", async (req, res) => {
-    const exerciseDeleted = await exercisesService.deleteExercise(
-      req.user.id,
-      req.params.id,
-    );
+    const exerciseDeleted = await exercisesService.deleteExercise({
+      userId: req.user.id,
+      exerciseId: req.params.id,
+      divisionId: req.query.divisionId,
+      workoutId: req.query.workoutId,
+    });
 
     return res.status(200).json({
       success: true,

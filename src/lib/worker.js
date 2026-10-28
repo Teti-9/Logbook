@@ -9,11 +9,25 @@ const worker = new Worker(
 
     switch (job.name) {
       case "taskSync":
-        const { userId, exerciseId } = job.data;
-        return syncLogbookJob.handle(userId, exerciseId);
+        const { userId, exerciseId, workoutId } = job.data;
+        return syncLogbookJob.handle(userId, exerciseId, workoutId);
     }
   },
   { connection: redis.redis },
 );
 
 console.log("Worker up.");
+
+worker.on("active", (job) => {
+  console.log(`Job ${job.id} started`);
+});
+
+worker.on("completed", (job, result) => {
+  console.log(`Job ${job.id} completed`, result);
+});
+
+worker.on("failed", (job, err) => {
+  console.error(`Job ${job?.id} failed:`, err);
+});
+
+worker.on("error", (err) => console.error("Worker error:", err));

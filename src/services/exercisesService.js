@@ -8,12 +8,19 @@ export default class ExercisesService {
     this.prisma = prisma;
   }
 
-  async getExercises(userId, { page = 1, limit = 10 } = {}) {
-    const fieldConfig = { page: "number", limit: "limit" };
+  async getExercises(data) {
+    const fieldConfig = {
+      divisionId: "number",
+      workoutId: "number",
+      page: "number",
+      limit: "limit",
+    };
 
     const params = {
-      page: Number(page),
-      limit: Number(limit),
+      divisionId: Number(data.divisionId),
+      workoutId: Number(data.workoutId),
+      page: Number(data.page),
+      limit: Number(data.limit),
     };
 
     const result = validateFields(params, fieldConfig);
@@ -24,16 +31,14 @@ export default class ExercisesService {
       throw error;
     }
 
-    const { exercises, total } = await this.exercisesRepo.findAll(
-      {
-        userId: userId,
-        isDeleted: false,
-      },
-      {
-        page: result.data.page,
-        limit: result.data.limit,
-      },
-    );
+    const { exercises, total } = await this.exercisesRepo.findAll({
+      userId: data.userId,
+      divisionId: result.data.divisionId,
+      workoutId: result.data.workoutId,
+      isDeleted: false,
+      page: result.data.page,
+      limit: result.data.limit,
+    });
 
     if (!exercises || exercises.length === 0) {
       const error = new Error("No exercises found.");
@@ -45,18 +50,27 @@ export default class ExercisesService {
       exercises,
       pagination: {
         total,
-        page: Number(page || 1),
-        limit: Number(limit || 10),
-        totalPages: Math.ceil(total / (Number(limit) || 10)),
+        page: Number(result.data.page || 1),
+        limit: Number(result.data.limit || 10),
+        totalPages: Math.ceil(total / (Number(result.data.limit) || 10)),
       },
     };
   }
 
-  async getExerciseById(userId, id) {
-    const exerciseId = Number(id);
-    const fieldConfig = { id: "number" };
+  async getExerciseById(data) {
+    const fieldConfig = {
+      exerciseId: "number",
+      divisionId: "number",
+      workoutId: "number",
+    };
 
-    const result = validateFields({ id: exerciseId }, fieldConfig);
+    const params = {
+      exerciseId: Number(data.exerciseId),
+      divisionId: Number(data.divisionId),
+      workoutId: Number(data.workoutId),
+    };
+
+    const result = validateFields(params, fieldConfig);
 
     if (!result.success) {
       const error = new Error(parseError(result.error));
@@ -65,8 +79,10 @@ export default class ExercisesService {
     }
 
     const exercise = await this.exercisesRepo.findById({
-      userId: userId,
-      id: exerciseId,
+      userId: data.userId,
+      exerciseId: result.data.exerciseId,
+      divisionId: result.data.divisionId,
+      workoutId: result.data.workoutId,
       isDeleted: false,
     });
 
@@ -79,7 +95,7 @@ export default class ExercisesService {
     return exercise;
   }
 
-  async createExercise(userId, body) {
+  async createExercise(data) {
     const fieldConfig = {
       name: "string",
       target_muscle_group: "string",
@@ -87,17 +103,16 @@ export default class ExercisesService {
       rest: "number",
       advanced_technique: "optional",
       observation: "optional",
+      workoutId: "number",
       divisionId: "number",
-      userId: "number",
     };
 
-    const newData = {
-      ...body,
-      divisionId: Number(body.divisionId),
-      userId: userId,
+    const params = {
+      ...data.body,
+      workoutId: Number(data.workoutId),
     };
 
-    const result = validateFields(newData, fieldConfig);
+    const result = validateFields(params, fieldConfig);
 
     if (!result.success) {
       const error = new Error(parseError(result.error));
@@ -105,11 +120,10 @@ export default class ExercisesService {
       throw error;
     }
 
-    const divisionId = result.data.divisionId;
-
     const divisionExists = await this.divisionRepo.findById({
-      userId: userId,
-      id: divisionId,
+      userId: data.userId,
+      divisionId: result.data.divisionId,
+      workoutId: result.data.workoutId,
       isDeleted: false,
     });
 
@@ -121,13 +135,16 @@ export default class ExercisesService {
 
     const name = result.data.name.toLowerCase();
 
-    const data = {
+    const exercise = {
       ...result.data,
       name,
+      advanced_technique: result.data.advanced_technique || null,
+      observation: result.data.observation || null,
+      userId: data.userId,
     };
 
-    await this.exercisesRepo.create(data);
-    await this.prisma.exercises__.create({
+    await this.exercisesRepo.create(exercise);
+    await this.prisma.ExerciseCatalog.create({
       data: {
         name,
         target_muscle_group: result.data.target_muscle_group.toLowerCase(),
@@ -137,11 +154,20 @@ export default class ExercisesService {
     return { message: "Exercise successfully created." };
   }
 
-  async deleteExercise(userId, id) {
-    const exerciseId = Number(id);
-    const fieldConfig = { id: "number" };
+  async deleteExercise(data) {
+    const fieldConfig = {
+      exerciseId: "number",
+      divisionId: "number",
+      workoutId: "number",
+    };
 
-    const result = validateFields({ id: exerciseId }, fieldConfig);
+    const params = {
+      exerciseId: Number(data.exerciseId),
+      divisionId: Number(data.divisionId),
+      workoutId: Number(data.workoutId),
+    };
+
+    const result = validateFields(params, fieldConfig);
 
     if (!result.success) {
       const error = new Error(parseError(result.error));
@@ -150,8 +176,10 @@ export default class ExercisesService {
     }
 
     const exercise = await this.exercisesRepo.findById({
-      userId: userId,
-      id: exerciseId,
+      userId: data.userId,
+      exerciseId: result.data.exerciseId,
+      workoutId: result.data.workoutId,
+      divisionId: result.data.divisionId,
       isDeleted: false,
     });
 
@@ -161,7 +189,7 @@ export default class ExercisesService {
       throw error;
     }
 
-    if (exercise.logbook.length > 0) {
+    if (exercise.logbooks.length > 0) {
       const error = new Error(
         "Exercise contains unsynced logbooks, please delete or sync them before hand.",
       );
@@ -169,7 +197,7 @@ export default class ExercisesService {
       throw error;
     }
 
-    await this.exercisesRepo.findByIdAndDelete(exerciseId);
+    await this.exercisesRepo.findByIdAndDelete(result.data.exerciseId);
 
     return { message: "Exercise successfully deleted." };
   }

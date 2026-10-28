@@ -3,7 +3,7 @@ export default class WorkoutRepo {
     this.prisma = prisma;
   }
 
-  async findAll({ userId, isDeleted }, { page = 1, limit = 10 } = {}) {
+  async findAll({ userId, isDeleted, page = 1, limit = 10 }) {
     const skip = (page - 1) * limit;
 
     const [workouts, total] = await Promise.all([
@@ -15,12 +15,19 @@ export default class WorkoutRepo {
         include: {
           divisions: {
             where: {
+              userId: userId,
               isDeleted: false,
             },
             select: {
               id: true,
               name: true,
               day: true,
+              workoutId: true,
+              exercises: {
+                where: {
+                  isDeleted: false,
+                },
+              },
             },
           },
         },
@@ -36,36 +43,29 @@ export default class WorkoutRepo {
     return { workouts, total };
   }
 
-  async findById(where) {
+  async findById({ userId, workoutId, isDeleted }) {
     return this.prisma.workout.findFirst({
-      where,
-      include: {
-        divisions: {
-          where: {
-            isDeleted: false,
-          },
-          select: {
-            id: true,
-            name: true,
-            day: true,
-          },
-        },
+      where: {
+        userId: userId,
+        id: workoutId,
+        isDeleted,
       },
-    });
-  }
-
-  async findOne(where) {
-    return this.prisma.workout.findFirst({
-      where,
       include: {
         divisions: {
           where: {
+            userId: userId,
             isDeleted: false,
           },
           select: {
             id: true,
             name: true,
             day: true,
+            workoutId: true,
+            exercises: {
+              where: {
+                isDeleted: false,
+              },
+            },
           },
         },
       },

@@ -7,12 +7,13 @@ export default class DivisionService {
     this.workoutRepo = workoutRepo;
   }
 
-  async getDivisions(userId, { page = 1, limit = 10 } = {}) {
-    const fieldConfig = { page: "number", limit: "limit" };
+  async getDivisions(data) {
+    const fieldConfig = { workoutId: "number", page: "number", limit: "limit" };
 
     const params = {
-      page: Number(page),
-      limit: Number(limit),
+      workoutId: Number(data.workoutId),
+      page: Number(data.page),
+      limit: Number(data.limit),
     };
 
     const result = validateFields(params, fieldConfig);
@@ -23,16 +24,13 @@ export default class DivisionService {
       throw error;
     }
 
-    const { divisions, total } = await this.divisionRepo.findAll(
-      {
-        userId: userId,
-        isDeleted: false,
-      },
-      {
-        page: result.data.page,
-        limit: result.data.limit,
-      },
-    );
+    const { divisions, total } = await this.divisionRepo.findAll({
+      userId: data.userId,
+      workoutId: result.data.workoutId,
+      isDeleted: false,
+      page: result.data.page,
+      limit: result.data.limit,
+    });
 
     if (!divisions || divisions.length === 0) {
       const error = new Error("No divisions found.");
@@ -44,18 +42,22 @@ export default class DivisionService {
       divisions,
       pagination: {
         total,
-        page: Number(page || 1),
-        limit: Number(limit || 10),
-        totalPages: Math.ceil(total / (Number(limit) || 10)),
+        page: Number(result.data.page || 1),
+        limit: Number(result.data.limit || 10),
+        totalPages: Math.ceil(total / (Number(result.data.limit) || 10)),
       },
     };
   }
 
-  async getDivisionById(userId, id) {
-    const divisionId = Number(id);
-    const fieldConfig = { id: "number" };
+  async getDivisionById(data) {
+    const fieldConfig = { divisionId: "number", workoutId: "number" };
 
-    const result = validateFields({ id: divisionId }, fieldConfig);
+    const params = {
+      divisionId: Number(data.divisionId),
+      workoutId: Number(data.workoutId),
+    };
+
+    const result = validateFields(params, fieldConfig);
 
     if (!result.success) {
       const error = new Error(parseError(result.error));
@@ -64,8 +66,9 @@ export default class DivisionService {
     }
 
     const division = await this.divisionRepo.findById({
-      userId: userId,
-      id: divisionId,
+      userId: data.userId,
+      divisionId: result.data.divisionId,
+      workoutId: result.data.workoutId,
       isDeleted: false,
     });
 
@@ -78,7 +81,7 @@ export default class DivisionService {
     return division;
   }
 
-  async createDivision(userId, body) {
+  async createDivision(data) {
     const DAYS = [
       "monday",
       "tuesday",
@@ -92,16 +95,9 @@ export default class DivisionService {
       name: "string",
       day: "string",
       workoutId: "number",
-      userId: "number",
     };
 
-    const newData = {
-      ...body,
-      workoutId: body.workoutId,
-      userId: userId,
-    };
-
-    const result = validateFields(newData, fieldConfig);
+    const result = validateFields(data.body, fieldConfig);
 
     if (!result.success) {
       const error = new Error(parseError(result.error));
@@ -109,11 +105,17 @@ export default class DivisionService {
       throw error;
     }
 
-    const workoutId = result.data.workoutId;
+    const lowercaseDay = result.data.day.toLowerCase();
 
-    const workout = await this.workoutRepo.findOne({
-      userId: userId,
-      id: workoutId,
+    if (!DAYS.includes(lowercaseDay)) {
+      const error = new Error(`'${result.data.day}' is not a day of the week.`);
+      error.statusCode = 400;
+      throw error;
+    }
+
+    const workout = await this.workoutRepo.findById({
+      userId: data.userId,
+      workoutId: result.data.workoutId,
       isDeleted: false,
     });
 
@@ -125,36 +127,40 @@ export default class DivisionService {
       throw error;
     }
 
-    const lowercaseDay = result.data.day.toLowerCase();
-
-    if (!DAYS.includes(lowercaseDay)) {
-      const error = new Error(`'${body.day}' is not a day of the week.`);
-      error.statusCode = 400;
-      throw error;
-    }
-
     const dayUsed = await this.divisionRepo.findOne({
-      userId: userId,
+      userId: data.userId,
       day: lowercaseDay,
+      workoutId: result.data.workoutId,
       isDeleted: false,
     });
 
     if (dayUsed) {
-      const error = new Error("A division for this day already exists.");
+      const error = new Error(
+        "A division for this day already exists inside this workout.",
+      );
       error.statusCode = 409;
       throw error;
     }
 
-    await this.divisionRepo.create(result.data);
+    const division = {
+      ...result.data,
+      userId: data.userId,
+    };
+
+    await this.divisionRepo.create(division);
 
     return { message: "Division successfully created." };
   }
 
-  async deleteDivision(userId, id) {
-    const divisionId = Number(id);
-    const fieldConfig = { id: "number" };
+  async deleteDivision(data) {
+    const fieldConfig = { divisionId: "number", workoutId: "number" };
 
-    const result = validateFields({ id: divisionId }, fieldConfig);
+    const params = {
+      divisionId: Number(data.divisionId),
+      workoutId: Number(data.workoutId),
+    };
+
+    const result = validateFields(params, fieldConfig);
 
     if (!result.success) {
       const error = new Error(parseError(result.error));
@@ -163,8 +169,9 @@ export default class DivisionService {
     }
 
     const divisionExists = await this.divisionRepo.findById({
-      userId: userId,
-      id: divisionId,
+      userId: data.userId,
+      divisionId: result.data.divisionId,
+      workoutId: result.data.workoutId,
       isDeleted: false,
     });
 
@@ -182,7 +189,7 @@ export default class DivisionService {
       throw error;
     }
 
-    await this.divisionRepo.findByIdAndDelete(divisionId);
+    await this.divisionRepo.findByIdAndDelete(result.data.divisionId);
 
     return { message: "Division successfully deleted." };
   }

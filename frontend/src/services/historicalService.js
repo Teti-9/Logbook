@@ -1,25 +1,24 @@
-import { authFetch } from './auth.js'
+import { authFetch } from "./auth.js";
 
-export default async function HistoricalService(method, search) {
+export default async function HistoricalService(method, search, workoutId) {
+  const HISTORICAL_API = `http://localhost:8000/api/historicals?search=${encodeURIComponent(search)}&workoutId=${workoutId}`;
 
-    const HISTORICAL_API = `http://localhost:8000/api/historicals?search=${encodeURIComponent(search)}`
+  if (method === "GET") {
+    try {
+      const response = await authFetch(HISTORICAL_API, {
+        method: "GET",
+      });
+      if (response.ok) {
+        const payload = await response.json();
+        return { success: true, data: payload.data };
+      } else {
+        const errorData = await response.json();
+        let errorMessage = errorData.data;
 
-    if (method === 'GET') {
-        try {
-            const response = await authFetch(HISTORICAL_API, {
-                method: 'GET',
-            })
-            if (response.ok) {
-                const payload = await response.json()
-                return { success: true, data: payload.data }
-            } else {
-                const errorData = await response.json()
-                let errorMessage = errorData.data
-
-                return { success: false, message: errorMessage }
-            }
-        } catch (error) {
-            console.error('Error:', error)
-        }
+        return { success: false, message: errorMessage };
+      }
+    } catch (error) {
+      console.error("Error:", error);
     }
+  }
 }

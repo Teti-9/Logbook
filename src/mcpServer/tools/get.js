@@ -81,25 +81,32 @@ const getDivisions = {
         .positive()
         .optional()
         .describe("Items per page (optional and defaults to 10.)"),
+      workoutId: z
+        .number()
+        .describe("Id of the workout that this division belongs to"),
     }),
   },
-  handler: errorHandling("Return all divisions", async ({ page, limit }) => {
-    const params = new URLSearchParams();
-    if (page !== undefined) params.set("page", String(page));
-    if (limit !== undefined) params.set("limit", String(limit));
-    const response = await makeApiRequest(`/divisions?${params}`, {
-      method: "GET",
-    });
-    const { divisions, pagination } = response.data;
-    return {
-      content: [
-        {
-          type: "text",
-          text: `Divisions: ${JSON.stringify({ divisions, pagination })}`,
-        },
-      ],
-    };
-  }),
+  handler: errorHandling(
+    "Return all divisions",
+    async ({ page, limit, workoutId }) => {
+      const params = new URLSearchParams();
+      if (workoutId !== undefined) params.set("workoutId", String(workoutId));
+      if (page !== undefined) params.set("page", String(page));
+      if (limit !== undefined) params.set("limit", String(limit));
+      const response = await makeApiRequest(`/divisions?${params}`, {
+        method: "GET",
+      });
+      const { divisions, pagination } = response.data;
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Divisions: ${JSON.stringify({ divisions, pagination })}`,
+          },
+        ],
+      };
+    },
+  ),
 };
 
 const getDivisionbyId = {
@@ -108,21 +115,30 @@ const getDivisionbyId = {
     description: "Return a division by it's id",
     inputSchema: z.object({
       id: z.number().describe("Id of the division"),
+      workoutId: z
+        .number()
+        .describe("Id of the workout that this division belongs to"),
     }),
   },
-  handler: errorHandling("Return a division by it's id", async ({ id }) => {
-    const division = await makeApiRequest(`/divisions/${id}`, {
-      method: "GET",
-    });
-    return {
-      content: [
+  handler: errorHandling(
+    "Return a division by it's id",
+    async ({ id, workoutId }) => {
+      const division = await makeApiRequest(
+        `/divisions/${id}?workoutId=${workoutId}`,
         {
-          type: "text",
-          text: `Division: ${JSON.stringify(division)}`,
+          method: "GET",
         },
-      ],
-    };
-  }),
+      );
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Division: ${JSON.stringify(division)}`,
+          },
+        ],
+      };
+    },
+  ),
 };
 
 const getExercises = {
@@ -142,25 +158,37 @@ const getExercises = {
         .positive()
         .optional()
         .describe("Items per page (optional and defaults to 10.)"),
+      workoutId: z
+        .number()
+        .describe("Id of the workout that this exercise belongs to"),
+      divisionId: z
+        .number()
+        .describe("Id of the division that this exercise belongs to"),
     }),
   },
-  handler: errorHandling("Return all exercises", async ({ page, limit }) => {
-    const params = new URLSearchParams();
-    if (page !== undefined) params.set("page", String(page));
-    if (limit !== undefined) params.set("limit", String(limit));
-    const response = await makeApiRequest(`/exercises?${params}`, {
-      method: "GET",
-    });
-    const { exercises, pagination } = response.data;
-    return {
-      content: [
-        {
-          type: "text",
-          text: `Exercises: ${JSON.stringify({ exercises, pagination })}`,
-        },
-      ],
-    };
-  }),
+  handler: errorHandling(
+    "Return all exercises",
+    async ({ page, limit, workoutId, divisionId }) => {
+      const params = new URLSearchParams();
+      if (workoutId !== undefined) params.set("workoutId", String(workoutId));
+      if (divisionId !== undefined)
+        params.set("divisionId", String(divisionId));
+      if (page !== undefined) params.set("page", String(page));
+      if (limit !== undefined) params.set("limit", String(limit));
+      const response = await makeApiRequest(`/exercises?${params}`, {
+        method: "GET",
+      });
+      const { exercises, pagination } = response.data;
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Exercises: ${JSON.stringify({ exercises, pagination })}`,
+          },
+        ],
+      };
+    },
+  ),
 };
 
 const getExercisebyId = {
@@ -169,30 +197,47 @@ const getExercisebyId = {
     description: "Return a exercise by it's id",
     inputSchema: z.object({
       id: z.number().describe("Id of the exercise"),
+      workoutId: z
+        .number()
+        .describe("Id of the workout that this exercise belongs to"),
+      divisionId: z
+        .number()
+        .describe("Id of the division that this exercise belongs to"),
     }),
   },
-  handler: errorHandling("Return a exercises by it's id", async ({ id }) => {
-    const exercise = await makeApiRequest(`/exercises/${id}`, {
-      method: "GET",
-    });
-    return {
-      content: [
+  handler: errorHandling(
+    "Return a exercises by it's id",
+    async ({ id, workoutId, divisionId }) => {
+      const exercise = await makeApiRequest(
+        `/exercises/${id}?workoutId=${workoutId}&divisionId=${divisionId}`,
         {
-          type: "text",
-          text: `Exercise: ${JSON.stringify(exercise)}`,
+          method: "GET",
         },
-      ],
-    };
-  }),
+      );
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Exercise: ${JSON.stringify(exercise)}`,
+          },
+        ],
+      };
+    },
+  ),
 };
 
 const getLogbooks = {
   name: "get_logbooks",
   config: {
     description: "Return all logbooks",
+    inputSchema: z.object({
+      workoutId: z
+        .number()
+        .describe("Id of the workout that this logbook belongs to"),
+    }),
   },
-  handler: errorHandling("Return all logbooks", async ({}) => {
-    const response = await makeApiRequest("/logbooks", {
+  handler: errorHandling("Return all logbooks", async ({ workoutId }) => {
+    const response = await makeApiRequest(`/logbooks?workoutId=${workoutId}`, {
       method: "GET",
     });
     return {
@@ -209,21 +254,30 @@ const getlogbookbyId = {
     description: "Return a logbook by it's id",
     inputSchema: z.object({
       id: z.number().describe("Id of the logbook"),
+      workoutId: z
+        .number()
+        .describe("Id of the workout that this logbook belongs to"),
     }),
   },
-  handler: errorHandling("Return a logbook by it's id", async ({ id }) => {
-    const logbook = await makeApiRequest(`/logbooks/${id}`, {
-      method: "GET",
-    });
-    return {
-      content: [
+  handler: errorHandling(
+    "Return a logbook by it's id",
+    async ({ id, workoutId }) => {
+      const logbook = await makeApiRequest(
+        `/logbooks/${id}?workoutId=${workoutId}`,
         {
-          type: "text",
-          text: `Logbook: ${JSON.stringify(logbook)}`,
+          method: "GET",
         },
-      ],
-    };
-  }),
+      );
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Logbook: ${JSON.stringify(logbook)}`,
+          },
+        ],
+      };
+    },
+  ),
 };
 
 const getlogbookJob = {
@@ -258,21 +312,28 @@ const getHistoricals = {
     description: "Return all historicals",
     inputSchema: z.object({
       search: z.string().optional().describe("Name of the exercise"),
+      workoutId: z
+        .number()
+        .describe("Id of the workout that this historical belongs to"),
     }),
   },
-  handler: errorHandling("Return all historicals", async ({ search }) => {
-    const params = new URLSearchParams();
-    if (search !== undefined) params.set("search", "");
+  handler: errorHandling(
+    "Return all historicals",
+    async ({ search, workoutId }) => {
+      const params = new URLSearchParams();
+      if (search !== undefined) params.set("search", search);
+      if (workoutId !== undefined) params.set("workoutId", workoutId);
 
-    const response = await makeApiRequest(`/historicals?search=${params}`, {
-      method: "GET",
-    });
-    return {
-      content: [
-        { type: "text", text: `Historicals: ${JSON.stringify(response)}` },
-      ],
-    };
-  }),
+      const response = await makeApiRequest(`/historicals?${params}`, {
+        method: "GET",
+      });
+      return {
+        content: [
+          { type: "text", text: `Historicals: ${JSON.stringify(response)}` },
+        ],
+      };
+    },
+  ),
 };
 
 const gethistoricalbyId = {
@@ -281,21 +342,30 @@ const gethistoricalbyId = {
     description: "Return a historical by it's id",
     inputSchema: z.object({
       id: z.number().describe("Id of the historical"),
+      workoutId: z
+        .number()
+        .describe("Id of the workout that this historical belongs to"),
     }),
   },
-  handler: errorHandling("Return a historical by it's id", async ({ id }) => {
-    const historical = await makeApiRequest(`/historicals/${id}`, {
-      method: "GET",
-    });
-    return {
-      content: [
+  handler: errorHandling(
+    "Return a historical by it's id",
+    async ({ id, workoutId }) => {
+      const historical = await makeApiRequest(
+        `/historicals/${id}?workoutId=${workoutId}`,
         {
-          type: "text",
-          text: `Historical: ${JSON.stringify(historical)}`,
+          method: "GET",
         },
-      ],
-    };
-  }),
+      );
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Historical: ${JSON.stringify(historical)}`,
+          },
+        ],
+      };
+    },
+  ),
 };
 
 export const getTools = [

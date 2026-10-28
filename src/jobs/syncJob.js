@@ -1,7 +1,7 @@
 import syncLogbooks from "../utils/syncBook.js";
 
 export const syncLogbookJob = {
-  async handle(userId, exerciseId) {
-    return await syncLogbooks(userId, exerciseId);
+  async handle(userId, exerciseId, workoutId) {
+    return await syncLogbooks(userId, exerciseId, workoutId);
   },
 };

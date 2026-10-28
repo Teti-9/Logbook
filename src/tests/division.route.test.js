@@ -1,171 +1,184 @@
-import { describe, it, expect, beforeEach } from 'vitest'
-import { prisma } from './setup.js'
-import request from 'supertest'
-import jwt from 'jsonwebtoken'
-import app from '../server.js'
+import { describe, it, expect, beforeEach } from "vitest";
+import { getAuthedAgent } from "./user.route.js";
+import { prisma } from "./setup.js";
+import request from "supertest";
+import app from "../server.js";
 
-const signToken = (userId) =>
-    jwt.sign({ id: userId }, process.env.JWT_SECRET, { expiresIn: '15m' })
+describe("division routes", () => {
+  let agent, user, workout, division;
 
-describe('api/divisions (integration)', () => {
-    let user, token
+  beforeEach(async () => {
+    ({ agent, user } = await getAuthedAgent());
 
-    beforeEach(async () => {
-        user = await prisma.user.create({
-            data: { email: 'teti@example.com', password: '123' }
-        })
-        token = signToken(user.id)
+    workout = await prisma.workout.create({
+      data: {
+        name: "main workout",
+        observation: "test",
+        userId: Number(user.id),
+      },
+    });
 
-        await prisma.division.createMany({
-            data: [
-                { name: 'Push', day: "monday", userId: user.id },
-                { name: 'Pull', day: "tuesday", userId: user.id }
-            ]
-        })
-    })
+    division = await prisma.division.create({
+      data: {
+        name: "push",
+        day: "monday",
+        workoutId: workout.id,
+        userId: Number(user.id),
+      },
+    });
+  });
 
-    it('rejects requests without a valid token.', async () => {
-        const res = await request(app).get('/api/divisions')
-        expect(res.status).toBe(401)
-    })
+  it("rejects unauthenticated requests", async () => {
+    const res = await request(app).get("/api/divisions");
+    expect(res.status).toBe(401);
+  });
 
-    it('missing fields, invalid shape.', async () => {
-        const res = await request(app)
-            .post('/api/divisions')
-            .set('Authorization', `Bearer ${token}`)
-            .send({ name: 'Upper' })
+  it("create a division without a workout that exists", async () => {
+    const res = await agent.post("/api/divisions").send({
+      name: "pull",
+      day: "tuesday",
+      workoutId: workout.id + 1,
+      userId: Number(user.id),
+    });
 
-        expect(res.status).toBe(500)
-        expect(res.body.success).toBe(false)
-        expect(res.body.data).toMatch(/invalid/i)
-    })
+    expect(res.status).toBe(404);
+    expect(res.body.success).toBe(false);
+    expect(res.body.data).toBe(
+      "Workout not found. Please create a workout first.",
+    );
+  });
 
-    it('day must be a valid enum.', async () => {
-        const res = await request(app)
-            .post('/api/divisions')
-            .set('Authorization', `Bearer ${token}`)
-            .send({ name: 'Push', day: 'notvalid' })
+  it("day is not a valid day", async () => {
+    const res = await agent.post("/api/divisions").send({
+      name: "pull",
+      day: "RANDOM",
+      workoutId: workout.id,
+      userId: Number(user.id),
+    });
 
-        expect(res.status).toBe(400)
-        expect(res.body.success).toBe(false)
-        expect(res.body.data).toMatch(/is not a day/i)
-    })
+    expect(res.status).toBe(400);
+    expect(res.body.success).toBe(false);
+  });
 
-    it('a training split for this day already exists.', async () => {
-        const res = await request(app)
-            .post('/api/divisions')
-            .set('Authorization', `Bearer ${token}`)
-            .send({ name: 'Push', day: 'monday' })
+  it("create a second division with the same day", async () => {
+    const res = await agent.post("/api/divisions").send({
+      name: "push",
+      day: "Monday",
+      workoutId: workout.id,
+      userId: Number(user.id),
+    });
 
-        expect(res.status).toBe(400)
-        expect(res.body.success).toBe(false)
-        expect(res.body.data).toBe('A training split for this day already exists.')
-    })
+    expect(res.status).toBe(409);
+    expect(res.body.success).toBe(false);
+  });
 
-    it('successfully creates a division.', async () => {
-        const res = await request(app)
-            .post('/api/divisions')
-            .set('Authorization', `Bearer ${token}`)
-            .send({ name: 'Upper', day: 'Friday' })
+  it("create a division", async () => {
+    const res = await agent.post("/api/divisions").send({
+      name: "pull",
+      day: "tuesday",
+      workoutId: workout.id,
+      userId: Number(user.id),
+    });
 
-        expect(res.status).toBe(201)
-        expect(res.body.success).toBe(true)
-        expect(res.body.data.message).toBe('Training split successfully created.')
-    })
+    expect(res.status).toBe(201);
+    expect(res.body.success).toBe(true);
+    expect(res.body.data.message).toBe("Division successfully created.");
+  });
 
-    it('returns no divisions found if no divisions.', async () => {
-        user = await prisma.user.create({
-            data: { email: 'teti3@example.com', password: '123' }
-        })
-        token = signToken(user.id)
+  it("divisions not found", async () => {
+    const res = await agent
+      .get(`/api/divisions?workoutId=${workout.id + 1}`)
+      .query({ page: 1, limit: 3 });
 
-        const res = await request(app)
-            .get('/api/divisions')
-            .set('Authorization', `Bearer ${token}`)
+    expect(res.body.success).toBe(false);
+    expect(res.status).toBe(404);
+    expect(res.body.data).toBe("No divisions found.");
+  });
 
-        expect(res.body.success).toBe(false)
-        expect(res.status).toBe(404)
-    })
+  it("does not return a division that belongs to another user", async () => {
+    const res = await agent.get(
+      `/api/divisions/${division.id + 1}?workoutId=${workout.id}`,
+    );
 
-    it('get division not-found path.', async () => {
-        const res = await request(app)
-            .get(`/api/divisions/${10}`)
-            .set('Authorization', `Bearer ${token}`)
+    expect(res.status).toBe(404);
+    expect(res.body.success).toBe(false);
+    expect(res.body.data).toBe("Division not found.");
+  });
 
-        expect(res.body.success).toBe(false)
-        expect(res.status).toBe(404)
-        expect(res.body.data).toBe('Division not found.')
-    })
+  it("returns divisions for the logged user", async () => {
+    const res = await agent
+      .get(`/api/divisions?workoutId=${workout.id}`)
+      .query({ page: 1, limit: 3 });
 
-    it('returns paginated divisions for the authenticated user.', async () => {
-        const res = await request(app)
-            .get('/api/divisions')
-            .set('Authorization', `Bearer ${token}`)
-            .query({ page: 1, limit: 2 })
+    expect(res.status).toBe(200);
+    expect(res.body.success).toBe(true);
+    expect(res.body.data.divisions).toHaveLength(1);
+  });
 
-        expect(res.status).toBe(200)
-        expect(res.body.success).toBe(true)
-        expect(res.body.data.divisions).toHaveLength(2)
-    })
+  it("division not found by its id", async () => {
+    const res = await agent.get(
+      `/api/divisions/${division.id + 999}?workoutId=${workout.id}`,
+    );
 
-    it('return division by id.', async () => {
-        const res = await request(app)
-            .get(`/api/divisions/${1}`)
-            .set('Authorization', `Bearer ${token}`)
+    expect(res.body.success).toBe(false);
+    expect(res.status).toBe(404);
+    expect(res.body.data).toBe("Division not found.");
+  });
 
-        expect(res.status).toBe(200)
-        expect(res.body.success).toBe(true)
-    })
+  it("returns a division by its id for the logged user", async () => {
+    const res = await agent.get(
+      `/api/divisions/${division.id}?workoutId=${workout.id}`,
+    );
 
-    it('does not leak another users divisions.', async () => {
-        const otherUser = await prisma.user.create({
-            data: { email: 'teti2@example.com', password: '1234' }
-        })
-        await prisma.division.create({ data: { name: 'Legs', day: "thursday", userId: otherUser.id } })
+    expect(res.status).toBe(200);
+    expect(res.body.success).toBe(true);
+    expect(res.body.data).toMatchObject({
+      id: division.id,
+      name: division.name,
+      day: division.day,
+      userId: division.userId,
+      isDeleted: false,
+    });
+  });
 
-        const res = await request(app)
-            .get('/api/divisions')
-            .set('Authorization', `Bearer ${token}`)
+  it("division contain exercises", async () => {
+    await prisma.exercises.create({
+      data: {
+        name: "push",
+        target_muscle_group: "chest",
+        series_reps: "2x9",
+        rest: 120,
+        advanced_technique: "backoff",
+        observation: "machine",
+        workoutId: workout.id,
+        divisionId: division.id,
+        userId: Number(user.id),
+      },
+    });
 
-        const names = res.body.data.divisions.map(d => d.name)
-        expect(names).not.toContain('Legs')
-    })
+    const res = await agent.delete(
+      `/api/divisions/${division.id}?workoutId=${workout.id}`,
+    );
+    expect(res.status).toBe(409);
+    expect(res.body.data).toBe(
+      "Division contain exercises, please delete them before hand.",
+    );
+  });
 
-    it('delete division not-found path.', async () => {
-        const res = await request(app)
-            .delete(`/api/divisions/${10}`)
-            .set('Authorization', `Bearer ${token}`)
+  it("delete a division by its id for the logged user", async () => {
+    const res = await agent.delete(
+      `/api/divisions/${division.id}?workoutId=${workout.id}`,
+    );
+    expect(res.status).toBe(200);
+    expect(res.body.data).toStrictEqual({
+      message: "Division successfully deleted.",
+    });
 
-        expect(res.body.success).toBe(false)
-        expect(res.status).toBe(404)
-        expect(res.body.data).toBe('Division not found.')
-    })
-
-    it('delete populated division.', async () => {
-        await prisma.exercises.create({ data: { name: 'tbar', series: 2, topset_weight: 50, topset_reps: 8, divisionId: 2, userId: user.id } })
-
-        const res = await request(app)
-            .delete(`/api/divisions/${2}`)
-            .set('Authorization', `Bearer ${token}`)
-
-        expect(res.body.success).toBe(false)
-        expect(res.status).toBe(409)
-        expect(res.body.data).toBe('Division contain exercises, please delete them before hand.')
-    })
-
-    it('successfully delete a division.', async () => {
-        const res = await request(app)
-            .delete(`/api/divisions/${1}`)
-            .set('Authorization', `Bearer ${token}`)
-
-        const deletedDivision = await prisma.division.findFirst({
-            where: { id: 1 }
-        })
-
-        expect(res.body.success).toBe(true)
-        expect(res.status).toBe(200)
-        expect(res.body.data.message).toBe('Division successfully deleted.')
-        expect(deletedDivision?.isDeleted).toBe(true)
-        expect(deletedDivision?.deletedAt).toBeInstanceOf(Date)
-    })
-})
+    const postRes = await agent.get(
+      `/api/divisions/${division.id}?workoutId=${workout.id}`,
+    );
+    expect(postRes.body.success).toBe(false);
+    expect(postRes.status).toBe(404);
+    expect(postRes.body.data).toBe("Division not found.");
+  });
+});

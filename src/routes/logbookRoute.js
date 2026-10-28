@@ -4,7 +4,10 @@ const LogbookRouter = (logbookService) => {
   const router = express.Router();
 
   router.get("/logbooks", async (req, res) => {
-    const result = await logbookService.getLogbooks(req.user.id);
+    const result = await logbookService.getLogbooks({
+      userId: req.user.id,
+      workoutId: req.query.workoutId,
+    });
 
     return res.status(200).json({
       success: true,
@@ -13,10 +16,11 @@ const LogbookRouter = (logbookService) => {
   });
 
   router.get("/logbooks/:id", async (req, res) => {
-    const result = await logbookService.getLogbookById(
-      req.user.id,
-      req.params.id,
-    );
+    const result = await logbookService.getLogbookById({
+      userId: req.user.id,
+      logbookId: req.params.id,
+      workoutId: req.query.workoutId,
+    });
 
     return res.status(200).json({
       success: true,
@@ -25,10 +29,11 @@ const LogbookRouter = (logbookService) => {
   });
 
   router.post("/logbooks", async (req, res) => {
-    const logbookCreated = await logbookService.createLogbook(
-      req.user.id,
-      req.body,
-    );
+    const logbookCreated = await logbookService.createLogbook({
+      userId: req.user.id,
+      workoutId: req.query.workoutId,
+      body: req.body,
+    });
 
     return res.status(201).json({
       success: true,
@@ -37,7 +42,11 @@ const LogbookRouter = (logbookService) => {
   });
 
   router.post("/synclogbooks", async (req, res) => {
-    const result = await logbookService.syncLogbook(req.user.id, req.body);
+    const result = await logbookService.syncLogbook({
+      userId: req.user.id,
+      workoutId: req.query.workoutId,
+      body: req.body,
+    });
 
     return res.status(200).json({
       success: true,
@@ -46,10 +55,10 @@ const LogbookRouter = (logbookService) => {
   });
 
   router.get("/logbooksjobs/:jobId", async (req, res) => {
-    const jobStatus = await logbookService.logbookJob(
-      req.user.id,
-      req.params.jobId,
-    );
+    const jobStatus = await logbookService.logbookJob({
+      userId: req.user.id,
+      jobId: req.params.jobId,
+    });
 
     return res.status(200).json({
       success: true,
@@ -58,10 +67,11 @@ const LogbookRouter = (logbookService) => {
   });
 
   router.delete("/logbooks/:id", async (req, res) => {
-    const logbookDeleted = await logbookService.deleteLogbook(
-      req.user.id,
-      req.params.id,
-    );
+    const logbookDeleted = await logbookService.deleteLogbook({
+      userId: req.user.id,
+      logbookId: req.params.id,
+      workoutId: req.query.workoutId,
+    });
 
     return res.status(200).json({
       success: true,

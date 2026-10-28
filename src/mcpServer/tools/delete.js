@@ -31,21 +31,30 @@ const deleteDivisionbyId = {
     description: "Delete a division by it's id",
     inputSchema: z.object({
       id: z.number().describe("Id of the division"),
+      workoutId: z
+        .number()
+        .describe("Id of the workout that this division belongs to"),
     }),
   },
-  handler: errorHandling("Delete a division by it's id", async ({ id }) => {
-    const division = await makeApiRequest(`/divisions/${id}`, {
-      method: "DELETE",
-    });
-    return {
-      content: [
+  handler: errorHandling(
+    "Delete a division by it's id",
+    async ({ id, workoutId }) => {
+      const division = await makeApiRequest(
+        `/divisions/${id}?workoutId=${workoutId}`,
         {
-          type: "text",
-          text: `Division: ${JSON.stringify(division)}`,
+          method: "DELETE",
         },
-      ],
-    };
-  }),
+      );
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Division: ${JSON.stringify(division)}`,
+          },
+        ],
+      };
+    },
+  ),
 };
 
 const deleteExercisebyId = {
@@ -54,21 +63,33 @@ const deleteExercisebyId = {
     description: "Delete a exercise by it's id",
     inputSchema: z.object({
       id: z.number().describe("Id of the exercise"),
+      workoutId: z
+        .number()
+        .describe("Id of the workout that this exercise belongs to"),
+      divisionId: z
+        .number()
+        .describe("Id of the division that this exercise belongs to"),
     }),
   },
-  handler: errorHandling("Delete a exercises by it's id", async ({ id }) => {
-    const exercise = await makeApiRequest(`/exercises/${id}`, {
-      method: "DELETE",
-    });
-    return {
-      content: [
+  handler: errorHandling(
+    "Delete a exercises by it's id",
+    async ({ id, workoutId, divisionId }) => {
+      const exercise = await makeApiRequest(
+        `/exercises/${id}?workoutId=${workoutId}&divisionId=${divisionId}`,
         {
-          type: "text",
-          text: `Exercise: ${JSON.stringify(exercise)}`,
+          method: "DELETE",
         },
-      ],
-    };
-  }),
+      );
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Exercise: ${JSON.stringify(exercise)}`,
+          },
+        ],
+      };
+    },
+  ),
 };
 
 const deletelogbookbyId = {
@@ -77,21 +98,30 @@ const deletelogbookbyId = {
     description: "Delete a logbook by it's id",
     inputSchema: z.object({
       id: z.number().describe("Id of the logbook"),
+      workoutId: z
+        .number()
+        .describe("Id of the workout that this logbook belongs to"),
     }),
   },
-  handler: errorHandling("Delete a logbook by it's id", async ({ id }) => {
-    const logbook = await makeApiRequest(`/logbooks/${id}`, {
-      method: "DELETE",
-    });
-    return {
-      content: [
+  handler: errorHandling(
+    "Delete a logbook by it's id",
+    async ({ id, workoutId }) => {
+      const logbook = await makeApiRequest(
+        `/logbooks/${id}?workoutId=${workoutId}`,
         {
-          type: "text",
-          text: `Logbook: ${JSON.stringify(logbook)}`,
+          method: "DELETE",
         },
-      ],
-    };
-  }),
+      );
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Logbook: ${JSON.stringify(logbook)}`,
+          },
+        ],
+      };
+    },
+  ),
 };
 
 const deletehistoricalbyId = {
@@ -100,21 +130,30 @@ const deletehistoricalbyId = {
     description: "Delete a historical by it's id",
     inputSchema: z.object({
       id: z.number().describe("Id of the historical"),
+      workoutId: z
+        .number()
+        .describe("Id of the workout that this historical belongs to"),
     }),
   },
-  handler: errorHandling("Delete a historical by it's id", async ({ id }) => {
-    const historical = await makeApiRequest(`/historicals/${id}`, {
-      method: "DELETE",
-    });
-    return {
-      content: [
+  handler: errorHandling(
+    "Delete a historical by it's id",
+    async ({ id, workoutId }) => {
+      const historical = await makeApiRequest(
+        `/historicals/${id}?workoutId=${workoutId}`,
         {
-          type: "text",
-          text: `Historical: ${JSON.stringify(historical)}`,
+          method: "DELETE",
         },
-      ],
-    };
-  }),
+      );
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Historical: ${JSON.stringify(historical)}`,
+          },
+        ],
+      };
+    },
+  ),
 };
 
 export const deleteTools = [

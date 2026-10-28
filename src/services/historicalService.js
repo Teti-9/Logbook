@@ -6,12 +6,31 @@ export default class HistoricalService {
     this.historicalRepo = historicalRepo;
   }
 
-  async getHistorical(userId, isDeleted, search) {
-    const historical = await this.historicalRepo.findAll(
-      userId,
-      isDeleted,
-      search,
-    );
+  async getHistorical(data) {
+    const fieldConfig = {
+      search: "optional",
+      workoutId: "number",
+    };
+
+    const params = {
+      search: data.search,
+      workoutId: Number(data.workoutId),
+    };
+
+    const result = validateFields(params, fieldConfig);
+
+    if (!result.success) {
+      const error = new Error(parseError(result.error));
+      error.statusCode = 400;
+      throw error;
+    }
+
+    const historical = await this.historicalRepo.findAll({
+      userId: data.userId,
+      search: result.data.search,
+      workoutId: result.data.workoutId,
+      isDeleted: false,
+    });
 
     if (!historical || historical.length === 0) {
       const error = new Error("No historical archives found.");
@@ -22,11 +41,15 @@ export default class HistoricalService {
     return historical;
   }
 
-  async getHistoricalById(userId, id) {
-    const historicalId = Number(id);
-    const fieldConfig = { id: "number" };
+  async getHistoricalById(data) {
+    const fieldConfig = { historicalId: "number", workoutId: "number" };
 
-    const result = validateFields({ id: historicalId }, fieldConfig);
+    const params = {
+      historicalId: Number(data.historicalId),
+      workoutId: Number(data.workoutId),
+    };
+
+    const result = validateFields(params, fieldConfig);
 
     if (!result.success) {
       const error = new Error(parseError(result.error));
@@ -35,8 +58,9 @@ export default class HistoricalService {
     }
 
     const historical = await this.historicalRepo.findById({
-      userId: userId,
-      id: historicalId,
+      userId: data.userId,
+      historicalId: result.data.historicalId,
+      workoutId: result.data.workoutId,
       isDeleted: false,
     });
 
@@ -49,11 +73,15 @@ export default class HistoricalService {
     return historical;
   }
 
-  async deleteHistorical(userId, id) {
-    const historicalId = Number(id);
-    const fieldConfig = { id: "number" };
+  async deleteHistorical(data) {
+    const fieldConfig = { historicalId: "number", workoutId: "number" };
 
-    const result = validateFields({ id: historicalId }, fieldConfig);
+    const params = {
+      historicalId: Number(data.historicalId),
+      workoutId: Number(data.workoutId),
+    };
+
+    const result = validateFields(params, fieldConfig);
 
     if (!result.success) {
       const error = new Error(parseError(result.error));
@@ -62,8 +90,9 @@ export default class HistoricalService {
     }
 
     const historical = await this.historicalRepo.findById({
-      userId: userId,
-      id: historicalId,
+      userId: data.userId,
+      historicalId: Number(result.data.historicalId),
+      workoutId: Number(result.data.workoutId),
       isDeleted: false,
     });
 
@@ -73,7 +102,7 @@ export default class HistoricalService {
       throw error;
     }
 
-    await this.historicalRepo.findByIdAndDelete(historicalId);
+    await this.historicalRepo.findByIdAndDelete(result.data.historicalId);
 
     return { message: "Historical archive successfully deleted." };
   }

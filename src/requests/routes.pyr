@@ -2,15 +2,15 @@
 import requests
 BASE = "http://localhost:8000/api"
 
-COOKIE = "better-auth.session_token=PASTE_COOKIE_FROM_SIGN-IN"
+COOKIE = "better-auth.session_token=5e8wTBXUEnJnDmSbkbJGKyyJrhvqLLVh.4twIB6PzYKQq8RMP%2Be1VfYIcsqdHAlMlSWzW0fyvPtQ%3D"
 H = {"Cookie": COOKIE, "Origin": "http://localhost:8000"}
 
 WORKOUT_ID = 1
-DIVISION_ID = 1
-EXERCISE_ID = 1
-LOGBOOK_ID = 1
-HISTORICAL_ID = 1
-JOB_ID = 1
+DIVISION_ID = 4
+EXERCISE_ID = 3
+LOGBOOK_ID = 3
+HISTORICAL_ID = 19
+JOB_ID = 6
 ###env
 
 
@@ -35,7 +35,7 @@ requests.get(f"{BASE}/workouts", params={"page": 1, "limit": 10}, headers=H)
 
 requests.get(f"{BASE}/workouts/{WORKOUT_ID}", headers=H)
 
-requests.post(f"{BASE}/workouts", json={"name": "Main workout"}, timeout=5, headers=H)
+requests.post(f"{BASE}/workouts", json={"name": "teste workout"}, timeout=5, headers=H)
 
 requests.delete(f"{BASE}/workouts/{WORKOUT_ID}", headers=H)
 
@@ -44,24 +44,24 @@ requests.delete(f"{BASE}/workouts/{WORKOUT_ID}", headers=H)
 # DIVISIONS
 # ============================================================
 
-requests.get(f"{BASE}/divisions", params={"page": 1, "limit": 10}, headers=H)
+requests.get(f"{BASE}/divisions?workoutId={WORKOUT_ID}", params={"page": 1, "limit": 10}, headers=H)
 
-requests.get(f"{BASE}/divisions/{DIVISION_ID}", headers=H)
+requests.get(f"{BASE}/divisions/{DIVISION_ID}?workoutId={WORKOUT_ID}", headers=H)
 
-requests.post(f"{BASE}/divisions", json={"name": "Push", "day": "Monday", "workoutId": WORKOUT_ID}, headers=H)
+requests.post(f"{BASE}/divisions", json={"name": "legs", "day": "wednesday", "workoutId": WORKOUT_ID}, headers=H)
 
-requests.delete(f"{BASE}/divisions/{DIVISION_ID}", headers=H)
+requests.delete(f"{BASE}/divisions/{DIVISION_ID}?workoutId={WORKOUT_ID}", headers=H)
 
 
 # ============================================================
 # EXERCISES
 # ============================================================
 
-requests.get(f"{BASE}/exercises", params={"page": 1, "limit": 10}, headers=H)
+requests.get(f"{BASE}/exercises?workoutId={WORKOUT_ID}&divisionId={DIVISION_ID}", params={"page": 1, "limit": 10}, headers=H)
 
-requests.get(f"{BASE}/exercises/{EXERCISE_ID}", headers=H)
+requests.get(f"{BASE}/exercises/{EXERCISE_ID}?workoutId={WORKOUT_ID}&divisionId={DIVISION_ID}", headers=H)
 
-requests.post(f"{BASE}/exercises", json={
+requests.post(f"{BASE}/exercises?workoutId={WORKOUT_ID}", json={
 	"name": "Bench press", 
 	"target_muscle_group": "Chest", 
 	"series_reps": "2x8", 
@@ -69,40 +69,38 @@ requests.post(f"{BASE}/exercises", json={
 	"divisionId": DIVISION_ID
 	}, headers=H)
 
-requests.delete(f"{BASE}/exercises/{EXERCISE_ID}", headers=H)
+requests.delete(f"{BASE}/exercises/{EXERCISE_ID}?workoutId={WORKOUT_ID}&divisionId={DIVISION_ID}", headers=H)
 
 
 # ============================================================
 # LOGBOOKS
 # ============================================================
 
-requests.get(f"{BASE}/logbooks", headers=H)
+requests.get(f"{BASE}/logbooks?workoutId={WORKOUT_ID}", headers=H)
 
-requests.get(f"{BASE}/logbooks/{LOGBOOK_ID}", headers=H)
+requests.get(f"{BASE}/logbooks/{LOGBOOK_ID}?workoutId={WORKOUT_ID}", headers=H)
 
-requests.post(f"{BASE}/logbooks", json={
+requests.post(f"{BASE}/logbooks?workoutId={WORKOUT_ID}", json={
 	"exerciseId": EXERCISE_ID, 
 	"topset_weight": 50, 
 	"topset_reps": 8,
 	}, headers=H)
 
-requests.post(f"{BASE}/synclogbooks", json={
-	"exercises": [1, 2]
+requests.post(f"{BASE}/synclogbooks?workoutId={WORKOUT_ID}", json={
+	"exercises": [3, 2, 4]
 	}, headers=H)
 
 requests.get(f"{BASE}/logbooksjobs/{JOB_ID}", headers=H)
 
-requests.delete(f"{BASE}/logbooks/{LOGBOOK_ID}", headers=H)
+requests.delete(f"{BASE}/logbooks/{LOGBOOK_ID}?workoutId={WORKOUT_ID}", headers=H)
 
 
 # ============================================================
 # HISTORICALS
 # ============================================================
 
-requests.get(f"{BASE}/historicals", headers=H)
+requests.get(f"{BASE}/historicals?workoutId={WORKOUT_ID}", params={"search": ""}, headers=H)
 
-requests.get(f"{BASE}/historicals", params={"search": "supino"}, headers=H)
+requests.get(f"{BASE}/historicals/{HISTORICAL_ID}?workoutId={WORKOUT_ID}", headers=H)
 
-requests.get(f"{BASE}/historicals/{HISTORICAL_ID}", headers=H)
-
-requests.delete(f"{BASE}/historicals/{HISTORICAL_ID}", headers=H)
+requests.delete(f"{BASE}/historicals/{HISTORICAL_ID}?workoutId={WORKOUT_ID}", headers=H)

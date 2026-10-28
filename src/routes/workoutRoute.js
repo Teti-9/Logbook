@@ -21,10 +21,10 @@ const WorkoutRouter = (workoutService) => {
   });
 
   router.get("/workouts/:id", async (req, res) => {
-    const result = await workoutService.getWorkoutById(
-      req.user.id,
-      req.params.id,
-    );
+    const result = await workoutService.getWorkoutById({
+      userId: req.user.id,
+      workoutId: req.params.id,
+    });
 
     return res.status(200).json({
       success: true,

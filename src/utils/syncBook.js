@@ -1,21 +1,11 @@
-import validateFields from "../schemas/zodFields.js";
-import parseError from "../schemas/zodError.js";
 import { prisma } from "../config/infra/database.js";
 
-async function syncLogbooks(userId, exerciseId) {
-  const id = Number(exerciseId);
-  const fieldConfig = { id: "number" };
-
-  const result = validateFields({ id: id }, fieldConfig);
-
-  if (!result.success) {
-    throw new Error(parseError(result.error));
-  }
-
+async function syncLogbooks(userId, exerciseId, workoutId) {
   const logbookAssociated = await prisma.logbook.findFirst({
     where: {
-      exerciseId: id,
       userId: userId,
+      exerciseId: exerciseId,
+      workoutId: workoutId,
       sync: false,
       isDeleted: false,
     },
@@ -26,19 +16,21 @@ async function syncLogbooks(userId, exerciseId) {
   }
 
   const historical_data = {
-    exerciseId: id,
+    userId: userId,
     previous_topset_weight: logbookAssociated.topset_weight,
     previous_topset_reps: logbookAssociated.topset_reps,
-    extra: logbookAssociated.extra,
-    userId: userId,
+    workoutId: logbookAssociated.workoutId,
+    divisionId: logbookAssociated.divisionId,
+    exerciseId: logbookAssociated.exerciseId,
+    logbookId: logbookAssociated.id,
   };
 
   await prisma.$transaction([
-    prisma.historical.create({ data: historical_data }),
     prisma.logbook.update({
-      where: { userId: userId, id: logbookAssociated.id },
+      where: { id: logbookAssociated.id },
       data: { sync: true },
     }),
+    prisma.historical.create({ data: historical_data }),
   ]);
 
   return { message: "Logbook successfully synchronized." };

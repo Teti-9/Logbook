@@ -3,10 +3,10 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const USER_AGENT = "logbook-api/1.0";
-const API_BASE = process.env.API_BASE;
-const EMAIL = process.env.EMAIL;
-const PASSWORD = process.env.PASSWORD;
-const ORIGIN = process.env.ORIGIN;
+const API_BASE = "http://localhost:8000/api";
+const EMAIL = "teti@teti.com";
+const PASSWORD = "1234";
+const ORIGIN = "http://localhost:8000/api";
 
 let sessionCookie = null;
 let signInPromise = null;
@@ -22,7 +22,7 @@ function baseHeaders() {
 
 async function signIn() {
   if (!EMAIL || !PASSWORD) {
-    throw new Error("LOGBOOK_EMAIL and LOGBOOK_PASSWORD must be set");
+    throw new Error("EMAIL and PASSWORD must be set");
   }
 
   const response = await fetch(`${API_BASE}/auth/sign-in/email`, {

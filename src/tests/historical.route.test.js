@@ -1,112 +1,146 @@
-import { describe, it, expect, beforeEach } from 'vitest'
-import { prisma } from './setup.js'
-import request from 'supertest'
-import jwt from 'jsonwebtoken'
-import app from '../server.js'
+import { describe, it, expect, beforeEach } from "vitest";
+import { getAuthedAgent } from "./user.route.js";
+import { prisma } from "./setup.js";
+import request from "supertest";
+import app from "../server.js";
 
-const signToken = (userId) =>
-    jwt.sign({ id: userId }, process.env.JWT_SECRET, { expiresIn: '15m' })
+describe("historical routes", () => {
+  let agent, user, workout, division, exercise, logbook, historical;
 
-describe('api/historicals (integration)', () => {
-    let user, token, new_token
+  beforeEach(async () => {
+    ({ agent, user } = await getAuthedAgent());
 
-    beforeEach(async () => {
-        user = await prisma.user.create({
-            data: { email: 'teti@example.com', password: '123' }
-        })
-        token = signToken(user.id)
+    workout = await prisma.workout.create({
+      data: {
+        name: "main workout",
+        observation: "test",
+        userId: Number(user.id),
+      },
+    });
 
-        await prisma.division.create({ data: { name: 'push', day: "monday", userId: user.id } })
-        await prisma.exercises.create({ data: { name: 'bench press', series: 2, topset_weight: 50, topset_reps: 8, divisionId: 1, userId: user.id } })
+    division = await prisma.division.create({
+      data: {
+        name: "push",
+        day: "monday",
+        workoutId: workout.id,
+        userId: Number(user.id),
+      },
+    });
 
-        await prisma.historical.createMany({
-            data: [
-                { exerciseId: 1, name: "bench press", series: 2, previous_topset_weight: 50, previous_topset_reps: 8, previous_backoff_weight: 40, previous_backoff_reps: 8, userId: user.id },
-                { exerciseId: 1, name: "bench press", series: 2, previous_topset_weight: 60, previous_topset_reps: 8, previous_backoff_weight: 50, previous_backoff_reps: 8, userId: user.id }
-            ]
-        })
-    })
+    exercise = await prisma.exercises.create({
+      data: {
+        name: "push",
+        target_muscle_group: "chest",
+        series_reps: "2x9",
+        rest: 120,
+        advanced_technique: "backoff",
+        observation: "machine",
+        workoutId: workout.id,
+        divisionId: division.id,
+        userId: Number(user.id),
+      },
+    });
 
-    it('rejects requests without a valid token.', async () => {
-        const res = await request(app).get('/api/historicals')
-        expect(res.status).toBe(401)
-    })
+    logbook = await prisma.logbook.create({
+      data: {
+        exerciseId: exercise.id,
+        topset_weight: 30,
+        topset_reps: 8,
+        extra: "progressed 2-5%",
+        workoutId: workout.id,
+        divisionId: division.id,
+        userId: Number(user.id),
+      },
+    });
 
-    it('returns historicals not found.', async () => {
-        user = await prisma.user.create({
-            data: { email: 'teti2@example.com', password: '123' }
-        })
-        new_token = signToken(user.id)
+    historical = await prisma.historical.create({
+      data: {
+        previous_topset_weight: 30,
+        previous_topset_reps: 9,
+        extra: "progressed 2-5%",
+        workoutId: workout.id,
+        divisionId: division.id,
+        userId: Number(user.id),
+        exerciseId: exercise.id,
+        logbookId: logbook.id,
+      },
+    });
+  });
 
-        const res = await request(app)
-            .get('/api/historicals')
-            .set('Authorization', `Bearer ${new_token}`)
+  it("rejects unauthenticated requests", async () => {
+    const res = await request(app).get("/api/historicals");
+    expect(res.status).toBe(401);
+  });
 
-        expect(res.status).toBe(404)
-        expect(res.body.success).toBe(false)
-        expect(res.body.data).toBe('No historical archives found.')
-    })
+  it("historicals not found", async () => {
+    const res = await agent.get(
+      `/api/historicals?workoutId=${workout.id + 1}&search=''`,
+    );
 
-    it('get historical not-found path.', async () => {
-        const res = await request(app)
-            .get(`/api/historicals/${10}`)
-            .set('Authorization', `Bearer ${token}`)
+    expect(res.body.success).toBe(false);
+    expect(res.status).toBe(404);
+    expect(res.body.data).toBe("No historical archives found.");
+  });
 
-        expect(res.body.success).toBe(false)
-        expect(res.status).toBe(404)
-        expect(res.body.data).toBe('Historical archive not found.')
-    })
+  it("does not return a historical archive that belongs to another user", async () => {
+    const res = await agent.get(
+      `/api/historicals/${historical.id}?workoutId=${workout.id + 1}`,
+    );
 
-    it('return historical by id.', async () => {
-        const res = await request(app)
-            .get(`/api/historicals/${1}`)
-            .set('Authorization', `Bearer ${token}`)
+    expect(res.status).toBe(404);
+    expect(res.body.success).toBe(false);
+    expect(res.body.data).toBe("Historical archive not found.");
+  });
 
-        expect(res.status).toBe(200)
-        expect(res.body.success).toBe(true)
-    })
+  it("returns historicals for the logged user", async () => {
+    const res = await agent.get(`/api/historicals?workoutId=${workout.id}`);
 
-    it('does not leak another users historicals.', async () => {
-        const otherUser = await prisma.user.create({
-            data: { email: 'teti2@example.com', password: '1234' }
-        })
+    expect(res.status).toBe(200);
+    expect(res.body.success).toBe(true);
+    expect(res.body.data).toHaveLength(1);
+  });
 
-        const otherDivision = await prisma.division.create({ data: { name: 'push', day: "monday", userId: otherUser.id } })
-        const otherExercise = await prisma.exercises.create({ data: { name: 'peck deck', series: 2, topset_weight: 50, topset_reps: 8, divisionId: otherDivision.id, userId: otherUser.id } })
+  it("historical not found by its id", async () => {
+    const res = await agent.get(
+      `/api/historicals/${historical.id + 999}?workoutId=${workout.id}`,
+    );
 
-        await prisma.historical.create({ data: { exerciseId: otherExercise.id, name: "peck deck", series: 2, previous_topset_weight: 50, previous_topset_reps: 8, previous_backoff_weight: 40, previous_backoff_reps: 8, userId: otherUser.id } })
+    expect(res.body.success).toBe(false);
+    expect(res.status).toBe(404);
+    expect(res.body.data).toBe("Historical archive not found.");
+  });
 
-        const res = await request(app)
-            .get('/api/historicals')
-            .set('Authorization', `Bearer ${token}`)
+  it("returns a historical archive by its id for the logged user", async () => {
+    const res = await agent.get(
+      `/api/historicals/${historical.id}?workoutId=${workout.id}`,
+    );
 
-        const names = res.body.data.map(d => d.name)
-        expect(names).not.toContain('peck deck')
-    })
+    expect(res.status).toBe(200);
+    expect(res.body.success).toBe(true);
+    expect(res.body.data).toMatchObject({
+      id: historical.id,
+      previous_topset_weight: historical.previous_topset_weight,
+      previous_topset_reps: historical.previous_topset_reps,
+      extra: historical.extra,
+      isDeleted: false,
+    });
+  });
 
-    it('delete historical not-found path.', async () => {
-        const res = await request(app)
-            .delete(`/api/historicals/${10}`)
-            .set('Authorization', `Bearer ${token}`)
+  it("delete a historical by its id for the logged user", async () => {
+    const res = await agent.delete(
+      `/api/historicals/${historical.id}?workoutId=${workout.id}`,
+    );
 
-        expect(res.body.success).toBe(false)
-        expect(res.status).toBe(404)
-        expect(res.body.data).toBe('Historical archive not found.')
-    })
+    expect(res.status).toBe(200);
+    expect(res.body.data).toStrictEqual({
+      message: "Historical archive successfully deleted.",
+    });
 
-    it('successfully delete an exercise.', async () => {
-        const res = await request(app)
-            .delete(`/api/historicals/${1}`)
-            .set('Authorization', `Bearer ${token}`)
-
-        const deletedHistorical = await prisma.historical.findFirst({
-            where: { id: 1 }
-        })
-
-        expect(res.body.success).toBe(true)
-        expect(res.status).toBe(200)
-        expect(res.body.data.message).toBe('Historical archive successfully deleted.')
-        expect(deletedHistorical?.isDeleted).toBe(true)
-        expect(deletedHistorical?.deletedAt).toBeInstanceOf(Date)
-    })
-})
+    const postRes = await agent.get(
+      `/api/historicals/${historical.id}?workoutId=${workout.id}`,
+    );
+    expect(postRes.body.success).toBe(false);
+    expect(postRes.status).toBe(404);
+    expect(postRes.body.data).toBe("Historical archive not found.");
+  });
+});

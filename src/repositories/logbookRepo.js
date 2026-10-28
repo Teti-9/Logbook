@@ -3,14 +3,32 @@ export default class LogbookRepo {
     this.prisma = prisma;
   }
 
-  async findAll(where) {
+  async findAll({ userId, workoutId, sync, isDeleted }) {
     return this.prisma.logbook.findMany({
-      where,
+      where: {
+        userId,
+        workoutId,
+        sync,
+        isDeleted,
+      },
       include: {
         exercise: {
           select: {
             id: true,
             name: true,
+            target_muscle_group: true,
+            division: {
+              select: {
+                id: true,
+                name: true,
+                workout: {
+                  select: {
+                    id: true,
+                    name: true,
+                  },
+                },
+              },
+            },
           },
         },
       },
@@ -20,32 +38,29 @@ export default class LogbookRepo {
     });
   }
 
-  async findById(where) {
+  async findById({ userId, id, workoutId, sync, isDeleted }) {
     return this.prisma.logbook.findFirst({
-      where,
+      where: {
+        userId,
+        id,
+        workoutId,
+        sync,
+        isDeleted,
+      },
       include: {
         exercise: {
           select: {
             id: true,
             name: true,
+            target_muscle_group: true,
           },
         },
       },
     });
   }
 
-  async findOne(where) {
-    return this.prisma.logbook.findFirst({
-      where,
-    });
-  }
-
   async create(data) {
     return this.prisma.logbook.create({ data });
-  }
-
-  async findByIdAndUpdate(id, data) {
-    return this.prisma.logbook.update({ where: { id }, data });
   }
 
   async findByIdAndDelete(id) {

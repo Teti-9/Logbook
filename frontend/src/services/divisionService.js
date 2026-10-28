@@ -1,46 +1,44 @@
-import { authFetch } from './auth.js'
+import { authFetch } from "./auth.js";
 
-export default async function DivisionsService(method, body) {
+export default async function DivisionsService(method, body, query) {
+  const DIVISION_API = `http://localhost:8000/api/divisions?workoutId=${query}`;
 
-    const DIVISION_API = 'http://localhost:8000/api/divisions'
+  if (method === "GET") {
+    try {
+      const response = await authFetch(DIVISION_API, {
+        method: "GET",
+      });
+      if (response.ok) {
+        const payload = await response.json();
+        return { success: true, data: payload.data };
+      } else {
+        const errorData = await response.json();
+        let errorMessage = errorData.data;
 
-    if (method === 'GET') {
-        try {
-            const response = await authFetch(DIVISION_API, {
-                method: 'GET',
-            })
-            if (response.ok) {
-                const payload = await response.json()
-                return { success: true, data: payload.data }
-            } else {
-                const errorData = await response.json()
-                let errorMessage = errorData.data
-
-                return { success: false, message: errorMessage }
-            }
-        } catch (error) {
-            console.error('Error:', error)
-        }
+        return { success: false, message: errorMessage };
+      }
+    } catch (error) {
+      console.error("Error:", error);
     }
+  }
 
-    if (method === 'POST') {
-        try {
-            const response = await authFetch(DIVISION_API, {
-                method: 'POST',
-                body: JSON.stringify(body),
-            })
-            if (response.ok) {
-                const data = await response.json()
-                return { success: true, data: data }
-            } else {
-                const errorData = await response.json()
-                let errorMessage = errorData.data
+  if (method === "POST") {
+    try {
+      const response = await authFetch(DIVISION_API, {
+        method: "POST",
+        body: JSON.stringify(body),
+      });
+      if (response.ok) {
+        const data = await response.json();
+        return { success: true, data: data };
+      } else {
+        const errorData = await response.json();
+        let errorMessage = errorData.data;
 
-                return { success: false, message: errorMessage }
-            }
-        } catch (error) {
-            console.error('Error:', error)
-        }
+        return { success: false, message: errorMessage };
+      }
+    } catch (error) {
+      console.error("Error:", error);
     }
-
+  }
 }

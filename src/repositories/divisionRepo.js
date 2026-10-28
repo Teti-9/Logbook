@@ -3,28 +3,22 @@ export default class DivisionRepo {
     this.prisma = prisma;
   }
 
-  async findAll({ userId, isDeleted }, { page = 1, limit = 10 } = {}) {
-    const skip = (page - 1) * limit;
+  async findAll({ userId, workoutId, isDeleted, page = 1, limit = 10 }) {
+    const take = Number(limit);
+    const skip = (Number(page) - 1) * take;
 
     const [divisions, total] = await Promise.all([
       this.prisma.division.findMany({
         where: {
           userId,
+          workoutId,
           isDeleted,
         },
         include: {
-          exercises: {
-            where: {
-              isDeleted: false,
-            },
+          workout: {
             select: {
               id: true,
               name: true,
-              target_muscle_group: true,
-              series_reps: true,
-              rest: true,
-              advanced_technique: true,
-              observation: true,
             },
           },
         },
@@ -32,17 +26,22 @@ export default class DivisionRepo {
           id: "asc",
         },
         skip,
-        take: Number(limit),
+        take,
       }),
-      this.prisma.division.count({ where: { userId, isDeleted } }),
+      this.prisma.division.count({ where: { userId, workoutId, isDeleted } }),
     ]);
 
     return { divisions, total };
   }
 
-  async findById(where) {
+  async findById({ userId, divisionId, workoutId, isDeleted }) {
     return this.prisma.division.findFirst({
-      where,
+      where: {
+        userId,
+        id: divisionId,
+        workoutId,
+        isDeleted,
+      },
       include: {
         exercises: {
           where: {
@@ -50,21 +49,20 @@ export default class DivisionRepo {
           },
           select: {
             id: true,
-            name: true,
-            target_muscle_group: true,
-            series_reps: true,
-            rest: true,
-            advanced_technique: true,
-            observation: true,
           },
         },
       },
     });
   }
 
-  async findOne(where) {
+  async findOne({ userId, day, workoutId, isDeleted }) {
     return this.prisma.division.findFirst({
-      where,
+      where: {
+        userId,
+        day,
+        workoutId,
+        isDeleted,
+      },
       include: {
         exercises: {
           where: {
@@ -86,10 +84,6 @@ export default class DivisionRepo {
 
   async create(data) {
     return this.prisma.division.create({ data });
-  }
-
-  async findByIdAndUpdate(id, data) {
-    return this.prisma.division.update({ where: { id }, data });
   }
 
   async findByIdAndDelete(id) {

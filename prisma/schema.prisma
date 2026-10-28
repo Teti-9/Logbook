@@ -1,8 +1,6 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider      = "prisma-client-js"
   binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
@@ -13,33 +11,21 @@ datasource db {
 }
 
 model Workout {
-  id          Int        @id @default(autoincrement())
+  id          Int          @id @default(autoincrement())
   name        String
-  userId      Int
   observation String?
-  user        User       @relation(fields: [userId], references: [id])
+  userId      Int
+  user        User         @relation(fields: [userId], references: [id])
   divisions   Division[]
-  isDeleted   Boolean    @default(false)
+  exercises   Exercises[]
+  logbooks    Logbook[]
+  historicals Historical[]
+  isDeleted   Boolean      @default(false)
   deletedAt   DateTime?
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-}
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
 
-model Division {
-  id        Int         @id @default(autoincrement())
-  name      String
-  day       Day
-  userId    Int
-  user      User        @relation(fields: [userId], references: [id])
-  workoutId Int
-  workout   Workout     @relation(fields: [workoutId], references: [id])
-  exercises Exercises[]
-  isDeleted Boolean     @default(false)
-  deletedAt DateTime?
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
-
-  @@index([userId, day, isDeleted])
+  @@index([userId, isDeleted])
 }
 
 enum Day {
@@ -52,6 +38,30 @@ enum Day {
   sunday
 }
 
+model Division {
+  id          Int          @id @default(autoincrement())
+  name        String
+  day         Day
+  userId      Int
+  user        User         @relation(fields: [userId], references: [id])
+  workoutId   Int
+  workout     Workout      @relation(fields: [workoutId], references: [id])
+  exercises   Exercises[]
+  logbooks    Logbook[]
+  historicals Historical[]
+  isDeleted   Boolean      @default(false)
+  deletedAt   DateTime?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@index([userId, day, isDeleted])
+  @@index([workoutId])
+}
+
+enum AdvancedTechnique {
+  backoff
+}
+
 model Exercises {
   id                  Int                @id @default(autoincrement())
   name                String
@@ -60,25 +70,24 @@ model Exercises {
   rest                Int
   advanced_technique  AdvancedTechnique?
   observation         String?
-  divisionId          Int
   userId              Int
-  logbook             Logbook[]
-  historical          Historical[]
   user                User               @relation(fields: [userId], references: [id])
+  workoutId           Int
+  workout             Workout            @relation(fields: [workoutId], references: [id])
+  divisionId          Int
   division            Division           @relation(fields: [divisionId], references: [id])
+  logbooks            Logbook[]
+  historicals         Historical[]
   isDeleted           Boolean            @default(false)
   deletedAt           DateTime?
   createdAt           DateTime           @default(now())
   updatedAt           DateTime           @updatedAt
 
   @@index([userId, divisionId, isDeleted])
+  @@index([workoutId])
 }
 
-enum AdvancedTechnique {
-  backoff
-}
-
-model Exercises__ {
+model ExerciseCatalog {
   id                  Int       @id @default(autoincrement())
   name                String
   target_muscle_group String
@@ -88,51 +97,67 @@ model Exercises__ {
   updatedAt           DateTime  @updatedAt
 
   @@index([name])
+  @@map("Exercises__")
 }
 
 model Logbook {
-  id            Int       @id @default(autoincrement())
-  exerciseId    Int
+  id            Int          @id @default(autoincrement())
   topset_weight Float
   topset_reps   Int
   extra         String?
-  sync          Boolean   @default(false)
+  sync          Boolean      @default(false)
   userId        Int
-  user          User      @relation(fields: [userId], references: [id])
-  exercise      Exercises @relation(fields: [exerciseId], references: [id])
-  isDeleted     Boolean   @default(false)
+  user          User         @relation(fields: [userId], references: [id])
+  workoutId     Int
+  workout       Workout      @relation(fields: [workoutId], references: [id])
+  divisionId    Int
+  division      Division     @relation(fields: [divisionId], references: [id])
+  exerciseId    Int
+  exercise      Exercises    @relation(fields: [exerciseId], references: [id])
+  historicals   Historical[]
+  isDeleted     Boolean      @default(false)
   deletedAt     DateTime?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
 
   @@index([userId, exerciseId, isDeleted])
 }
 
 model Historical {
   id                     Int       @id @default(autoincrement())
-  exerciseId             Int
   previous_topset_weight Float
   previous_topset_reps   Int
   extra                  String?
   userId                 Int
   user                   User      @relation(fields: [userId], references: [id])
+  workoutId              Int
+  workout                Workout   @relation(fields: [workoutId], references: [id])
+  divisionId             Int
+  division               Division  @relation(fields: [divisionId], references: [id])
+  exerciseId             Int
   exercise               Exercises @relation(fields: [exerciseId], references: [id])
+  logbookId              Int
+  logbook                Logbook   @relation(fields: [logbookId], references: [id])
   isDeleted              Boolean   @default(false)
   deletedAt              DateTime?
   createdAt              DateTime  @default(now())
   updatedAt              DateTime  @updatedAt
 
   @@index([userId, exerciseId, isDeleted])
+  @@index([logbookId])
 }
 
 model RefreshToken {
   id         Int      @id @default(autoincrement())
   userId     Int
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   tokenHash  String
   expiresAt  DateTime
   revoked    Boolean  @default(false)
   replacedBy String?
-  user       User     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([tokenHash])
 }
 
 model Session {

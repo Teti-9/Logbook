@@ -10,6 +10,7 @@ import DivisionBuilder from "./components/division.jsx";
 import Dashboard from "./components/dashboard.jsx";
 import SyncCenter from "./components/sync.jsx";
 import HistoryPage from "./components/history.jsx";
+import WorkoutBuilder from "./components/workout.jsx";
 import "./App.css";
 
 function App() {
@@ -24,12 +25,24 @@ function App() {
 
 function AppShell({ page, setPage, ...rest }) {
   const [syncState, setSyncState] = useState("idle");
+  const [workoutId, setWorkoutId] = useState(0);
+  const [currWorkout, setCurrWorkout] = useState({
+    name: "",
+    id: 0,
+  });
   const [search, setSearch] = useState("");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [workouts, setWorkouts] = useState([]);
   const [divisions, setDivisions] = useState([]);
+  const [workout, setWorkout] = useState({
+    name: "",
+    observation: "",
+    divisions: [],
+  });
   const [division, setDivision] = useState({
+    id: 0,
     name: "",
     day: "",
     exercises: [],
@@ -44,14 +57,15 @@ function AppShell({ page, setPage, ...rest }) {
   const [pendingLogs, setPendingLogs] = useState([]);
   const [exercises, setExercises] = useState({
     name: "",
-    series: "",
-    topset_weight: "",
-    topset_reps: "",
-    backoff_weight: "",
-    backoff_reps: "",
+    target_muscle_group: "",
+    series_reps: "",
+    rest: "",
+    advanced_technique: "",
+    observation: "",
     divisionId: "",
   });
   const [historical, setHistorical] = useState([]);
+  const [previousByExercise, setPreviousByExercise] = useState({});
 
   const { isAuthenticated, loading } = useAuth();
 
@@ -88,20 +102,30 @@ function AppShell({ page, setPage, ...rest }) {
 
     3: (
       <Dashboard
+        workout={workout}
+        workouts={workouts}
+        workoutId={workoutId}
+        currWorkout={currWorkout}
+        setCurrWorkout={setCurrWorkout}
         division={division}
-        divisions={divisions}
-        setDivisions={setDivisions}
+        setWorkoutId={setWorkoutId}
         setDivision={setDivision}
+        setWorkouts={setWorkouts}
+        setWorkout={setWorkout}
         setPage={setPage}
       />
     ),
 
     4: (
       <DivisionBuilder
-        division={division}
+        workouts={workouts}
+        setWorkouts={setWorkouts}
+        currWorkout={currWorkout}
+        setCurrWorkout={setCurrWorkout}
         divisions={divisions}
-        setDivisions={setDivisions}
+        division={division}
         setDivision={setDivision}
+        setDivisions={setDivisions}
         exercises={exercises}
         setExercises={setExercises}
         setPage={setPage}
@@ -112,9 +136,10 @@ function AppShell({ page, setPage, ...rest }) {
       <ActiveWorkout
         logbook={logbook}
         division={division}
-        divisions={divisions}
+        previousByExercise={previousByExercise}
+        setPreviousByExercise={setPreviousByExercise}
+        currWorkout={currWorkout}
         setLogbook={setLogbook}
-        setDivisions={setDivisions}
         setDivision={setDivision}
         setPage={setPage}
       />
@@ -123,6 +148,7 @@ function AppShell({ page, setPage, ...rest }) {
     6: (
       <SyncCenter
         pendingLogs={pendingLogs}
+        currWorkout={currWorkout}
         syncState={syncState}
         setPendingLogs={setPendingLogs}
         setSyncState={setSyncState}
@@ -133,9 +159,18 @@ function AppShell({ page, setPage, ...rest }) {
     7: (
       <HistoryPage
         search={search}
+        currWorkout={currWorkout}
         historical={historical}
         setSearch={setSearch}
         setHistorical={setHistorical}
+        setPage={setPage}
+      />
+    ),
+
+    8: (
+      <WorkoutBuilder
+        workout={workout}
+        setWorkout={setWorkout}
         setPage={setPage}
       />
     ),

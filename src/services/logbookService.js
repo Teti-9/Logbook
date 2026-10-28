@@ -9,9 +9,24 @@ export default class LogbookService {
     this.prisma = prisma;
   }
 
-  async getLogbooks(userId) {
+  async getLogbooks(data) {
+    const fieldConfig = { workoutId: "number" };
+
+    const params = {
+      workoutId: Number(data.workoutId),
+    };
+
+    const result = validateFields(params, fieldConfig);
+
+    if (!result.success) {
+      const error = new Error(parseError(result.error));
+      error.statusCode = 400;
+      throw error;
+    }
+
     const logbooks = await this.logbookRepo.findAll({
-      userId: userId,
+      userId: data.userId,
+      workoutId: result.data.workoutId,
       sync: false,
       isDeleted: false,
     });
@@ -25,11 +40,15 @@ export default class LogbookService {
     return logbooks;
   }
 
-  async getLogbookById(userId, id) {
-    const logbookId = Number(id);
-    const fieldConfig = { id: "number" };
+  async getLogbookById(data) {
+    const fieldConfig = { logbookId: "number", workoutId: "number" };
 
-    const result = validateFields({ id: logbookId }, fieldConfig);
+    const params = {
+      logbookId: Number(data.logbookId),
+      workoutId: Number(data.workoutId),
+    };
+
+    const result = validateFields(params, fieldConfig);
 
     if (!result.success) {
       const error = new Error(parseError(result.error));
@@ -38,10 +57,11 @@ export default class LogbookService {
     }
 
     const logbook = await this.logbookRepo.findById({
-      userId: userId,
-      id: logbookId,
+      userId: data.userId,
+      id: result.data.logbookId,
       sync: false,
       isDeleted: false,
+      workoutId: result.data.workoutId,
     });
 
     if (!logbook) {
@@ -53,21 +73,23 @@ export default class LogbookService {
     return logbook;
   }
 
-  async createLogbook(userId, body) {
+  async createLogbook(data) {
     const fieldConfig = {
       exerciseId: "number",
       topset_weight: "float",
       topset_reps: "number",
       extra: "optional",
-      userId: "number",
+      divisionId: "number",
+      workoutId: "number",
     };
 
-    const newData = {
-      ...body,
-      userId: userId,
+    const params = {
+      ...data.body,
+      divisionId: Number(data.body.divisionId),
+      workoutId: Number(data.workoutId),
     };
 
-    const result = validateFields(newData, fieldConfig);
+    const result = validateFields(params, fieldConfig);
 
     if (!result.success) {
       const error = new Error(parseError(result.error));
@@ -75,11 +97,11 @@ export default class LogbookService {
       throw error;
     }
 
-    const exerciseId = result.data.exerciseId;
-
     const exerciseExists = await this.exercisesRepo.findById({
-      userId: userId,
-      id: exerciseId,
+      userId: data.userId,
+      exerciseId: result.data.exerciseId,
+      divisionId: result.data.divisionId,
+      workoutId: result.data.workoutId,
       isDeleted: false,
     });
 
@@ -90,8 +112,9 @@ export default class LogbookService {
     }
 
     const logbookExists = await this.logbookRepo.findById({
-      userId: userId,
-      exerciseId,
+      userId: data.userId,
+      id: result.data.exerciseId,
+      workoutId: result.data.workoutId,
       sync: false,
       isDeleted: false,
     });
@@ -104,16 +127,27 @@ export default class LogbookService {
       throw error;
     }
 
-    await this.logbookRepo.create(result.data);
+    const logbook = {
+      ...result.data,
+      userId: data.userId,
+    };
+
+    await this.logbookRepo.create(logbook);
 
     return { message: "Logbook successfully created." };
   }
 
-  async syncLogbook(userId, body) {
-    const { exercises } = body;
-    const fieldConfig = { exercises: "array" };
+  async syncLogbook(data) {
+    const fieldConfig = { exercises: "array", workoutId: "number" };
 
-    const result = validateFields(body, fieldConfig);
+    const { exercises } = data.body;
+
+    const params = {
+      exercises,
+      workoutId: Number(data.workoutId),
+    };
+
+    const result = validateFields(params, fieldConfig);
 
     if (!result.success) {
       const error = new Error(parseError(result.error));
@@ -121,10 +155,13 @@ export default class LogbookService {
       throw error;
     }
 
+    const userId = data.userId;
+    const workoutId = result.data.workoutId;
+
     for (const exerciseId of exercises) {
       await addQueue.add(
         "taskSync",
-        { userId, exerciseId },
+        { userId, exerciseId, workoutId },
         {
           attempts: 2,
           backoff: { type: "exponential", delay: 2000 },
@@ -136,10 +173,14 @@ export default class LogbookService {
     return { message: "Logbook(s) successfully added for synchronization." };
   }
 
-  async logbookJob(userId, id) {
-    const jobId = Number(id);
-    const fieldConfig = { id: "number" };
-    const result = validateFields({ id: jobId }, fieldConfig);
+  async logbookJob(data) {
+    const fieldConfig = { jobId: "number" };
+
+    const params = {
+      jobId: Number(data.jobId),
+    };
+
+    const result = validateFields(params, fieldConfig);
 
     if (!result.success) {
       const error = new Error(parseError(result.error));
@@ -147,7 +188,7 @@ export default class LogbookService {
       throw error;
     }
 
-    const jobResult = await addQueue.getJob(jobId);
+    const jobResult = await addQueue.getJob(result.data.jobId);
 
     if (!jobResult) {
       const error = new Error("Job not found.");
@@ -155,7 +196,7 @@ export default class LogbookService {
       throw error;
     }
 
-    if (jobResult.data.userId !== userId) {
+    if (jobResult.data.userId !== data.userId) {
       const error = new Error("Job not found.");
       error.statusCode = 404;
       throw error;
@@ -165,20 +206,24 @@ export default class LogbookService {
     const failed = jobResult.failedReason;
     const returnValue = jobResult.returnvalue;
 
-    const data = {
+    const newData = {
       state,
       failed,
       returnValue,
     };
 
-    return data;
+    return newData;
   }
 
-  async deleteLogbook(userId, id) {
-    const logbookId = Number(id);
-    const fieldConfig = { id: "number" };
+  async deleteLogbook(data) {
+    const fieldConfig = { logbookId: "number", workoutId: "number" };
 
-    const result = validateFields({ id: logbookId }, fieldConfig);
+    const params = {
+      logbookId: Number(data.logbookId),
+      workoutId: Number(data.workoutId),
+    };
+
+    const result = validateFields(params, fieldConfig);
 
     if (!result.success) {
       const error = new Error(parseError(result.error));
@@ -187,8 +232,10 @@ export default class LogbookService {
     }
 
     const logbook = await this.logbookRepo.findById({
-      userId: userId,
-      id: logbookId,
+      userId: data.userId,
+      id: result.data.logbookId,
+      workoutId: result.data.workoutId,
+      sync: false,
       isDeleted: false,
     });
 
@@ -198,7 +245,7 @@ export default class LogbookService {
       throw error;
     }
 
-    await this.logbookRepo.findByIdAndDelete(logbookId);
+    await this.logbookRepo.findByIdAndDelete(result.data.logbookId);
 
     return { message: "Logbook successfully deleted." };
   }

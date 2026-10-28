@@ -3,10 +3,11 @@ export default class HistoricalRepo {
     this.prisma = prisma;
   }
 
-  async findAll(userId, isDeleted, search) {
+  async findAll({ userId, search, workoutId, isDeleted }) {
     return this.prisma.historical.findMany({
       where: {
         userId,
+        workoutId,
         isDeleted,
         ...(search && {
           exercise: {
@@ -22,11 +23,9 @@ export default class HistoricalRepo {
           select: {
             id: true,
             name: true,
-            target_muscle_group: true,
-            series_reps: true,
-            rest: true,
             advanced_technique: true,
             observation: true,
+            updatedAt: true,
           },
         },
       },
@@ -36,24 +35,19 @@ export default class HistoricalRepo {
     });
   }
 
-  async findById(where) {
+  async findById({ userId, historicalId, workoutId, isDeleted }) {
     return this.prisma.historical.findFirst({
-      where,
-    });
-  }
-
-  async findOne(where) {
-    return this.prisma.historical.findFirst({
-      where,
+      where: {
+        userId,
+        id: historicalId,
+        workoutId,
+        isDeleted,
+      },
     });
   }
 
   async create(data) {
     return this.prisma.historical.create({ data });
-  }
-
-  async findByIdAndUpdate(id, data) {
-    return this.prisma.historical.update({ where: { id }, data });
   }
 
   async findByIdAndDelete(id) {
