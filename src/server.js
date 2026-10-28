@@ -5,7 +5,7 @@ import cookieParser from "cookie-parser";
 import swaggerUI from "swagger-ui-express";
 // import swaggerJsdoc from "swagger-jsdoc";
 import errorMiddleware from "./middleware/error.js";
-import openapi from "./openApi.js";
+import openapi from "./openapi.js";
 // import authMiddleware from "./middleware/auth.js";
 import sessionsMiddleware from "./middleware/sessions.js";
 import { prisma, connectDB } from "./config/infra/database.js";
