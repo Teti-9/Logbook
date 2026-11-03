@@ -59,6 +59,27 @@ export default class LogbookRepo {
     });
   }
 
+  async findOne({ userId, exerciseId, workoutId, sync, isDeleted }) {
+    return this.prisma.logbook.findFirst({
+      where: {
+        userId,
+        exerciseId,
+        workoutId,
+        sync,
+        isDeleted,
+      },
+      include: {
+        exercise: {
+          select: {
+            id: true,
+            name: true,
+            target_muscle_group: true,
+          },
+        },
+      },
+    });
+  }
+
   async create(data) {
     return this.prisma.logbook.create({ data });
   }

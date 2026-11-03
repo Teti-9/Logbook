@@ -39,7 +39,7 @@ jobs:
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/logbook_test?schema=public
       REDIS_HOST: localhost
       REDIS_PORT: 6379
-      JWT_SECRET: test-secret
+      # JWT_SECRET: test-secret - LEGACY
 
     steps:
       - name: Checkout code

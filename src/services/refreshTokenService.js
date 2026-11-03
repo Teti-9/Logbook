@@ -1,103 +1,108 @@
-import 'dotenv/config'
-import jwt from 'jsonwebtoken'
-import bcrypt from 'bcryptjs'
-import { generateRefreshToken, hashRefreshToken } from '../utils/token.js'
+// LEGACY REFRESH JWT TOKEN SERVICE
 
-const ACCESS_TOKEN_TTL = '12h'
-const REFRESH_TOKEN_DAYS = 7
+// import "dotenv/config";
+// import jwt from "jsonwebtoken";
+// import bcrypt from "bcryptjs";
+// import { generateRefreshToken, hashRefreshToken } from "../utils/token.js";
 
-export default class RefreshTokenService {
-    constructor(userRepo, refreshRepo) {
-        this.userRepo = userRepo
-        this.refreshRepo = refreshRepo
-    }
+// const ACCESS_TOKEN_TTL = "12h";
+// const REFRESH_TOKEN_DAYS = 7;
 
-    async logoutUser(token) {
-        const tokenHash = hashRefreshToken(token)
-        const stored = await this.refreshRepo.findByHash({
-            tokenHash: tokenHash
-        })
+// export default class RefreshTokenService {
+//   constructor(userRepo, refreshRepo) {
+//     this.userRepo = userRepo;
+//     this.refreshRepo = refreshRepo;
+//   }
 
-        if (!stored || stored.revoked) {
-            const err = new Error('Invalid refresh token.')
-            err.statusCode = 401
-            throw err
-        }
+//   async logoutUser(token) {
+//     const tokenHash = hashRefreshToken(token);
+//     const stored = await this.refreshRepo.findByHash({
+//       tokenHash: tokenHash,
+//     });
 
-        await this.refreshRepo.revokeByHash(tokenHash)
+//     if (!stored || stored.revoked) {
+//       const err = new Error("Invalid refresh token.");
+//       err.statusCode = 401;
+//       throw err;
+//     }
 
-        return { message: 'User logged out.' }
-    }
+//     await this.refreshRepo.revokeByHash(tokenHash);
 
-    async refreshToken(token) {
-        const tokenHash = hashRefreshToken(token)
-        const stored = await this.refreshRepo.findByHash({
-            tokenHash: tokenHash
-        })
+//     return { message: "User logged out." };
+//   }
 
-        if (!stored || stored.expiresAt < new Date()) {
-            const err = new Error('Expired refresh token.')
-            err.statusCode = 401
-            throw err
-        }
+//   async refreshToken(token) {
+//     const tokenHash = hashRefreshToken(token);
+//     const stored = await this.refreshRepo.findByHash({
+//       tokenHash: tokenHash,
+//     });
 
-        if (stored.revoked) {
-            await this.refreshRepo.revokeUser(stored.userId)
-            const err = new Error('Reused refresh token. All sessions terminated.')
-            err.statusCode = 401
-            throw err
-        }
+//     if (!stored || stored.expiresAt < new Date()) {
+//       const err = new Error("Expired refresh token.");
+//       err.statusCode = 401;
+//       throw err;
+//     }
 
-        const user = await this.userRepo.findUser({ id: stored.userId })
+//     if (stored.revoked) {
+//       await this.refreshRepo.revokeUser(stored.userId);
+//       const err = new Error("Reused refresh token. All sessions terminated.");
+//       err.statusCode = 401;
+//       throw err;
+//     }
 
-        const { tokens, newHash } = await this._tokenPair(user, { returnHash: true })
+//     const user = await this.userRepo.findUser({ id: stored.userId });
 
-        await this.refreshRepo.revokeByHash(tokenHash, newHash)
+//     const { tokens, newHash } = await this._tokenPair(user, {
+//       returnHash: true,
+//     });
 
-        return tokens
-    }
+//     await this.refreshRepo.revokeByHash(tokenHash, newHash);
 
-    async _tokenPair(user, { returnHash = false } = {}) {
-        const accessToken = jwt.sign(
-            {
-                id: user.id,
-                email: user.email
-            },
-            process.env.JWT_SECRET, { expiresIn: ACCESS_TOKEN_TTL }
-        )
+//     return tokens;
+//   }
 
-        const rawRefresh = generateRefreshToken()
-        const newHash = hashRefreshToken(rawRefresh)
-        const expiresAt = new Date(Date.now() + REFRESH_TOKEN_DAYS * 86400 * 1000)
+//   async _tokenPair(user, { returnHash = false } = {}) {
+//     const accessToken = jwt.sign(
+//       {
+//         id: user.id,
+//         email: user.email,
+//       },
+//       process.env.JWT_SECRET,
+//       { expiresIn: ACCESS_TOKEN_TTL },
+//     );
 
-        await this.refreshRepo.create({
-            userId: user.id,
-            tokenHash: newHash,
-            expiresAt: expiresAt
-        })
+//     const rawRefresh = generateRefreshToken();
+//     const newHash = hashRefreshToken(rawRefresh);
+//     const expiresAt = new Date(Date.now() + REFRESH_TOKEN_DAYS * 86400 * 1000);
 
-        const tokens = {
-            accessToken: `Bearer ${accessToken}`,
-            refreshToken: rawRefresh
-        }
+//     await this.refreshRepo.create({
+//       userId: user.id,
+//       tokenHash: newHash,
+//       expiresAt: expiresAt,
+//     });
 
-        return returnHash ? { tokens, newHash } : tokens
-    }
+//     const tokens = {
+//       accessToken: `Bearer ${accessToken}`,
+//       refreshToken: rawRefresh,
+//     };
 
-    _cookieOptions({ clear = false } = {}) {
-        const isProduction = process.env.NODE_ENV === 'production'
+//     return returnHash ? { tokens, newHash } : tokens;
+//   }
 
-        const options = {
-            httpOnly: true,
-            secure: isProduction,
-            sameSite: isProduction ? 'none' : 'lax',
-            path: '/api/auth',
-        }
+//   _cookieOptions({ clear = false } = {}) {
+//     const isProduction = process.env.NODE_ENV === "production";
 
-        if (!clear) {
-            options.maxAge = 7 * 24 * 60 * 60 * 1000
-        }
+//     const options = {
+//       httpOnly: true,
+//       secure: isProduction,
+//       sameSite: isProduction ? "none" : "lax",
+//       path: "/api/auth",
+//     };
 
-        return options
-    }
-}
+//     if (!clear) {
+//       options.maxAge = 7 * 24 * 60 * 60 * 1000;
+//     }
+
+//     return options;
+//   }
+// }

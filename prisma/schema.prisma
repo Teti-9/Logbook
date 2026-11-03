@@ -89,7 +89,7 @@ model Exercises {
 
 model ExerciseCatalog {
   id                  Int       @id @default(autoincrement())
-  name                String
+  name                String    @unique
   target_muscle_group String
   isDeleted           Boolean   @default(false)
   deletedAt           DateTime?

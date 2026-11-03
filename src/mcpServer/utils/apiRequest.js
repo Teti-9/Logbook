@@ -4,8 +4,8 @@ dotenv.config();
 
 const USER_AGENT = "logbook-api/1.0";
 const API_BASE = "http://localhost:8000/api";
-const EMAIL = "teti@teti.com";
-const PASSWORD = "1234";
+const EMAIL = process.env.EMAIL;
+const PASSWORD = process.env.PASSWORD;
 const ORIGIN = "http://localhost:8000/api";
 
 let sessionCookie = null;

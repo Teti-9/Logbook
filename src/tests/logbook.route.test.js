@@ -205,13 +205,17 @@ describe("logbook routes", () => {
         exercises: [exercise.id, exercise.id + 1],
       });
 
+    const ids =
+      (res.body.data.message.split("ids:")[1] || "")
+        .split("successfully")[0]
+        .match(/\d+/g)
+        ?.map(Number) ?? [];
+
     expect(res.status).toBe(200);
     expect(res.body.success).toBe(true);
     expect(res.body.data.message).toBe(
-      "Logbook(s) successfully added for synchronization.",
+      `Logbook(s) ids: ${ids.join(", ")}, successfully added for synchronization.`,
     );
-
-    // const postRes = await agent.get(`/api/logbooksjobs?workoutId=${res.body.data.id}`)
   }, 10000);
 
   it("delete a logbook by its id for the logged user", async () => {

@@ -111,9 +111,9 @@ export default class LogbookService {
       throw error;
     }
 
-    const logbookExists = await this.logbookRepo.findById({
+    const logbookExists = await this.logbookRepo.findOne({
       userId: data.userId,
-      id: result.data.exerciseId,
+      exerciseId: result.data.exerciseId,
       workoutId: result.data.workoutId,
       sync: false,
       isDeleted: false,
@@ -155,11 +155,12 @@ export default class LogbookService {
       throw error;
     }
 
+    const jobIds = [];
     const userId = data.userId;
     const workoutId = result.data.workoutId;
 
     for (const exerciseId of exercises) {
-      await addQueue.add(
+      const job = await addQueue.add(
         "taskSync",
         { userId, exerciseId, workoutId },
         {
@@ -169,8 +170,12 @@ export default class LogbookService {
           removeOnFail: { count: 5000 },
         },
       );
+      jobIds.push(job.id);
     }
-    return { message: "Logbook(s) successfully added for synchronization." };
+
+    return {
+      message: `Logbook(s) ids: ${jobIds.join(", ")}, successfully added for synchronization.`,
+    };
   }
 
   async logbookJob(data) {

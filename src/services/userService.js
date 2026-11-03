@@ -1,78 +1,80 @@
-import jwt from 'jsonwebtoken'
-import bcrypt from 'bcryptjs'
+// LEGACY JWT USER SERVICE
 
-export default class UserService {
-    constructor(userRepo, refreshTokenService) {
-        this.userRepo = userRepo
-        this.refreshTokenService = refreshTokenService
-    }
+// import jwt from "jsonwebtoken";
+// import bcrypt from "bcryptjs";
 
-    async getUserById(id) {
-        const userId = Number(id)
+// export default class UserService {
+//   constructor(userRepo, refreshTokenService) {
+//     this.userRepo = userRepo;
+//     this.refreshTokenService = refreshTokenService;
+//   }
 
-        const user = await this.userRepo.findUser({
-            id: userId,
-            isDeleted: false
-        })
+//   async getUserById(id) {
+//     const userId = Number(id);
 
-        if (!user) {
-            const error = new Error('User not found.')
-            error.statusCode = 404
-            throw error
-        }
+//     const user = await this.userRepo.findUser({
+//       id: userId,
+//       isDeleted: false,
+//     });
 
-        const { password, ...safeUser } = user
+//     if (!user) {
+//       const error = new Error("User not found.");
+//       error.statusCode = 404;
+//       throw error;
+//     }
 
-        return safeUser
-    }
+//     const { password, ...safeUser } = user;
 
-    async createUser(body) {
-        const lowercaseEmail = body.email.toLowerCase()
+//     return safeUser;
+//   }
 
-        const userExists = await this.userRepo.findUser({
-            email: lowercaseEmail,
-            isDeleted: false
-        })
+//   async createUser(body) {
+//     const lowercaseEmail = body.email.toLowerCase();
 
-        if (userExists) {
-            const error = new Error('Email already in use.')
-            error.statusCode = 409
-            throw error
-        }
+//     const userExists = await this.userRepo.findUser({
+//       email: lowercaseEmail,
+//       isDeleted: false,
+//     });
 
-        const hashedPassword = await bcrypt.hash(body.password, 8)
+//     if (userExists) {
+//       const error = new Error("Email already in use.");
+//       error.statusCode = 409;
+//       throw error;
+//     }
 
-        const user = {
-            email: lowercaseEmail,
-            password: hashedPassword
-        }
+//     const hashedPassword = await bcrypt.hash(body.password, 8);
 
-        const createdUser = await this.userRepo.create(user)
+//     const user = {
+//       email: lowercaseEmail,
+//       password: hashedPassword,
+//     };
 
-        return { message: 'User successfully created.' }
-    }
+//     const createdUser = await this.userRepo.create(user);
 
-    async loginUser(body) {
-        const lowercaseEmail = body.email.toLowerCase()
+//     return { message: "User successfully created." };
+//   }
 
-        const user = await this.userRepo.findUser({
-            email: lowercaseEmail
-        })
+//   async loginUser(body) {
+//     const lowercaseEmail = body.email.toLowerCase();
 
-        if (!user) {
-            const error = new Error('Email not found.')
-            error.statusCode = 404
-            throw error
-        }
+//     const user = await this.userRepo.findUser({
+//       email: lowercaseEmail,
+//     });
 
-        const validPassword = await bcrypt.compare(body.password, user.password)
+//     if (!user) {
+//       const error = new Error("Email not found.");
+//       error.statusCode = 404;
+//       throw error;
+//     }
 
-        if (!validPassword) {
-            const error = new Error('Invalid password.')
-            error.statusCode = 401
-            throw error
-        }
+//     const validPassword = await bcrypt.compare(body.password, user.password);
 
-        return this.refreshTokenService._tokenPair(user)
-    }
-}
+//     if (!validPassword) {
+//       const error = new Error("Invalid password.");
+//       error.statusCode = 401;
+//       throw error;
+//     }
+
+//     return this.refreshTokenService._tokenPair(user);
+//   }
+// }

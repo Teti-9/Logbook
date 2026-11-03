@@ -3,10 +3,8 @@ import cors from "cors";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import swaggerUI from "swagger-ui-express";
-// import swaggerJsdoc from "swagger-jsdoc";
 import errorMiddleware from "./middleware/error.js";
 import openapi from "./openapi.js";
-// import authMiddleware from "./middleware/auth.js";
 import sessionsMiddleware from "./middleware/sessions.js";
 import { prisma, connectDB } from "./config/infra/database.js";
 import { toNodeHandler } from "better-auth/node";
@@ -30,13 +28,6 @@ import ExercisesRouter from "./routes/exercisesRoute.js";
 import LogbookRepo from "./repositories/logbookRepo.js";
 import LogbookService from "./services/logbookService.js";
 import LogbookRouter from "./routes/logbookRoute.js";
-
-// import RefreshTokenRepo from "./repositories/refreshTokenRepo.js";
-// import RefreshTokenService from "./services/refreshTokenService.js";
-
-// import UserRepo from "./repositories/userRepo.js";
-// import UserService from "./services/userService.js";
-// import UserRouter from "./routes/userRoute.js";
 
 dotenv.config();
 
@@ -64,13 +55,6 @@ const historicalRepo = new HistoricalRepo(prisma);
 const historicalService = new HistoricalService(historicalRepo);
 const historicalRouter = HistoricalRouter(historicalService);
 
-// const refreshTokenRepo = new RefreshTokenRepo(prisma);
-// const refreshTokenService = new RefreshTokenService(userRepo, refreshTokenRepo);
-
-// const userRepo = new UserRepo(prisma);
-// const userService = new UserService(userRepo, refreshTokenService);
-// const userRouter = UserRouter(userService, refreshTokenService);
-
 const app = express();
 const PORT = 8000;
 
@@ -94,7 +78,6 @@ app.use(express.json());
 
 app.use(cookieParser());
 
-// app.use("/api/auth", userRouter);
 app.use("/api", sessionsMiddleware, workoutRouter);
 app.use("/api", sessionsMiddleware, divisionRouter);
 app.use("/api", sessionsMiddleware, exercisesRouter);

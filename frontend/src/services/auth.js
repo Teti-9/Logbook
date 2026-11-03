@@ -77,6 +77,8 @@ export async function authFetch(url, options = {}) {
   });
 }
 
+// COMMENTED CODE = LEGACY JWT AUTHENTICATION
+
 // export async function authFetch(url, options = {}) {
 //     const token = getAccessToken()
 //     const baseHeaders = options.headers ?? {}

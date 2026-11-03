@@ -198,7 +198,7 @@ const Dashboard = (props) => {
                     {capitalizeEachWord(today[0].name)}
                   </h3>
                   <p className="text-slate-400 font-medium text-sm">
-                    {today[0].exercises?.length || 0} Exercise(s) configured
+                    {today[0].exercises?.length || 0} Exercise(s) assigned
                   </p>
                 </div>
 

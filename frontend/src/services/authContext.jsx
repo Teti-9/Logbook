@@ -17,6 +17,8 @@ export function AuthProvider({ children }) {
     refetch,
   } = authClient.useSession();
 
+  // COMMENTED CODE = LEGACY JWT AUTHENTICATION
+
   // const [token, setToken] = useState(getAccessToken());
   // const [loading, setLoading] = useState(true);
 

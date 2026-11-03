@@ -28,7 +28,7 @@ export default class ExercisesRepo {
         take: Number(limit),
       }),
       this.prisma.exercises.count({
-        where: { userId, isDeleted },
+        where: { userId, divisionId, workoutId, isDeleted },
       }),
     ]);
 

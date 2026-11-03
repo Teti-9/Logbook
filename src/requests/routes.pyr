@@ -2,14 +2,14 @@
 import requests
 BASE = "http://localhost:8000/api"
 
-COOKIE = "better-auth.session_token=5e8wTBXUEnJnDmSbkbJGKyyJrhvqLLVh.4twIB6PzYKQq8RMP%2Be1VfYIcsqdHAlMlSWzW0fyvPtQ%3D"
+COOKIE = "better-auth.session_token=TOKEN_HERE"
 H = {"Cookie": COOKIE, "Origin": "http://localhost:8000"}
 
 WORKOUT_ID = 1
-DIVISION_ID = 4
+DIVISION_ID = 2
 EXERCISE_ID = 3
-LOGBOOK_ID = 3
-HISTORICAL_ID = 19
+LOGBOOK_ID = 4
+HISTORICAL_ID = 5
 JOB_ID = 6
 ###env
 
@@ -62,7 +62,7 @@ requests.get(f"{BASE}/exercises?workoutId={WORKOUT_ID}&divisionId={DIVISION_ID}"
 requests.get(f"{BASE}/exercises/{EXERCISE_ID}?workoutId={WORKOUT_ID}&divisionId={DIVISION_ID}", headers=H)
 
 requests.post(f"{BASE}/exercises?workoutId={WORKOUT_ID}", json={
-	"name": "Bench press", 
+	"name": "Bench Press", 
 	"target_muscle_group": "Chest", 
 	"series_reps": "2x8", 
 	"rest": 120,

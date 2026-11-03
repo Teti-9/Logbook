@@ -144,12 +144,19 @@ export default class ExercisesService {
     };
 
     await this.exercisesRepo.create(exercise);
-    await this.prisma.ExerciseCatalog.create({
-      data: {
-        name,
-        target_muscle_group: result.data.target_muscle_group.toLowerCase(),
-      },
-    });
+
+    try {
+      await this.prisma.ExerciseCatalog.create({
+        data: {
+          name,
+          target_muscle_group: result.data.target_muscle_group.toLowerCase(),
+        },
+      });
+    } catch (error) {
+      if (error.code !== "P2002") {
+        throw error;
+      }
+    }
 
     return { message: "Exercise successfully created." };
   }
